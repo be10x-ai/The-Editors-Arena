@@ -68,6 +68,20 @@ export async function saveHackathonSettings(
       return errorState(`${sequence[i][0]} must come after ${sequence[i - 1][0]}.`);
     }
   }
+
+  /**
+   * Task release sits outside that strict chain because releasing the task at the
+   * exact moment the hackathon starts is the normal case, so it cannot be
+   * required to come strictly after. It still has to land inside the window —
+   * without this it was unvalidated, and silently kept a date from a previous
+   * schedule while every other field moved.
+   */
+  if (input.taskReleaseAt < input.startsAt) {
+    return errorState("Task release cannot be before the hackathon starts.");
+  }
+  if (input.taskReleaseAt > input.submissionDeadline) {
+    return errorState("Task release must be on or before the submission deadline.");
+  }
   if (input.taskReleaseAt < input.startsAt) {
     return errorState("Task release cannot be earlier than the start time.");
   }
