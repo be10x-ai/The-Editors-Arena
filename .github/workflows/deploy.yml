@@ -16,9 +16,11 @@ name: Deploy to Vercel
 # AUTH_SECRET and the rest still have to be set in the Vercel project itself —
 # this workflow does not replace that.
 
+# Manual only. Vercel's Git integration handles pushes, so running this on every
+# push meant a second build competing with it and — before the secrets exist — a
+# red X on every commit. Trigger it from the Actions tab if the integration
+# breaks again: Actions -> Deploy to Vercel -> Run workflow.
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 concurrency:
