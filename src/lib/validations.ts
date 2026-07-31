@@ -101,6 +101,20 @@ export const youtubeSubmissionSchema = z.object({
   }),
 });
 
+export const ownProfileSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(3, "Enter your full name")
+    .max(120)
+    .regex(/^[\p{L}\p{M}.'\- ]+$/u, "Letters, spaces, hyphens and apostrophes only"),
+  /** Judge-only fields; ignored for other roles. */
+  title: z.string().trim().max(120).optional().or(z.literal("")),
+  organization: z.string().trim().max(120).optional().or(z.literal("")),
+  bio: z.string().trim().max(1500).optional().or(z.literal("")),
+  expertise: z.array(z.string().trim().min(1).max(60)).max(12).default([]),
+});
+
 export const setPasswordSchema = z
   .object({
     password: z

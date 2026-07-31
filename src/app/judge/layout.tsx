@@ -27,6 +27,7 @@ export default async function JudgeLayout({ children }: { children: React.ReactN
       badge: pending,
     },
     { href: "/judge/completed", label: "Completed", icon: "CheckCheck" },
+    { href: "/judge/profile", label: "My profile", icon: "User" },
     { href: "/leaderboard", label: "Leaderboard", icon: "Trophy" },
   ];
 
