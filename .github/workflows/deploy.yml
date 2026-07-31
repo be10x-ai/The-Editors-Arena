@@ -1,0 +1,94 @@
+name: Deploy to Vercel
+
+# Fallback deploy path. Vercel's own Git integration is the normal route; this
+# exists because that integration silently does nothing when the Vercel GitHub
+# App lacks access to the repo — no build, no failed check, no error anywhere.
+# Driving the CLI from Actions removes that dependency: if this workflow runs,
+# you get a deployment or a visible failure.
+#
+# Requires three repository secrets (Settings -> Secrets and variables -> Actions):
+#   VERCEL_TOKEN       Vercel -> Account Settings -> Tokens
+#   VERCEL_ORG_ID      from .vercel/project.json after `vercel link`, or
+#                      Vercel -> Team Settings -> General -> Team ID
+#   VERCEL_PROJECT_ID  from .vercel/project.json, or Project Settings -> General
+#
+# `vercel pull` fetches the project's environment variables, so DATABASE_URL,
+# AUTH_SECRET and the rest still have to be set in the Vercel project itself —
+# this workflow does not replace that.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check the required secrets exist
+        env:
+          TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          ORG: ${{ secrets.VERCEL_ORG_ID }}
+          PROJECT: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          missing=""
+          [ -z "$TOKEN" ]   && missing="$missing VERCEL_TOKEN"
+          [ -z "$ORG" ]     && missing="$missing VERCEL_ORG_ID"
+          [ -z "$PROJECT" ] && missing="$missing VERCEL_PROJECT_ID"
+          if [ -n "$missing" ]; then
+            echo "::error::Missing repository secret(s):$missing — see the header of this workflow."
+            exit 1
+          fi
+
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - run: npm install --global vercel@latest
+
+      - name: Pull the project's production config and env
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: vercel pull --yes --environment=production --token="${{ secrets.VERCEL_TOKEN }}"
+
+      - name: Build
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: vercel build --prod --token="${{ secrets.VERCEL_TOKEN }}"
+
+      - name: Deploy the prebuilt output
+        id: deploy
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          url=$(vercel deploy --prebuilt --prod --token="${{ secrets.VERCEL_TOKEN }}")
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+          echo "Deployed: $url"
+          echo "### Deployed" >> "$GITHUB_STEP_SUMMARY"
+          echo "$url" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Smoke-test the deployment
+        run: |
+          url="${{ steps.deploy.outputs.url }}"
+          # /api/health reports database and integration wiring, so a 200 here
+          # means the deploy is genuinely usable, not merely served.
+          for i in 1 2 3 4 5; do
+            code=$(curl -sS -o /tmp/health.json -w '%{http_code}' --max-time 30 "$url/api/health" || echo 000)
+            [ "$code" = "200" ] && break
+            echo "attempt $i: HTTP $code — retrying"
+            sleep 10
+          done
+          cat /tmp/health.json 2>/dev/null || true
+          echo
+          [ "$code" = "200" ] || { echo "::error::Health check failed with HTTP $code"; exit 1; }

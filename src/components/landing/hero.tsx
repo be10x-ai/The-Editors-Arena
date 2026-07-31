@@ -119,14 +119,24 @@ export function Hero({
           </h1>
         </Reveal>
 
-        <Reveal delay={0.15}>
-          <p className="mx-auto mt-7 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
+        {/* Countdown sits directly under the wordmark so the deadline reads as
+            part of the headline, not as a footnote below the buttons. */}
+        <Reveal delay={0.15} className="mt-8 w-full">
+          <CountdownTimer
+            target={countdown.target}
+            label={countdown.label}
+            reachedLabel={countdown.reachedLabel}
+          />
+        </Reveal>
+
+        <Reveal delay={0.2}>
+          <p className="mx-auto mt-9 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
             {BRAND.tagline}. One day, real client footage, a published rubric, and a
             named jury — then a hiring track for the editors who prove it.
           </p>
         </Reveal>
 
-        <Reveal delay={0.2}>
+        <Reveal delay={0.25}>
           <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-center">
             {gates.registrationOpen ? (
               <Button asChild size="lg">
@@ -151,14 +161,6 @@ export function Hero({
                 : "Registration is closed for this edition."}
             </p>
           ) : null}
-        </Reveal>
-
-        <Reveal delay={0.25} className="mt-14 w-full">
-          <CountdownTimer
-            target={countdown.target}
-            label={countdown.label}
-            reachedLabel={countdown.reachedLabel}
-          />
         </Reveal>
 
         <Reveal delay={0.3} className="w-full">

@@ -327,6 +327,57 @@ time alone, so a late start never leaks assets early or locks anyone out.
 
 ## 11. Troubleshooting
 
+**Pushing to `main` produces no Vercel deployment at all — no build, no error.**
+This is the failure mode where the dashboard says "Connected" but the Vercel
+GitHub App has no access to the repository. Vercel never receives the push, so
+there is nothing to fail and nothing is logged. Confirm it from the GitHub side —
+Vercel posts a commit status on every build it attempts, so an empty result means
+it never tried:
+
+```bash
+SHA=$(git rev-parse HEAD)
+gh api "repos/<owner>/<repo>/commits/$SHA/status" --jq '{state, count: (.statuses|length)}'
+# {"state":"pending","count":0}   <- Vercel is not building this repo
+```
+
+Fix, in order:
+
+1. **Grant the App the repo.** <https://github.com/settings/installations> →
+   *Vercel* → Configure → under *Repository access* add this repository (or pick
+   "All repositories"). A project connected while the App lacked access stays
+   silently dead until this is done.
+2. **Check the project is linked to the right repo.** Vercel → Project →
+   Settings → Git. If it shows no repository, connect it there.
+3. **Check the production branch** is `main` (Settings → Git → Production
+   Branch). A project defaulting to `master` ignores every push to `main`.
+4. **Check Ignored Build Step** (Settings → Git) is empty. A leftover script
+   that exits 0 cancels every build.
+5. Push an empty commit to retrigger: `git commit --allow-empty -m "trigger" && git push`.
+
+If the App cannot be fixed (org policy, no admin rights), use the CI fallback at
+`.github/workflows/deploy.yml`, which drives the Vercel CLI directly and needs
+only `VERCEL_TOKEN`, `VERCEL_ORG_ID` and `VERCEL_PROJECT_ID` as repo secrets.
+Note it still reads env vars from the Vercel project via `vercel pull`, so step 6
+above is a prerequisite either way.
+
+**The build is rejected with "Hobby accounts are limited to daily cron jobs".**
+`vercel.json` declared `*/15 * * * *`. It is now `0 3 * * *`; the 15-minute
+reminder cadence moved to `.github/workflows/reminders.yml`. Vercel validates
+`crons` before building, so this rejects the deployment rather than failing it.
+
+**Deploy succeeds but every page 500s.**
+The build never needs the database — `src/lib/env.ts` throws at no point during
+import, and all data pages are `force-dynamic`. So a green build with red pages
+means runtime env vars are missing. `DATABASE_URL`, `DIRECT_DATABASE_URL`,
+`AUTH_SECRET`, `AUTH_TRUST_HOST=true` and `NEXT_PUBLIC_APP_URL` are the ones that
+break everything; check `/api/health` first.
+
+**Looking for `.htaccess`.**
+There isn't one, and adding one would have no effect. `.htaccess` is read by
+Apache; Vercel does not run Apache. Redirects, headers, rewrites and cron all
+live in `vercel.json` and `next.config.ts` instead — the security headers that
+would normally go in `.htaccess` are already set in `next.config.ts`.
+
 **Uploads fail with "Google Drive is not configured".**
 `INTEGRATIONS_DRY_RUN` is still `true`, or the service account / folder ID is
 missing. Check `/api/health`.
