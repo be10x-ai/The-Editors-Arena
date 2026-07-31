@@ -1,7 +1,7 @@
 import type { EventStatus, HiringRecommendation } from "@prisma/client";
 
 export const BRAND = {
-  name: "The Editor Arena",
+  name: "The Editor's Arena",
   tagline: "India's Video Editing Challenge to Discover Next Generation Editors",
   themeLine: "Real Footage. Real Deadlines. Real Editing Talent.",
   organiser: "House of EduTech",

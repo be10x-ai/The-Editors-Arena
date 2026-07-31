@@ -37,7 +37,7 @@ function autoWidth(sheet: ExcelJS.Worksheet, min = 10, max = 52) {
  */
 export async function renderHiringReportXlsx(report: HiringReport): Promise<Buffer> {
   const workbook = new ExcelJS.Workbook();
-  workbook.creator = "The Editor Arena";
+  workbook.creator = "The Editor's Arena";
   workbook.created = report.generatedAt;
 
   // --- Summary -------------------------------------------------------------
@@ -192,7 +192,7 @@ export async function renderRegistrationsXlsx(hackathonId: string): Promise<Buff
   });
 
   const workbook = new ExcelJS.Workbook();
-  workbook.creator = "The Editor Arena";
+  workbook.creator = "The Editor's Arena";
 
   const sheet = workbook.addWorksheet("Registrations", {
     views: [{ state: "frozen", ySplit: 1 }],

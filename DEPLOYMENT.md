@@ -1,4 +1,4 @@
-# Deployment Guide — The Editor Arena
+# Deployment Guide — The Editor's Arena
 
 Target: Vercel + managed PostgreSQL + a Google Cloud service account.
 Everything below also works on any Node 20+ host; only the cron wiring differs.
@@ -146,7 +146,7 @@ GOOGLE_OAUTH_CLIENT_ID="…apps.googleusercontent.com"
 GOOGLE_OAUTH_CLIENT_SECRET="…"
 GMAIL_REFRESH_TOKEN="1//…"
 GMAIL_SENDER_EMAIL="arena@yourdomain.com"
-GMAIL_SENDER_NAME="The Editor Arena"
+GMAIL_SENDER_NAME="The Editor's Arena"
 ```
 
 Refresh tokens for an app still in "Testing" expire after 7 days — publish the

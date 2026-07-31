@@ -20,7 +20,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Register",
   description:
-    "Register for The Editor Arena — India's video editing hackathon. Real client footage, a published rubric, and a hiring track.",
+    "Register for The Editor's Arena — India's video editing hackathon. Real client footage, a published rubric, and a hiring track.",
 };
 
 export default async function RegisterPage() {
@@ -49,8 +49,13 @@ export default async function RegisterPage() {
         <div className="grid gap-10 lg:grid-cols-[1fr_1.35fr] lg:gap-16">
           <div>
             <p className="label-eyebrow">Registration</p>
-            <h1 className="heading-hero mt-3 text-3xl sm:text-4xl">
-              Enter <span className="text-gradient">The Editor Arena</span>
+            <h1 className="mt-3">
+              <span className="type-chrome block text-xl leading-tight sm:text-2xl">
+                Enter
+              </span>
+              <span className="type-arena mt-1.5 block pb-1 text-[2rem] leading-[1] sm:text-[2.6rem]">
+                The Editor&apos;s Arena
+              </span>
             </h1>
             <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
               {BRAND.tagline}. Two minutes to register, one portfolio link, and

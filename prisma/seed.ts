@@ -51,7 +51,7 @@ function seededRandom(seed: number) {
 }
 
 async function main() {
-  console.log("→ Seeding The Editor Arena…\n");
+  console.log("→ Seeding The Editor's Arena…\n");
 
   // --- Hackathon -----------------------------------------------------------
   const hackathon = await prisma.hackathon.upsert({

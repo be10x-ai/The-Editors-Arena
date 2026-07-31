@@ -240,7 +240,7 @@ export default async function AdminContentPage() {
                       <Input
                         id="title"
                         name="title"
-                        placeholder="Champion — The Editor Arena 2026"
+                        placeholder="Champion — The Editor's Arena 2026"
                         required
                       />
                     </div>

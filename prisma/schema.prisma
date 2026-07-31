@@ -1,4 +1,4 @@
-// The Editor Arena — Hackathon Management Platform
+// The Editor's Arena — Hackathon Management Platform
 // Postgres + Prisma. One row per human, one row per artefact, no implicit state.
 
 generator client {

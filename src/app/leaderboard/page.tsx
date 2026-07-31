@@ -18,7 +18,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Leaderboard",
   description:
-    "Live results for The Editor Arena — ranks, average scores, winner and runners-up.",
+    "Live results for The Editor's Arena — ranks, average scores, winner and runners-up.",
 };
 
 export default async function LeaderboardPage() {
@@ -50,7 +50,9 @@ export default async function LeaderboardPage() {
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
             <p className="label-eyebrow">Results</p>
-            <h1 className="heading-hero mt-3 text-3xl sm:text-4xl">Leaderboard</h1>
+            <h1 className="type-arena mt-3 block pb-1 text-[2.3rem] leading-[1] sm:text-5xl">
+              Leaderboard
+            </h1>
             <p className="mt-3 max-w-xl text-sm leading-relaxed text-muted-foreground">
               Final score is the average of every judge&apos;s overall mark, to two
               decimals. Ties share a rank.

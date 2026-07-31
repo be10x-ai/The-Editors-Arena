@@ -1,4 +1,4 @@
-# The Editor Arena
+# The Editor's Arena
 
 Hackathon management platform for a professional video-editing hiring competition.
 Handles the whole lifecycle: registration → contestant IDs → automated email

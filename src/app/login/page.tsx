@@ -13,7 +13,7 @@ export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Sign in",
-  description: "Sign in to your Editor Arena dashboard.",
+  description: "Sign in to your Editor's Arena dashboard.",
 };
 
 const AUTH_ERRORS: Record<string, string> = {

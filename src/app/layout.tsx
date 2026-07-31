@@ -57,13 +57,13 @@ export const metadata: Metadata = {
     template: `%s · ${BRAND.name}`,
   },
   description:
-    "The Editor Arena is India's video editing hackathon: real client footage, real deadlines, a published rubric, and a hiring track for the editors who win.",
+    "The Editor's Arena is India's video editing hackathon: real client footage, real deadlines, a published rubric, and a hiring track for the editors who win.",
   keywords: [
     "video editing hackathon",
     "video editor jobs India",
     "editing competition",
     "Premiere Pro challenge",
-    "The Editor Arena",
+    "The Editor's Arena",
   ],
   openGraph: {
     type: "website",

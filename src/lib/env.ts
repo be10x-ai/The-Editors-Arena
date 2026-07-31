@@ -39,7 +39,7 @@ export const env = {
 
   mail: {
     senderEmail: str("GMAIL_SENDER_EMAIL"),
-    senderName: str("GMAIL_SENDER_NAME", "The Editor Arena"),
+    senderName: str("GMAIL_SENDER_NAME", "The Editor's Arena"),
   },
 
   seed: {

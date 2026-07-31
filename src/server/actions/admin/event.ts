@@ -343,7 +343,7 @@ export async function publishResults(
     queued = await queueBroadcast(
       hackathon.id,
       "RESULTS_ANNOUNCED",
-      "Your Editor Arena results",
+      "Your Editor's Arena results",
     );
     await processDueReminders(200);
   }

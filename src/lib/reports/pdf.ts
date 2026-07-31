@@ -223,7 +223,7 @@ function recommendationLabel(row: HiringReportRow): string {
 export async function renderHiringReportPdf(report: HiringReport): Promise<Uint8Array> {
   const doc = await PDFDocument.create();
   doc.setTitle(`${report.hackathonName} — Hiring Report`);
-  doc.setAuthor("The Editor Arena");
+  doc.setAuthor("The Editor's Arena");
   doc.setSubject("Post-event hiring evaluation");
   doc.setCreationDate(report.generatedAt);
 

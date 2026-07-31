@@ -13,7 +13,7 @@ function ist(year: number, month: number, day: number, hour = 0, minute = 0): Da
 
 export const DEFAULT_HACKATHON = {
   slug: "editor-arena-2026",
-  name: "The Editor Arena 2026",
+  name: "The Editor's Arena 2026",
   tagline: "India's Video Editing Challenge to Discover Next Generation Editors",
   edition: 1,
   idYear: 2026,
@@ -99,7 +99,7 @@ export const DEFAULT_PRIZES: {
 }[] = [
   {
     position: 1,
-    title: "Champion — The Editor Arena 2026",
+    title: "Champion — The Editor's Arena 2026",
     reward: "iPhone",
     description:
       "Plus a fast-tracked hiring interview, a paid trial project, and your edit featured across our channels with full credit.",
