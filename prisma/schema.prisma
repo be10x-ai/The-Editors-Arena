@@ -1,0 +1,513 @@
+// The Editor Arena — Hackathon Management Platform
+// Postgres + Prisma. One row per human, one row per artefact, no implicit state.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
+
+enum Role {
+  CONTESTANT
+  JUDGE
+  ADMIN
+}
+
+/// Lifecycle of a single hackathon edition. Admin drives these transitions
+/// manually from the control panel; every change is written to EventStatusLog.
+enum EventStatus {
+  NOT_STARTED
+  RUNNING
+  SUBMISSION_OPEN
+  JUDGING
+  COMPLETED
+}
+
+enum ContestantStatus {
+  REGISTERED
+  CONFIRMED
+  ACTIVE
+  SUBMITTED
+  SHORTLISTED
+  DISQUALIFIED
+  WITHDRAWN
+}
+
+enum SubmissionStatus {
+  NOT_SUBMITTED
+  UPLOADING
+  SUBMITTED
+  LATE
+  REJECTED
+}
+
+enum ReminderType {
+  REGISTRATION_CONFIRMATION
+  THREE_DAYS_BEFORE
+  TWO_DAYS_BEFORE
+  ONE_DAY_BEFORE
+  ONE_HOUR_BEFORE
+  ASSETS_RELEASED
+  SUBMISSION_RECEIVED
+  RESULTS_ANNOUNCED
+}
+
+enum ReminderStatus {
+  SCHEDULED
+  SENDING
+  SENT
+  FAILED
+  CANCELLED
+  SKIPPED
+}
+
+enum HiringRecommendation {
+  STRONG_HIRE
+  HIRE
+  FREELANCE_ROSTER
+  KEEP_WARM
+  NO_HIRE
+}
+
+enum OtpPurpose {
+  LOGIN
+  PASSWORD_RESET
+}
+
+// ---------------------------------------------------------------------------
+// Identity & access
+// ---------------------------------------------------------------------------
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String
+  passwordHash  String?
+  role          Role      @default(CONTESTANT)
+  emailVerified DateTime?
+  isActive      Boolean   @default(true)
+  lastLoginAt   DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  contestant Contestant?
+  judge      Judge?
+  auditLogs  AuditLog[]
+
+  @@index([role])
+  @@map("users")
+}
+
+/// Short-lived one-time codes for passwordless contestant login.
+model OtpToken {
+  id         String     @id @default(cuid())
+  email      String
+  codeHash   String
+  purpose    OtpPurpose @default(LOGIN)
+  expiresAt  DateTime
+  consumedAt DateTime?
+  attempts   Int        @default(0)
+  createdAt  DateTime   @default(now())
+
+  @@index([email, purpose])
+  @@index([expiresAt])
+  @@map("otp_tokens")
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  actorId   String?
+  actorRole Role?
+  action    String
+  entity    String
+  entityId  String?
+  meta      Json?
+  createdAt DateTime @default(now())
+
+  actor User? @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([entity, entityId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+// ---------------------------------------------------------------------------
+// Hackathon (multi-edition by design)
+// ---------------------------------------------------------------------------
+
+model Hackathon {
+  id       String @id @default(cuid())
+  slug     String @unique
+  name     String
+  tagline  String
+  edition  Int    @default(1)
+  /// Year used when minting contestant IDs, e.g. EA2026____
+  idYear   Int    @default(2026)
+  idPrefix String @default("EA")
+
+  status   EventStatus @default(NOT_STARTED)
+  isActive Boolean     @default(true)
+  timezone String      @default("Asia/Kolkata")
+
+  registrationOpensAt  DateTime
+  registrationClosesAt DateTime
+  startsAt             DateTime
+  taskReleaseAt        DateTime
+  submissionDeadline   DateTime
+  judgingEndsAt        DateTime
+  resultsAt            DateTime
+
+  // --- Task asset distribution ---
+  assetZipName       String    @default("Editor_Arena_Task_Files.zip")
+  assetDriveFileId   String?
+  assetDriveUrl      String?
+  /// Set by the admin ahead of time; only ever returned to contestants once
+  /// assetsReleased && passwordReleased are both true.
+  assetZipPassword   String?
+  assetsReleased     Boolean   @default(false)
+  passwordReleased   Boolean   @default(false)
+  assetsReleasedAt   DateTime?
+  passwordReleasedAt DateTime?
+
+  // --- Submission rules ---
+  submissionFolderId  String?
+  maxUploadMb         Int      @default(4096)
+  allowedMimeTypes    String[] @default(["video/mp4", "video/quicktime"])
+  allowLateSubmission Boolean  @default(false)
+
+  // --- Judging ---
+  judgingLocked       Boolean @default(false)
+  resultsPublished    Boolean @default(false)
+  judgesPerSubmission Int     @default(5)
+
+  // --- Integrations ---
+  sheetId      String?
+  sheetTabName String  @default("Registrations")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  contestants    Contestant[]
+  submissions    Submission[]
+  reminders      EmailReminder[]
+  faqs           Faq[]
+  prizes         Prize[]
+  timelineEvents TimelineEvent[]
+  statusLogs     EventStatusLog[]
+
+  @@map("hackathons")
+}
+
+/// Append-only record of every event-state transition.
+model EventStatusLog {
+  id          String       @id @default(cuid())
+  hackathonId String
+  from        EventStatus?
+  to          EventStatus
+  changedById String?
+  note        String?
+  createdAt   DateTime     @default(now())
+
+  hackathon Hackathon @relation(fields: [hackathonId], references: [id], onDelete: Cascade)
+
+  @@index([hackathonId, createdAt])
+  @@map("event_status_logs")
+}
+
+// ---------------------------------------------------------------------------
+// Contestants
+// ---------------------------------------------------------------------------
+
+model Contestant {
+  id           String @id @default(cuid())
+  /// Human-facing competition ID, e.g. EA20260001
+  contestantId String @unique
+
+  userId      String @unique
+  hackathonId String
+
+  fullName String
+  email    String
+  phone    String
+  city     String
+
+  experienceYears Int
+  jobRole         String
+  softwareSkills  String[]
+  portfolioUrl    String
+  linkedinUrl     String?
+  socialUrl       String?
+  heardFrom       String?
+
+  status             ContestantStatus @default(REGISTERED)
+  registeredAt       DateTime         @default(now())
+  assetsDownloadedAt DateTime?
+  disqualifiedReason String?
+
+  // Denormalised results — recomputed by the ranking engine, never hand-edited.
+  finalScore  Float?
+  rank        Int?
+  isWinner    Boolean @default(false)
+  isRunnerUp  Boolean @default(false)
+  shortlisted Boolean @default(false)
+
+  sheetRowSyncedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user       User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  hackathon  Hackathon       @relation(fields: [hackathonId], references: [id], onDelete: Cascade)
+  submission Submission?
+  reminders  EmailReminder[]
+
+  @@unique([hackathonId, email])
+  @@index([hackathonId, status])
+  @@index([rank])
+  @@map("contestants")
+}
+
+// ---------------------------------------------------------------------------
+// Judges
+// ---------------------------------------------------------------------------
+
+model Judge {
+  id     String @id @default(cuid())
+  userId String @unique
+
+  name         String
+  email        String   @unique
+  title        String?
+  organization String?
+  expertise    String[]
+  bio          String?
+  isActive     Boolean  @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  assignments JudgeAssignment[]
+  ratings     Rating[]
+
+  @@map("judges")
+}
+
+/// Which judge reviews which submission. Admin-controlled fan-out.
+model JudgeAssignment {
+  id           String    @id @default(cuid())
+  judgeId      String
+  submissionId String
+  assignedAt   DateTime  @default(now())
+  completedAt  DateTime?
+
+  judge      Judge      @relation(fields: [judgeId], references: [id], onDelete: Cascade)
+  submission Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+
+  @@unique([judgeId, submissionId])
+  @@index([judgeId, completedAt])
+  @@map("judge_assignments")
+}
+
+// ---------------------------------------------------------------------------
+// Submissions
+// ---------------------------------------------------------------------------
+
+model Submission {
+  id           String @id @default(cuid())
+  contestantId String @unique
+  hackathonId  String
+
+  status SubmissionStatus @default(NOT_SUBMITTED)
+
+  // Google Drive
+  driveFolderId String?
+  driveFileId   String?
+  videoUrl      String?
+  previewUrl    String?
+  downloadUrl   String?
+
+  fileName        String?
+  mimeType        String?
+  sizeBytes       BigInt?
+  durationSeconds Int?
+
+  uploadedAt     DateTime?
+  isLate         Boolean   @default(false)
+  rejectedReason String?
+  notes          String?
+
+  // Denormalised scoring — owned by lib/scoring.ts
+  averageScore Float?
+  ratingsCount Int    @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  contestant  Contestant        @relation(fields: [contestantId], references: [id], onDelete: Cascade)
+  hackathon   Hackathon         @relation(fields: [hackathonId], references: [id], onDelete: Cascade)
+  ratings     Rating[]
+  assignments JudgeAssignment[]
+
+  @@index([hackathonId, status])
+  @@index([averageScore])
+  @@map("submissions")
+}
+
+// ---------------------------------------------------------------------------
+// Judging
+// ---------------------------------------------------------------------------
+
+model Rating {
+  id           String @id @default(cuid())
+  submissionId String
+  judgeId      String
+
+  // Six criteria, each 0.0–10.0 with one decimal place.
+  creativity       Float
+  storytelling     Float
+  editingSkill     Float
+  motionGraphics   Float
+  soundDesign      Float
+  technicalQuality Float
+
+  /// Judge's holistic 0–10 call. This is what the ranking engine averages.
+  overallScore  Float
+  /// Weighted mean of the six criteria — computed server-side, read-only.
+  computedScore Float
+
+  /// Once true the judge can no longer edit; only an admin can unlock.
+  isSubmitted  Boolean   @default(false)
+  submittedAt  DateTime?
+  unlockedById String?
+  unlockedAt   DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  submission Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  judge      Judge      @relation(fields: [judgeId], references: [id], onDelete: Cascade)
+  feedback   Feedback?
+
+  @@unique([submissionId, judgeId])
+  @@index([judgeId, isSubmitted])
+  @@map("ratings")
+}
+
+/// Qualitative half of a review. Split from Rating so the hiring report can be
+/// generated from feedback alone without loading score matrices.
+model Feedback {
+  id       String @id @default(cuid())
+  ratingId String @unique
+
+  comment        String
+  strengths      String?
+  weaknesses     String?
+  recommendation HiringRecommendation @default(KEEP_WARM)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  rating Rating @relation(fields: [ratingId], references: [id], onDelete: Cascade)
+
+  @@map("feedback")
+}
+
+// ---------------------------------------------------------------------------
+// Communications
+// ---------------------------------------------------------------------------
+
+model EmailReminder {
+  id           String  @id @default(cuid())
+  hackathonId  String
+  contestantId String?
+
+  type    ReminderType
+  status  ReminderStatus @default(SCHEDULED)
+  toEmail String
+  subject String
+
+  scheduledFor      DateTime
+  sentAt            DateTime?
+  attempts          Int       @default(0)
+  lastError         String?
+  providerMessageId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  hackathon  Hackathon   @relation(fields: [hackathonId], references: [id], onDelete: Cascade)
+  contestant Contestant? @relation(fields: [contestantId], references: [id], onDelete: Cascade)
+
+  @@unique([contestantId, type])
+  @@index([status, scheduledFor])
+  @@map("email_reminders")
+}
+
+// ---------------------------------------------------------------------------
+// Editable landing-page content
+// ---------------------------------------------------------------------------
+
+model Faq {
+  id          String  @id @default(cuid())
+  hackathonId String
+  question    String
+  answer      String
+  order       Int     @default(0)
+  isPublished Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  hackathon Hackathon @relation(fields: [hackathonId], references: [id], onDelete: Cascade)
+
+  @@index([hackathonId, order])
+  @@map("faqs")
+}
+
+model Prize {
+  id          String  @id @default(cuid())
+  hackathonId String
+  /// 1 = winner, 2..n = runners-up
+  position    Int
+  title       String
+  reward      String
+  description String?
+  quantity    Int     @default(1)
+  icon        String  @default("trophy")
+  order       Int     @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  hackathon Hackathon @relation(fields: [hackathonId], references: [id], onDelete: Cascade)
+
+  @@index([hackathonId, order])
+  @@map("prizes")
+}
+
+model TimelineEvent {
+  id          String   @id @default(cuid())
+  hackathonId String
+  title       String
+  description String?
+  occursAt    DateTime
+  order       Int      @default(0)
+  isPublished Boolean  @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  hackathon Hackathon @relation(fields: [hackathonId], references: [id], onDelete: Cascade)
+
+  @@index([hackathonId, order])
+  @@map("timeline_events")
+}

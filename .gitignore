@@ -1,0 +1,26 @@
+node_modules/
+.next/
+out/
+build/
+dist/
+
+.env
+.env.local
+.env.*.local
+!.env.example
+
+*.log
+npm-debug.log*
+.DS_Store
+.vercel
+*.tsbuildinfo
+next-env.d.ts
+coverage/
+
+# Never commit service-account keys or exported reports
+*service-account*.json
+gcp-*.json
+/exports/
+
+# Local session scratch
+Terminal Saved Output.txt
