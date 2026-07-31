@@ -69,14 +69,14 @@ export function Hero({
           alt=""
           width={540}
           height={1100}
-          className="editor-in-left absolute bottom-0 left-[5%] hidden h-[72%] w-auto max-w-[30vw] object-contain object-bottom md:block lg:left-[10%] lg:h-[80%]"
+          className="editor-in-left absolute bottom-0 left-[5%] hidden h-[72%] w-auto max-w-[30vw] object-contain object-bottom brightness-[1.42] contrast-[1.07] drop-shadow-[0_0_28px_rgba(240,178,19,0.18)] saturate-[1.12] md:block lg:left-[10%] lg:h-[80%]"
         />
         <Image
           src="/editor-right.png"
           alt=""
           width={568}
           height={1100}
-          className="editor-in-right absolute bottom-0 right-[5%] hidden h-[72%] w-auto max-w-[30vw] object-contain object-bottom md:block lg:right-[10%] lg:h-[80%]"
+          className="editor-in-right absolute bottom-0 right-[5%] hidden h-[72%] w-auto max-w-[30vw] object-contain object-bottom brightness-[1.42] contrast-[1.07] drop-shadow-[0_0_28px_rgba(240,178,19,0.18)] saturate-[1.12] md:block lg:right-[10%] lg:h-[80%]"
         />
 
         {/* Pull the middle down so the wordmark keeps its contrast over the

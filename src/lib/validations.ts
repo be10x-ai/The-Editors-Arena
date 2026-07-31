@@ -28,11 +28,6 @@ export const istDateTime = z.union([z.string(), z.date()]).transform((value, ctx
   return parsed;
 });
 
-const optionalUrl = z
-  .union([url, z.literal("")])
-  .optional()
-  .transform((v) => (v ? v : undefined));
-
 export const registrationSchema = z
   .object({
     fullName: z

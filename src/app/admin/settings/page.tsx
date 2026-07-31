@@ -1,10 +1,8 @@
-import { CheckCircle2, RefreshCw, Save, XCircle } from "lucide-react";
+import { Save } from "lucide-react";
 import type { Metadata } from "next";
 
-import { ActionButton } from "@/components/admin/action-button";
 import { ActionForm, FieldError } from "@/components/admin/action-form";
 import { SubmitButton } from "@/components/shared/submit-button";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   Card,
   CardContent,
@@ -15,12 +13,10 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { integrationStatus } from "@/lib/env";
 import { getActiveHackathon } from "@/lib/hackathon";
-import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/rbac";
-import { formatIST, toISTInputValue } from "@/lib/utils";
-import { resyncSheet, saveHackathonSettings } from "@/server/actions/admin/settings";
+import { toISTInputValue } from "@/lib/utils";
+import { saveHackathonSettings } from "@/server/actions/admin/settings";
 
 export const dynamic = "force-dynamic";
 
@@ -41,13 +37,6 @@ export default async function AdminSettingsPage() {
   const hackathon = await getActiveHackathon();
   if (!hackathon) return null;
 
-  const integrations = integrationStatus();
-  const lastSync = await prisma.contestant.findFirst({
-    where: { hackathonId: hackathon.id, sheetRowSyncedAt: { not: null } },
-    orderBy: { sheetRowSyncedAt: "desc" },
-    select: { sheetRowSyncedAt: true },
-  });
-
   return (
     <div className="space-y-7">
       <div>
@@ -58,76 +47,6 @@ export default async function AdminSettingsPage() {
           gate. Changing the start time re-queues all pending reminders.
         </p>
       </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Integrations</CardTitle>
-          <CardDescription>
-            Read from environment variables — change them in Vercel, then redeploy.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {integrations.dryRun ? (
-            <Alert variant="info">
-              <AlertTitle>Dry-run mode is on</AlertTitle>
-              <AlertDescription>
-                <code className="font-mono">INTEGRATIONS_DRY_RUN=true</code> — Google
-                calls are logged instead of executed. Turn it off for the live event.
-              </AlertDescription>
-            </Alert>
-          ) : null}
-
-          <ul className="space-y-2.5">
-            {[
-              {
-                label: "Google Drive (submission uploads)",
-                ok: integrations.drive,
-                hint: "Needs the service account plus GOOGLE_DRIVE_SUBMISSIONS_FOLDER_ID.",
-              },
-              {
-                label: "Email (SMTP relay)",
-                ok: integrations.email,
-                hint: "Needs SMTP_HOST, SMTP_USER, SMTP_PASSWORD and MAIL_FROM_EMAIL.",
-              },
-              {
-                label: "Google Sheets (registration mirror)",
-                ok: integrations.sheets,
-                hint: "Needs the service account plus GOOGLE_SHEET_ID.",
-              },
-            ].map((item) => (
-              <li key={item.label} className="flex items-start gap-3">
-                {item.ok ? (
-                  <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-emerald-400" />
-                ) : (
-                  <XCircle className="mt-0.5 size-4 shrink-0 text-rose-400" />
-                )}
-                <div>
-                  <p className="text-sm font-medium">{item.label}</p>
-                  <p className="text-xs text-muted-foreground">{item.hint}</p>
-                </div>
-              </li>
-            ))}
-          </ul>
-
-          <div className="hairline" />
-
-          <div className="flex flex-wrap items-center gap-3">
-            <ActionButton
-              action={resyncSheet}
-              variant="secondary"
-              disabled={!integrations.sheets}
-            >
-              <RefreshCw />
-              Re-sync Google Sheet
-            </ActionButton>
-            <p className="text-xs text-muted-foreground">
-              {lastSync?.sheetRowSyncedAt
-                ? `Last synced ${formatIST(lastSync.sheetRowSyncedAt)} IST`
-                : "Never synced"}
-            </p>
-          </div>
-        </CardContent>
-      </Card>
 
       <Card>
         <CardHeader>
