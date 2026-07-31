@@ -365,6 +365,21 @@ above is a prerequisite either way.
 reminder cadence moved to `.github/workflows/reminders.yml`. Vercel validates
 `crons` before building, so this rejects the deployment rather than failing it.
 
+**Every page takes 5-7 seconds.**
+The functions were running in `iad1` (Washington) while the database sits in
+`ap-south-1` (Mumbai), so every query crossed the Atlantic twice. Check the
+compute region — it is the *second* field of `x-vercel-id`, not the first:
+
+```bash
+curl -sI https://<host>/api/health | grep x-vercel-id
+# x-vercel-id: bom1::iad1::…   <- edge Mumbai, compute Washington: wrong
+# x-vercel-id: bom1::bom1::…   <- both Mumbai: right
+```
+
+`vercel.json` pins `"regions": ["bom1"]`. Measured effect: `/api/health` DB
+latency 3140ms → 18ms, and `/` TTFB 5.4s → 0.26s warm. If you move the database,
+move this too — they must stay in the same region.
+
 **Every route 404s (`NOT_FOUND`) but files in `public/` still serve.**
 The project was detected as a **static site**, not Next.js: Vercel ran the build,
 then published only `public/` and threw the server output away. The tell is that
