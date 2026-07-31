@@ -4,19 +4,17 @@ import Credentials from "next-auth/providers/credentials";
 import { z } from "zod";
 
 import { authConfig } from "@/lib/auth.config";
-import { consumeOtp } from "@/lib/otp";
 import { prisma } from "@/lib/prisma";
 
 const credentialsSchema = z.object({
   email: z.string().email(),
-  password: z.string().min(1).optional(),
-  otp: z.string().min(4).max(10).optional(),
+  password: z.string().min(1),
 });
 
 /**
- * A single credentials provider serving both login modes:
- *   • password — admins, judges, and contestants who set one
- *   • otp      — contestants who prefer the emailed six-digit code
+ * Email and password for every role. The emailed one-time code was removed —
+ * it made sign-in depend on outbound mail, so an unconfigured Gmail locked
+ * everyone out, contestants included.
  */
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
@@ -26,15 +24,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       credentials: {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
-        otp: { label: "One-time code", type: "text" },
       },
       async authorize(raw) {
         const parsed = credentialsSchema.safeParse(raw);
         if (!parsed.success) return null;
 
         const email = parsed.data.email.toLowerCase().trim();
-        const { password, otp } = parsed.data;
-        if (!password && !otp) return null;
+        const { password } = parsed.data;
+        if (!password) return null;
 
         const user = await prisma.user.findUnique({
           where: { email },
@@ -47,18 +44,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         // Constant-ish work whether or not the account exists, so response
         // timing does not leak which emails are registered.
         if (!user || !user.isActive) {
-          if (password) await bcrypt.compare(password, DUMMY_HASH);
+          await bcrypt.compare(password, DUMMY_HASH);
           return null;
         }
 
-        if (otp) {
-          const ok = await consumeOtp(email, otp);
-          if (!ok) return null;
-        } else if (password) {
-          if (!user.passwordHash) return null;
-          const ok = await bcrypt.compare(password, user.passwordHash);
-          if (!ok) return null;
+        // Still burn a bcrypt compare when no hash exists, so an account without
+        // a password cannot be distinguished by response time.
+        if (!user.passwordHash) {
+          await bcrypt.compare(password, DUMMY_HASH);
+          return null;
         }
+        if (!(await bcrypt.compare(password, user.passwordHash))) return null;
 
         if (user.role === "JUDGE" && user.judge && !user.judge.isActive) return null;
 

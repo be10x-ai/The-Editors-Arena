@@ -1,6 +1,7 @@
 "use server";
 
 import { Prisma } from "@prisma/client";
+import bcrypt from "bcryptjs";
 import { headers } from "next/headers";
 
 import { recordAudit } from "@/lib/audit";
@@ -93,6 +94,8 @@ export async function registerContestant(
 
   let created: { id: string; contestantId: string; email: string } | null = null;
 
+  const passwordHash = await bcrypt.hash(input.password, 10);
+
   // The unique index on contestantId is the real guard; two entrants hitting
   // submit in the same millisecond retry rather than collide.
   for (let attempt = 0; attempt < 4 && !created; attempt += 1) {
@@ -105,6 +108,7 @@ export async function registerContestant(
             email: input.email,
             name: input.fullName,
             role: "CONTESTANT",
+            passwordHash,
           },
           select: { id: true },
         });

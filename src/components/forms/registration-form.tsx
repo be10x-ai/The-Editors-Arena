@@ -282,6 +282,45 @@ export function RegistrationForm() {
 
       <div className="hairline" />
 
+      <fieldset>
+        <legend className="label-eyebrow mb-4">3 · Choose a password</legend>
+        <div className="grid gap-5 sm:grid-cols-2">
+          <div className="space-y-2">
+            <Label htmlFor="password">Password *</Label>
+            <Input
+              id="password"
+              name="password"
+              type="password"
+              autoComplete="new-password"
+              placeholder="At least 8 characters"
+              minLength={8}
+              required
+            />
+            <FieldError errors={fieldErrors.password} />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="confirmPassword">Confirm password *</Label>
+            <Input
+              id="confirmPassword"
+              name="confirmPassword"
+              type="password"
+              autoComplete="new-password"
+              placeholder="Re-enter your password"
+              minLength={8}
+              required
+            />
+            <FieldError errors={fieldErrors.confirmPassword} />
+          </div>
+        </div>
+        <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
+          You&apos;ll sign in with this email and password to reach your dashboard,
+          download the footage and upload your final video.
+        </p>
+      </fieldset>
+
+      <div className="hairline" />
+
       <div className="flex items-start gap-3 rounded-xl border border-white/10 bg-white/[0.03] p-4">
         <Checkbox id="consent" name="consent" required className="mt-0.5" />
         <Label htmlFor="consent" className="text-sm font-normal leading-relaxed">
@@ -366,8 +405,7 @@ function RegistrationSuccess({
         </div>
 
         <p className="mt-6 text-xs leading-relaxed text-muted-foreground">
-          No password needed — sign in with your email and we&apos;ll send a 6-digit
-          code.
+          Sign in with the email and password you just chose.
         </p>
       </CardContent>
     </Card>

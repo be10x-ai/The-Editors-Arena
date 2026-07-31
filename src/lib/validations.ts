@@ -31,39 +31,46 @@ const optionalUrl = z
   .optional()
   .transform((v) => (v ? v : undefined));
 
-export const registrationSchema = z.object({
-  fullName: z
-    .string()
-    .trim()
-    .min(3, "Please enter your full name")
-    .max(120)
-    .regex(/^[\p{L}\p{M}.'\- ]+$/u, "Letters, spaces, hyphens and apostrophes only"),
-  email: z.string().trim().toLowerCase().email("Enter a valid email").max(200),
-  phone: z
-    .string()
-    .trim()
-    .min(10, "Enter a valid phone number")
-    .max(20)
-    .regex(/^[+0-9][0-9\s\-()]{8,19}$/, "Digits, spaces and + only"),
-  city: z.string().trim().min(2, "Enter your city").max(80),
-  experienceYears: z.coerce
-    .number({ invalid_type_error: "Select your experience" })
-    .int("Whole years only")
-    .min(0)
-    .max(50),
-  jobRole: z.string().trim().min(2, "Select your current role").max(80),
-  softwareSkills: z
-    .array(z.string().trim().min(1).max(60))
-    .min(1, "Pick at least one tool you work in")
-    .max(15),
-  portfolioUrl: url,
-  linkedinUrl: optionalUrl,
-  socialUrl: optionalUrl,
-  heardFrom: z.string().trim().max(80).optional(),
-  consent: z.literal(true, {
-    errorMap: () => ({ message: "You must accept the rules to register" }),
-  }),
-});
+export const registrationSchema = z
+  .object({
+    fullName: z
+      .string()
+      .trim()
+      .min(3, "Please enter your full name")
+      .max(120)
+      .regex(/^[\p{L}\p{M}.'\- ]+$/u, "Letters, spaces, hyphens and apostrophes only"),
+    email: z.string().trim().toLowerCase().email("Enter a valid email").max(200),
+    phone: z
+      .string()
+      .trim()
+      .min(10, "Enter a valid phone number")
+      .max(20)
+      .regex(/^[+0-9][0-9\s\-()]{8,19}$/, "Digits, spaces and + only"),
+    city: z.string().trim().min(2, "Enter your city").max(80),
+    experienceYears: z.coerce
+      .number({ invalid_type_error: "Select your experience" })
+      .int("Whole years only")
+      .min(0)
+      .max(50),
+    jobRole: z.string().trim().min(2, "Select your current role").max(80),
+    softwareSkills: z
+      .array(z.string().trim().min(1).max(60))
+      .min(1, "Pick at least one tool you work in")
+      .max(15),
+    portfolioUrl: url,
+    linkedinUrl: optionalUrl,
+    socialUrl: optionalUrl,
+    heardFrom: z.string().trim().max(80).optional(),
+    password: z.string().min(8, "Use at least 8 characters").max(200),
+    confirmPassword: z.string().min(8, "Use at least 8 characters").max(200),
+    consent: z.literal(true, {
+      errorMap: () => ({ message: "You must accept the rules to register" }),
+    }),
+  })
+  .refine((v) => v.password === v.confirmPassword, {
+    path: ["confirmPassword"],
+    message: "Passwords do not match",
+  });
 
 export type RegistrationInput = z.infer<typeof registrationSchema>;
 
