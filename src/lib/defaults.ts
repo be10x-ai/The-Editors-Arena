@@ -146,7 +146,7 @@ export const DEFAULT_FAQS: { question: string; answer: string; order: number }[]
   {
     question: "How will I receive the assets?",
     answer:
-      "Everything comes through your dashboard — nothing arrives by DM or WhatsApp. When the hackathon goes live, a download button appears with the task ZIP hosted on Google Drive, and the ZIP password is displayed on the same page at the same moment. Neither is visible before the event starts.",
+      "Everything comes through your dashboard — nothing arrives by DM or WhatsApp. When the hackathon goes live, a download button appears with the task ZIP. The ZIP password stays hidden until the task timer starts, and appears on the same page at that moment. Neither is visible before the event begins.",
     order: 3,
   },
   {
@@ -164,7 +164,7 @@ export const DEFAULT_FAQS: { question: string; answer: string; order: number }[]
   {
     question: "How are winners selected?",
     answer:
-      "Your final score is the average of the five judges' overall scores, to two decimal places. Rank 1 is the Champion, ranks 2 to 4 are the runners-up. Ties share a rank. The full leaderboard is published when results are announced.",
+      "Your final score is the average of the five judges' overall scores, to two decimal places. Rank 1 is the Champion and takes ₹1 Lakh; ranks 2 and 3 are the runners-up and take ₹10,000 each. Ties share a rank. The full leaderboard is published when results are announced, within 60 minutes of the submission deadline.",
     order: 6,
   },
   {

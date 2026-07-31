@@ -89,9 +89,9 @@ export default async function AdminContestantsPage({
           <h1 className="heading-hero mt-2 text-2xl sm:text-3xl">Registrations</h1>
         </div>
         <Button asChild variant="secondary">
-          <a href="/api/reports/hiring?format=registrations">
+          <a href="/api/reports/hiring?format=registrations-csv">
             <Download />
-            Export registrations
+            Export CSV
           </a>
         </Button>
       </div>

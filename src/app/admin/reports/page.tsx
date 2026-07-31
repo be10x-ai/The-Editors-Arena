@@ -1,4 +1,4 @@
-import { FileSpreadsheet, FileText, Table2, Trophy } from "lucide-react";
+import { Download, FileText, Trophy } from "lucide-react";
 import type { Metadata } from "next";
 
 import { StatCard } from "@/components/shared/stat-card";
@@ -37,39 +37,31 @@ export default async function AdminReportsPage() {
 
   const report = await buildHiringReport(hackathon.id);
 
-  const EXPORTS = [
-    {
-      href: "/api/reports/hiring?format=pdf",
-      icon: FileText,
-      title: "Hiring report (PDF)",
-      description:
-        "One page per candidate: scores by criterion, judge feedback verbatim, strengths, weaknesses and a consensus recommendation.",
-    },
-    {
-      href: "/api/reports/hiring?format=xlsx",
-      icon: FileSpreadsheet,
-      title: "Hiring report (Excel)",
-      description:
-        "Three sheets — summary, one row per judge scorecard, and per-criterion averages for calibration analysis.",
-    },
-    {
-      href: "/api/reports/hiring?format=registrations",
-      icon: Table2,
-      title: "Registrations (Excel)",
-      description:
-        "The full applicant pool with portfolios and contact details — useful as a hiring database beyond the competition.",
-    },
-  ];
-
   return (
     <div className="space-y-7">
-      <div>
-        <p className="label-eyebrow">Post-event</p>
-        <h1 className="heading-hero mt-2 text-2xl sm:text-3xl">Reports</h1>
-        <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">
-          Built from finalised scorecards only — drafts are never included.
-          Recommendation is the consensus across judges, breaking ties conservatively.
-        </p>
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <p className="label-eyebrow">Post-event</p>
+          <h1 className="heading-hero mt-2 text-2xl sm:text-3xl">Reports</h1>
+          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">
+            Built from finalised scorecards only — drafts are never included.
+            Recommendation is the consensus across judges, breaking ties conservatively.
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Button asChild variant="secondary" size="sm">
+            <a href="/api/reports/hiring?format=csv">
+              <Download />
+              Results CSV
+            </a>
+          </Button>
+          <Button asChild variant="secondary" size="sm">
+            <a href="/api/reports/hiring?format=registrations-csv">
+              <Download />
+              Registrations CSV
+            </a>
+          </Button>
+        </div>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3">
@@ -85,25 +77,6 @@ export default async function AdminReportsPage() {
           icon={Trophy}
           tone="emerald"
         />
-      </div>
-
-      <div className="grid gap-4 lg:grid-cols-3">
-        {EXPORTS.map((item) => (
-          <Card key={item.href} className="glass-hover flex flex-col">
-            <CardHeader>
-              <span className="grid size-11 place-items-center rounded-xl bg-amber-500/15 text-amber-200">
-                <item.icon className="size-5" />
-              </span>
-              <CardTitle className="mt-3">{item.title}</CardTitle>
-              <CardDescription>{item.description}</CardDescription>
-            </CardHeader>
-            <CardContent className="mt-auto">
-              <Button asChild variant="secondary" className="w-full">
-                <a href={item.href}>Download</a>
-              </Button>
-            </CardContent>
-          </Card>
-        ))}
       </div>
 
       <Card className="overflow-hidden">
