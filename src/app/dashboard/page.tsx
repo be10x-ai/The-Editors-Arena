@@ -5,6 +5,7 @@ import {
   Clock,
   ExternalLink,
   Upload,
+  Youtube,
 } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -22,6 +23,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { computeGates, countdownTarget, getActiveHackathon } from "@/lib/hackathon";
 import { prisma } from "@/lib/prisma";
+import { youtubeEmbedUrl } from "@/lib/youtube";
 import { requireRole } from "@/lib/rbac";
 import { formatIST, formatScore } from "@/lib/utils";
 
@@ -180,37 +182,51 @@ export default async function ContestantDashboard() {
           <CardContent className="space-y-4">
             {hasSubmitted && submission ? (
               <>
+                {/* The submitted edit, playable in place — the entrant should be
+                    able to confirm the jury will see the right video without
+                    leaving the dashboard. */}
+                {submission.youtubeVideoId ? (
+                  <div className="relative aspect-video overflow-hidden rounded-xl border border-white/10 bg-black">
+                    <iframe
+                      src={youtubeEmbedUrl(submission.youtubeVideoId)}
+                      title="Your submitted edit"
+                      allow="accelerometer; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                      allowFullScreen
+                      loading="lazy"
+                      className="absolute inset-0 size-full"
+                    />
+                  </div>
+                ) : null}
+
                 <div className="rounded-xl border border-emerald-500/25 bg-emerald-500/10 p-4">
                   <p className="flex items-center gap-2 text-sm font-semibold text-emerald-200">
                     <CheckCircle2 className="size-4" />
                     {submission.status === "LATE"
                       ? "Received — flagged late"
-                      : "Received"}
+                      : "Received and locked"}
                   </p>
-                  <p className="mt-1.5 truncate font-mono text-xs text-emerald-100/80">
-                    {submission.fileName}
-                  </p>
+                  {submission.youtubeUrl ? (
+                    <p className="mt-1.5 break-all font-mono text-xs text-emerald-100/80">
+                      {submission.youtubeUrl}
+                    </p>
+                  ) : null}
                   <p className="mt-1 text-xs text-emerald-100/70">
-                    Uploaded {formatIST(submission.uploadedAt)} IST
+                    Submitted {formatIST(submission.uploadedAt)} IST · the link cannot
+                    be changed
                   </p>
                 </div>
 
                 <div className="flex flex-wrap gap-3">
-                  {submission.videoUrl ? (
+                  {(submission.youtubeUrl ?? submission.videoUrl) ? (
                     <Button asChild variant="secondary" size="sm">
                       <a
-                        href={submission.videoUrl}
+                        href={(submission.youtubeUrl ?? submission.videoUrl)!}
                         target="_blank"
                         rel="noopener noreferrer"
                       >
                         <ExternalLink />
-                        View on Drive
+                        {submission.youtubeUrl ? "Open on YouTube" : "View on Drive"}
                       </a>
-                    </Button>
-                  ) : null}
-                  {gates.uploadsOpen ? (
-                    <Button asChild size="sm">
-                      <Link href="/dashboard/submit">Replace my video</Link>
                     </Button>
                   ) : null}
                 </div>
@@ -219,17 +235,17 @@ export default async function ContestantDashboard() {
               <>
                 <p className="text-sm leading-relaxed text-muted-foreground">
                   {gates.uploadsOpen
-                    ? "Uploads are open. MP4 or MOV, up to " +
-                      hackathon.maxUploadMb +
-                      " MB. Leave time for the upload itself — the deadline is when the file is fully received, not when you start."
+                    ? "Submissions are open. Upload your edit to YouTube as Public or Unlisted, then paste the link — you get one submission and it cannot be changed afterwards."
                     : gates.deadlinePassed
                       ? "The submission window has closed."
-                      : "The upload form unlocks when the organisers open submissions on event day."}
+                      : "The link form unlocks when the organisers open submissions on event day."}
                 </p>
                 <Button asChild disabled={!gates.uploadsOpen}>
                   <Link href={gates.uploadsOpen ? "/dashboard/submit" : "/dashboard"}>
-                    <Upload />
-                    {gates.uploadsOpen ? "Upload final video" : "Upload not open yet"}
+                    <Youtube />
+                    {gates.uploadsOpen
+                      ? "Submit my YouTube link"
+                      : "Submissions not open yet"}
                   </Link>
                 </Button>
               </>

@@ -48,7 +48,7 @@ export function PrizeSection({ prizes }: { prizes: Prize[] }) {
           description="Prizes are the smallest part of this. The scorecard, the portfolio piece and the hiring conversation are the reason to enter."
         />
 
-        <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {prizes.map((prize, index) => {
             const Icon = iconFor(prize.icon);
             const isWinner = prize.position === 1;
@@ -57,7 +57,7 @@ export function PrizeSection({ prizes }: { prizes: Prize[] }) {
               <Reveal
                 key={prize.id}
                 delay={index * 0.08}
-                className={cn(isWinner && "sm:col-span-2 lg:col-span-4")}
+                className={cn(isWinner && "sm:col-span-2 lg:col-span-1")}
               >
                 <Card
                   className={cn(

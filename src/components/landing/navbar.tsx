@@ -5,6 +5,7 @@ import Link from "next/link";
 import * as React from "react";
 
 import { LogoLockup } from "@/components/shared/logo";
+import { SignOutButton } from "@/components/shared/sign-out-button";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -72,9 +73,12 @@ export function Navbar({
 
         <div className="hidden items-center gap-2 sm:flex">
           {isAuthenticated ? (
-            <Button asChild size="sm">
-              <Link href={dashboardHref}>My dashboard</Link>
-            </Button>
+            <>
+              <Button asChild size="sm">
+                <Link href={dashboardHref}>My dashboard</Link>
+              </Button>
+              <SignOutButton />
+            </>
           ) : (
             <>
               <Button asChild size="sm" variant="ghost">
@@ -115,9 +119,12 @@ export function Navbar({
             ))}
             <div className="mt-3 flex flex-col gap-2">
               {isAuthenticated ? (
-                <Button asChild onClick={() => setOpen(false)}>
-                  <Link href={dashboardHref}>My dashboard</Link>
-                </Button>
+                <>
+                  <Button asChild onClick={() => setOpen(false)}>
+                    <Link href={dashboardHref}>My dashboard</Link>
+                  </Button>
+                  <SignOutButton className="flex justify-center" />
+                </>
               ) : (
                 <>
                   <Button asChild variant="secondary" onClick={() => setOpen(false)}>

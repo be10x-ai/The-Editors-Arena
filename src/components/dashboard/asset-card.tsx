@@ -31,18 +31,47 @@ export function AssetCard({
             <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-white/[0.05] text-muted-foreground">
               <Lock className="size-5" />
             </span>
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <h3 className="font-display text-base font-semibold">
                 Task files are locked
               </h3>
               <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
-                The download button and the ZIP password both appear on this page the
-                moment the hackathon goes live
+                Both unlock on this page the moment the hackathon goes live
                 {gates.status === "NOT_STARTED"
                   ? ` — scheduled for ${formatIST(startsAt)} IST.`
                   : "."}{" "}
                 Nothing is sent by email or DM.
               </p>
+
+              {/* The real controls, shown disabled rather than described. An
+                  entrant can see exactly what will appear and where, which is
+                  what stops "where do I download it?" on the day. */}
+              <div className="mt-5 space-y-3">
+                <Button disabled className="w-full sm:w-auto">
+                  <Download />
+                  Download {zipName}
+                </Button>
+
+                <div className="space-y-1.5">
+                  <p className="label-eyebrow flex items-center gap-1.5">
+                    <KeyRound className="size-3" />
+                    ZIP password
+                  </p>
+                  <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.02] px-3 py-2.5">
+                    <Lock className="size-3.5 shrink-0 text-muted-foreground" />
+                    <span
+                      aria-hidden
+                      className="select-none font-mono text-sm tracking-[0.3em] text-muted-foreground"
+                    >
+                      ••••••••••
+                    </span>
+                    <span className="sr-only">Hidden until the task timer starts</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Revealed here when the task timer starts.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </CardContent>

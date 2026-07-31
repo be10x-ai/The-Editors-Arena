@@ -33,6 +33,9 @@ export default async function SubmitPage() {
   // REJECTED is deliberately not locked — an admin rejecting a link is how a
   // contestant gets a second attempt.
   const isLocked = submission?.status === "SUBMITTED" || submission?.status === "LATE";
+  // Shown verbatim so entrants copy it rather than inventing a format — the
+  // title is how the jury ties an unlisted video back to a contestant.
+  const requiredTitle = `${contestant.contestantId} - ${contestant.fullName}`;
 
   return (
     <div className="space-y-7">
@@ -40,9 +43,10 @@ export default async function SubmitPage() {
         <p className="label-eyebrow">Submission</p>
         <h1 className="heading-hero mt-2 text-2xl sm:text-3xl">Submit your edit</h1>
         <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">
-          Upload your finished edit to YouTube, then paste the link here. You get one
-          submission — once it is in, the link is locked and only the organisers can
-          change it.
+          Upload your finished edit to YouTube in 1080p, title it{" "}
+          <strong className="text-foreground">{requiredTitle}</strong>, then paste the
+          link here. You get one submission — once it is in, the link is locked and only
+          the organisers can change it.
         </p>
       </div>
 
@@ -133,9 +137,10 @@ export default async function SubmitPage() {
             <CardContent>
               <dl className="space-y-3 text-sm">
                 {[
-                  ["Where", "YouTube"],
+                  ["Where", "YouTube — a link, not a file"],
+                  ["Resolution", "1080p (1920×1080), H.264"],
                   ["Visibility", "Public or Unlisted"],
-                  ["Recommended export", "1920×1080, H.264"],
+                  ["Video title", requiredTitle],
                   ["Deadline", `${formatIST(hackathon.submissionDeadline)} IST`],
                   [
                     "Late submissions",
@@ -160,6 +165,20 @@ export default async function SubmitPage() {
             </CardHeader>
             <CardContent>
               <ul className="space-y-2.5 text-sm leading-relaxed text-muted-foreground">
+                <li>
+                  • Title the video exactly{" "}
+                  <strong className="break-all font-mono text-foreground">
+                    {requiredTitle}
+                  </strong>
+                  . An untitled or mismatched video is slower to verify and may be
+                  queried before it is scored.
+                </li>
+                <li>
+                  • Export and upload at{" "}
+                  <strong className="text-foreground">1080p</strong>. YouTube will offer
+                  lower resolutions too, but the judges watch the best available and
+                  anything under 1080p reads as a technical fault.
+                </li>
                 <li>
                   • Set the video to{" "}
                   <strong className="text-foreground">Unlisted</strong> if you would
