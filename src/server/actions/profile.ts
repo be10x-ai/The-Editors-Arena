@@ -5,8 +5,20 @@ import { revalidatePath } from "next/cache";
 import { recordAudit } from "@/lib/audit";
 import { prisma } from "@/lib/prisma";
 import { getSessionUser } from "@/lib/rbac";
+import {
+  ALLOWED_AVATAR_TYPES,
+  hasStorage,
+  MAX_AVATAR_BYTES,
+  removeAvatar,
+  uploadAvatar,
+} from "@/lib/storage";
 import { ownProfileSchema } from "@/lib/validations";
-import { errorState, successState, type ActionState } from "@/server/actions/types";
+import {
+  errorState,
+  successState,
+  toMessage,
+  type ActionState,
+} from "@/server/actions/types";
 
 /**
  * Lets a signed-in admin or judge edit their own profile.
@@ -67,4 +79,78 @@ export async function updateOwnProfile(
   revalidatePath("/admin/profile");
   revalidatePath("/judge/profile");
   return successState("Profile updated.");
+}
+
+/**
+ * Replaces a contestant's profile photo.
+ *
+ * Validated server-side rather than trusting the browser: the file is checked for
+ * type and size here, and stored under the contestant's own id so one entrant can
+ * never overwrite another's avatar.
+ */
+export async function updateContestantPhoto(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const user = await getSessionUser();
+  if (!user || user.role !== "CONTESTANT" || !user.contestantRowId) {
+    return errorState("Sign in as a contestant first.");
+  }
+  if (!hasStorage()) {
+    return errorState(
+      "Photo uploads are not configured on this deployment yet. Contact the organisers.",
+    );
+  }
+
+  const file = formData.get("photo");
+  if (!(file instanceof File) || file.size === 0) {
+    return errorState("Choose an image to upload.", { photo: ["No file selected"] });
+  }
+  if (
+    !ALLOWED_AVATAR_TYPES.includes(file.type as (typeof ALLOWED_AVATAR_TYPES)[number])
+  ) {
+    return errorState("Use a JPG, PNG or WebP image.", {
+      photo: ["JPG, PNG or WebP only"],
+    });
+  }
+  if (file.size > MAX_AVATAR_BYTES) {
+    return errorState("That image is over 2 MB.", { photo: ["Maximum 2 MB"] });
+  }
+
+  const existing = await prisma.contestant.findUnique({
+    where: { id: user.contestantRowId },
+    select: { photoPath: true, contestantId: true },
+  });
+  if (!existing) return errorState("We can't find your entry.");
+
+  const extension =
+    file.type === "image/png" ? "png" : file.type === "image/webp" ? "webp" : "jpg";
+  // Cache-busting suffix: the bucket is public and CDN-cached, so reusing one
+  // path would leave the old picture served after a change.
+  const path = `${existing.contestantId}/${Date.now()}.${extension}`;
+
+  try {
+    await uploadAvatar(path, await file.arrayBuffer(), file.type);
+  } catch (error) {
+    return errorState(toMessage(error, "The upload failed. Try again."));
+  }
+
+  await prisma.contestant.update({
+    where: { id: user.contestantRowId },
+    data: { photoPath: path },
+  });
+
+  if (existing.photoPath) await removeAvatar(existing.photoPath);
+
+  await recordAudit({
+    actorId: user.id,
+    actorRole: user.role,
+    action: "profile.photo_updated",
+    entity: "Contestant",
+    entityId: user.contestantRowId,
+  });
+
+  revalidatePath("/dashboard/profile");
+  revalidatePath("/dashboard");
+  return successState("Photo updated.");
 }

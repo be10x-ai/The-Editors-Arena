@@ -239,6 +239,10 @@ model Contestant {
   phone    String
   city     String
 
+  /// Object path inside the avatars bucket, not a full URL — the public URL is
+  /// derived at render time, so changing bucket or CDN does not rewrite rows.
+  photoPath String?
+
   experienceYears Int
   jobRole         String
   softwareSkills  String[]

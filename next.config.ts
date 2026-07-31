@@ -8,6 +8,8 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       { protocol: "https", hostname: "drive.google.com" },
       { protocol: "https", hostname: "lh3.googleusercontent.com" },
+      // Supabase Storage serves contestant avatars from the project subdomain.
+      { protocol: "https", hostname: "*.supabase.co" },
     ],
   },
   async headers() {

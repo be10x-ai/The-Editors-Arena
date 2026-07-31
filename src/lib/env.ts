@@ -35,6 +35,16 @@ export const env = {
   },
 
   /**
+   * Supabase, used only for Storage — the database goes through Prisma and auth
+   * is this app's own. The service-role key bypasses row-level security, so it
+   * must never be exposed to the browser.
+   */
+  supabase: {
+    url: str("NEXT_PUBLIC_SUPABASE_URL"),
+    serviceRoleKey: str("SUPABASE_SERVICE_ROLE_KEY"),
+  },
+
+  /**
    * Outbound mail over plain SMTP — the same credentials you would paste into
    * Supabase's Custom SMTP screen. Supabase itself cannot carry these emails:
    * its mailer only handles Supabase Auth flows, and this app authenticates

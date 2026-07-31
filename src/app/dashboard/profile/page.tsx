@@ -2,6 +2,7 @@ import { ExternalLink } from "lucide-react";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
+import { PhotoUploadForm } from "@/components/forms/photo-upload-form";
 import { SetPasswordForm } from "@/components/forms/set-password-form";
 import { CopyField } from "@/components/shared/copy-field";
 import { ContestantStatusBadge } from "@/components/shared/status-badges";
@@ -14,6 +15,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { prisma } from "@/lib/prisma";
+import { avatarPublicUrl } from "@/lib/storage";
 import { requireRole } from "@/lib/rbac";
 import { formatIST } from "@/lib/utils";
 
@@ -29,11 +31,9 @@ export default async function ProfilePage() {
   });
   if (!contestant) redirect("/dashboard");
 
-  const links = [
-    { label: "Portfolio", href: contestant.portfolioUrl },
-    { label: "LinkedIn", href: contestant.linkedinUrl },
-    { label: "Instagram / YouTube", href: contestant.socialUrl },
-  ].filter((link): link is { label: string; href: string } => Boolean(link.href));
+  const links = [{ label: "Portfolio", href: contestant.portfolioUrl }].filter(
+    (link): link is { label: string; href: string } => Boolean(link.href),
+  );
 
   return (
     <div className="space-y-7">
@@ -127,9 +127,21 @@ export default async function ProfilePage() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Set a password</CardTitle>
+              <CardTitle>Profile photo</CardTitle>
               <CardDescription>
-                Optional. You can always sign in with a one-time code instead.
+                Optional. Shown to the organisers alongside your entry.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <PhotoUploadForm currentUrl={avatarPublicUrl(contestant.photoPath)} />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Change password</CardTitle>
+              <CardDescription>
+                You sign in with this email and password.
               </CardDescription>
             </CardHeader>
             <CardContent>
