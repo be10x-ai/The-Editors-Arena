@@ -53,6 +53,32 @@ export function Hero({
 
         <DustMotes className="absolute inset-0 size-full" />
 
+        {/* The two editors, facing each other across the arena. Deliberately
+            placed above the plate but *below* the scrims that follow, so the
+            vignette and the floor fade land on them too — outside that stack
+            they read as stickers rather than as figures standing in the scene.
+            Hidden below md, where they would crowd the wordmark. */}
+        {/* Inset from the edge rather than flush. Each mace head sits on the
+            outer side of its figure, so anything at or past 0 clipped the
+            play-triangle and the reel — the whole point of the props. No
+            `priority`: they are hidden below md, and a display:none image never
+            satisfies the lazy-load observer, so phones skip both files
+            entirely. On desktop they are in the viewport and fetch at once. */}
+        <Image
+          src="/editor-left.png"
+          alt=""
+          width={540}
+          height={1100}
+          className="editor-in-left absolute bottom-0 left-[5%] hidden h-[72%] w-auto max-w-[30vw] object-contain object-bottom md:block lg:left-[10%] lg:h-[80%]"
+        />
+        <Image
+          src="/editor-right.png"
+          alt=""
+          width={568}
+          height={1100}
+          className="editor-in-right absolute bottom-0 right-[5%] hidden h-[72%] w-auto max-w-[30vw] object-contain object-bottom md:block lg:right-[10%] lg:h-[80%]"
+        />
+
         {/* Pull the middle down so the wordmark keeps its contrast over the
             floor detail, without flattening the gold shaft at the right. */}
         <div className="absolute inset-0 bg-[radial-gradient(68%_60%_at_50%_44%,rgba(10,10,9,0.84),rgba(10,10,9,0.42)_58%,transparent_100%)]" />

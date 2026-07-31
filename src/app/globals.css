@@ -135,6 +135,11 @@
     /* The crest's ARENA is a struck hit in caps; lowercase reads as a caption. */
     text-transform: uppercase;
     letter-spacing: 0.005em;
+    /* Road Rage's brush strokes overshoot their advance widths — the final T in
+       "TALENT" flicks well past its own box. `background-clip: text` only paints
+       inside the element box, so that overhang was clipping to transparent.
+       Symmetric inline padding gives the ink room without shifting the centring. */
+    padding-inline: 0.14em;
     background-image:
       /* Dust and pitting, as on the crest's gold. Four dot layers tiled at
          coprime sizes: the tiles never line up, so the eye reads scattered
@@ -241,6 +246,19 @@
     will-change: transform;
   }
 
+  /* The two editors squaring up. They enter from the side they stand on, once,
+     on load — the hero is above the fold so there is nothing to scroll-trigger.
+     `both` fill matters: under prefers-reduced-motion the global rule collapses
+     the duration, and the fill is what leaves them at their final position
+     instead of stuck at the offset start frame. */
+  .editor-in-left {
+    animation: editor-in-left 1.25s cubic-bezier(0.22, 1, 0.36, 1) 0.3s both;
+  }
+
+  .editor-in-right {
+    animation: editor-in-right 1.25s cubic-bezier(0.22, 1, 0.36, 1) 0.42s both;
+  }
+
   .beam-breathe {
     /* An additive gold cone sitting on the artwork's own shaft, screened so it
        only ever brightens. */
@@ -299,6 +317,28 @@
   }
   to {
     transform: scale(1.13) translate3d(-1.1%, -1.3%, 0);
+  }
+}
+
+@keyframes editor-in-left {
+  from {
+    opacity: 0;
+    transform: translate3d(-24%, 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes editor-in-right {
+  from {
+    opacity: 0;
+    transform: translate3d(24%, 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
   }
 }
 
