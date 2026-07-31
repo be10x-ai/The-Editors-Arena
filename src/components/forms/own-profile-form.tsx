@@ -1,10 +1,12 @@
 "use client";
 
+import { Pencil, X } from "lucide-react";
 import * as React from "react";
 import { useActionState } from "react";
 import { toast } from "sonner";
 
 import { SubmitButton } from "@/components/shared/submit-button";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -48,15 +50,44 @@ export function OwnProfileForm({
 }) {
   const [state, action] = useActionState(updateOwnProfile, idleState as never);
   const [expertise, setExpertise] = React.useState<string[]>(defaultExpertise ?? []);
+  // Read-only until explicitly unlocked, so a stray keystroke on a page someone
+  // opened to *look* at cannot change their own account.
+  const [editing, setEditing] = React.useState(false);
   const errors = state.fieldErrors ?? {};
 
   React.useEffect(() => {
-    if (state.status === "success") toast.success(state.message ?? "Saved.");
+    if (state.status === "success") {
+      toast.success(state.message ?? "Saved.");
+      setEditing(false);
+    }
     if (state.status === "error") toast.error(state.message ?? "Could not save.");
   }, [state]);
 
+  const cancel = () => {
+    setExpertise(defaultExpertise ?? []);
+    setEditing(false);
+  };
+
+  // `readOnly` rather than `disabled`: a disabled field submits nothing, and the
+  // values still need to reach the action when the form is saved.
+  const fieldTone = editing ? "" : "cursor-default border-white/[0.06] bg-white/[0.02]";
+
   return (
     <form action={action} className="space-y-5">
+      {!editing ? (
+        <div className="flex justify-end">
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            onClick={() => setEditing(true)}
+          >
+            <Pencil />
+            Edit
+          </Button>
+        </div>
+      ) : null}
+
       <div className="space-y-2">
         <Label htmlFor="name">Full name *</Label>
         <Input
@@ -69,6 +100,8 @@ export function OwnProfileForm({
           }
           autoComplete="name"
           required
+          readOnly={!editing}
+          className={fieldTone}
           aria-invalid={Boolean(errors.name)}
         />
         {errors.name ? (
@@ -84,6 +117,8 @@ export function OwnProfileForm({
               <Input
                 id="title"
                 name="title"
+                readOnly={!editing}
+                className={fieldTone}
                 defaultValue={defaultTitle ?? ""}
                 placeholder="Senior Video Editor"
               />
@@ -93,6 +128,8 @@ export function OwnProfileForm({
               <Input
                 id="organization"
                 name="organization"
+                readOnly={!editing}
+                className={fieldTone}
                 defaultValue={defaultOrganization ?? ""}
                 placeholder="House of EduTech"
               />
@@ -115,6 +152,7 @@ export function OwnProfileForm({
                     key={item}
                     type="button"
                     aria-pressed={on}
+                    disabled={!editing}
                     onClick={() =>
                       setExpertise((current) =>
                         current.includes(item)
@@ -124,6 +162,7 @@ export function OwnProfileForm({
                     }
                     className={cn(
                       "select-none rounded-full border px-3 py-1.5 text-xs font-medium transition",
+                      !editing && "cursor-default opacity-70",
                       on
                         ? "border-amber-400/50 bg-amber-500/20 text-foreground"
                         : "border-white/12 bg-white/[0.03] text-muted-foreground hover:border-white/25 hover:text-foreground",
@@ -142,6 +181,8 @@ export function OwnProfileForm({
               id="bio"
               name="bio"
               rows={4}
+              readOnly={!editing}
+              className={fieldTone}
               defaultValue={defaultBio ?? ""}
               placeholder="Two or three sentences. Shown to contestants on the public jury list."
             />
@@ -152,7 +193,15 @@ export function OwnProfileForm({
         </>
       ) : null}
 
-      <SubmitButton pendingLabel="Saving…">Save profile</SubmitButton>
+      {editing ? (
+        <div className="flex flex-wrap gap-3">
+          <SubmitButton pendingLabel="Saving…">Save profile</SubmitButton>
+          <Button type="button" variant="ghost" onClick={cancel}>
+            <X />
+            Cancel
+          </Button>
+        </div>
+      ) : null}
     </form>
   );
 }
