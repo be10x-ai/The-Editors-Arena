@@ -9,7 +9,13 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
 /**
- * Reminder queue drain. Wired to Vercel Cron (see vercel.json) every 15 minutes.
+ * Reminder queue drain. Idempotent: only sends reminders whose due time has
+ * passed, so calling it more often changes granularity, never volume.
+ *
+ * Two callers, because Vercel's Hobby plan caps cron at one run per day:
+ * - Vercel Cron, daily (vercel.json) — the safety net.
+ * - .github/workflows/reminders.yml, every 15 min — carries the 1-hour-before
+ *   reminder, which a daily run would miss.
  *
  * Authorisation: `Authorization: Bearer $CRON_SECRET`. Vercel Cron sends this
  * automatically once CRON_SECRET is set on the project.

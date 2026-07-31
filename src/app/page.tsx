@@ -147,7 +147,6 @@ export default async function LandingPage() {
 
       <main>
         <Hero
-          status={hackathon.status}
           gates={gates}
           countdown={countdown}
           startsAt={hackathon.startsAt}

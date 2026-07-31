@@ -120,7 +120,10 @@
      six-step extrude stacked underneath. Gradient runs #ECECEC → #6E6E6E. */
   .type-chrome {
     font-family: var(--font-chrome), var(--font-display), system-ui, sans-serif;
-    font-weight: 900;
+    /* Russo One is single-weight and already heavy; synthesised bold smears the
+       squared corners the extrude depends on. Raise this if you swap in a
+       licensed multi-weight face. */
+    font-weight: 400;
     letter-spacing: 0.005em;
     background-image:
       /* vertical brush streaks */
@@ -164,9 +167,12 @@
      perspective warp so it sits on the plate the way the logo's does. */
   .type-arena {
     font-family: var(--font-brush), var(--font-display), system-ui, sans-serif;
-    font-weight: 900;
-    font-style: italic;
-    letter-spacing: -0.01em;
+    /* Single-weight, and upright by design — the lean comes from the skew below,
+       not from a synthesised oblique, which would shear the torn edges. */
+    font-weight: 400;
+    /* The crest's ARENA is a struck hit in caps; lowercase reads as a caption. */
+    text-transform: uppercase;
+    letter-spacing: 0.005em;
     background-image:
       repeating-linear-gradient(
         86deg,
@@ -186,7 +192,8 @@
     color: transparent;
     filter: url(#brush-rough) drop-shadow(0 0 14px rgba(240, 178, 19, 0.45))
       drop-shadow(0 0 40px rgba(240, 178, 19, 0.2));
-    transform: perspective(700px) rotateX(7deg) skewX(-3deg);
+    /* Leans harder than the old 3deg — the crest's ARENA is pitched well right. */
+    transform: perspective(700px) rotateX(6deg) skewX(-8deg);
     transform-origin: 50% 100%;
   }
 

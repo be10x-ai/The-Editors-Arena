@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Kanit, Orbitron, Sora } from "next/font/google";
+import { Inter, Protest_Guerrilla, Russo_One, Sora } from "next/font/google";
 import { Toaster } from "sonner";
 
 import { CrestFilters } from "@/components/shared/crest-filters";
@@ -27,25 +27,31 @@ const display = Sora({
  *
  * The brand spec calls for TT Supermolot ExtraBold / Ethnocentric on "EDITOR'S"
  * and Road Rage on "ARENA". All three are commercially licensed and are not
- * bundled here. Orbitron (wide, squared, 900) and Kanit 900 Italic (heavy,
- * leaning) stand in — they carry the same proportions, so the metal and gold
- * treatments in globals.css read correctly either way.
+ * bundled here.
  *
- * To switch to the licensed faces: drop the woff2 files in `public/fonts/`,
- * swap these two `next/font/google` calls for `next/font/local`, and keep the
- * `--font-chrome` / `--font-brush` variable names. Nothing else changes.
+ * Russo One stands in for EDITOR'S — wide, squared and heavy, the closest open
+ * face to Eurostile Extended / Ethnocentric. Protest Guerrilla stands in for
+ * ARENA: its outlines are genuinely torn rather than a clean italic, which is
+ * what the brush lettering needs.
+ *
+ * Both are single-weight, so `.type-chrome` / `.type-arena` in globals.css set
+ * `font-weight: 400` — synthesised bold smears these outlines. If you swap in
+ * the licensed faces, raise those two weights to match.
+ *
+ * To switch: drop the woff2 files in `public/fonts/`, swap these two
+ * `next/font/google` calls for `next/font/local`, and keep the `--font-chrome`
+ * / `--font-brush` variable names. Nothing else changes.
  */
-const chrome = Orbitron({
+const chrome = Russo_One({
   subsets: ["latin"],
-  weight: ["700", "800", "900"],
+  weight: ["400"],
   variable: "--font-chrome",
   display: "swap",
 });
 
-const brush = Kanit({
+const brush = Protest_Guerrilla({
   subsets: ["latin"],
-  weight: ["900"],
-  style: ["italic"],
+  weight: ["400"],
   variable: "--font-brush",
   display: "swap",
 });

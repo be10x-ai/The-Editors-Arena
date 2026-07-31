@@ -4,22 +4,18 @@ import Link from "next/link";
 import { CountdownTimer } from "@/components/landing/countdown-timer";
 import { Reveal } from "@/components/landing/reveal";
 import { LogoMark } from "@/components/shared/logo";
-import { EventStatusBadge } from "@/components/shared/status-badges";
 import { Button } from "@/components/ui/button";
 import { BRAND } from "@/lib/constants";
 import type { Gates } from "@/lib/hackathon";
 import { formatISTDate } from "@/lib/utils";
-import type { EventStatus } from "@prisma/client";
 
 export function Hero({
-  status,
   gates,
   countdown,
   startsAt,
   registrationsCount,
   prizeHeadline,
 }: {
-  status: EventStatus;
   gates: Gates;
   countdown: { target: Date; label: string; reachedLabel: string };
   startsAt: Date;
@@ -35,16 +31,8 @@ export function Hero({
       />
 
       <div className="container relative z-10 flex flex-col items-center text-center">
-        <Reveal className="flex flex-wrap items-center justify-center gap-3">
-          <EventStatusBadge status={status} />
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-medium text-muted-foreground">
-            <Sparkles className="size-3 text-primary" />
-            {BRAND.organiser}
-          </span>
-        </Reveal>
-
         {/* The crest, plate dropped out so the metal floats on the page. */}
-        <Reveal delay={0.04} className="mt-6">
+        <Reveal delay={0.04}>
           <LogoMark
             variant="bare"
             size={340}
