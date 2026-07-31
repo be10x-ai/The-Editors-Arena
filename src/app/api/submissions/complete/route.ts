@@ -18,6 +18,13 @@ import { getSessionUser } from "@/lib/rbac";
 import { completeUploadSchema } from "@/lib/validations";
 
 export const runtime = "nodejs";
+/**
+ * Four sequential Google calls (getFile, makeReadableByLink, the sheet sync) plus
+ * a transaction and an audit write. The platform default of 10s is tight for
+ * that, and this route runs at the submission deadline — the one moment a
+ * timeout costs a contestant their entry.
+ */
+export const maxDuration = 60;
 
 /**
  * Step 2 of the upload: the browser reports the Drive file id it just created.

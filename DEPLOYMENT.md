@@ -365,6 +365,20 @@ above is a prerequisite either way.
 reminder cadence moved to `.github/workflows/reminders.yml`. Vercel validates
 `crons` before building, so this rejects the deployment rather than failing it.
 
+**Build fails: "The pattern ... defined in `functions` doesn't match any
+Serverless Functions inside the `api` directory."**
+`vercel.json`'s `functions` block does not address App Router route handlers —
+that key targets the legacy `api/` directory convention, so any glob pointing at
+`src/app/api/**` matches nothing and Vercel rejects the config. Per-route limits
+belong in the route file itself as Route Segment Config:
+
+```ts
+export const maxDuration = 60;
+```
+
+The block has been removed; `/api/reports/hiring`, `/api/submissions/complete`
+and `/api/cron/reminders` each declare their own `maxDuration`.
+
 **Deploy succeeds but every page 500s.**
 The build never needs the database — `src/lib/env.ts` throws at no point during
 import, and all data pages are `force-dynamic`. So a green build with red pages
