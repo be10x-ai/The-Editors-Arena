@@ -9,8 +9,6 @@ export const metadata: Metadata = { title: "Dashboard" };
 
 const NAV: PortalNavItem[] = [
   { href: "/dashboard", label: "Overview", icon: "LayoutDashboard", exact: true },
-  { href: "/dashboard/submit", label: "Submit video", icon: "Upload" },
-  { href: "/dashboard/scorecard", label: "My scorecard", icon: "ClipboardList" },
   { href: "/dashboard/profile", label: "Profile", icon: "User" },
   { href: "/leaderboard", label: "Leaderboard", icon: "Trophy" },
 ];

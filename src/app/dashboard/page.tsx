@@ -7,10 +7,11 @@ import {
   Upload,
   Youtube,
 } from "lucide-react";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { AssetCard } from "@/components/dashboard/asset-card";
+import { ScorecardPanel } from "@/components/dashboard/scorecard-panel";
+import { YoutubeSubmitForm } from "@/components/dashboard/youtube-submit-form";
 import { CountdownTimer } from "@/components/landing/countdown-timer";
 import { CopyField } from "@/components/shared/copy-field";
 import { StatCard } from "@/components/shared/stat-card";
@@ -37,7 +38,15 @@ export default async function ContestantDashboard() {
   const contestant = await prisma.contestant.findUnique({
     where: { id: user.contestantRowId ?? "" },
     include: {
-      submission: true,
+      submission: {
+        include: {
+          ratings: {
+            where: { isSubmitted: true },
+            include: { feedback: true },
+            orderBy: { submittedAt: "asc" },
+          },
+        },
+      },
       hackathon: { select: { timezone: true } },
     },
   });
@@ -240,14 +249,14 @@ export default async function ContestantDashboard() {
                       ? "The submission window has closed."
                       : "The link form unlocks when the organisers open submissions on event day."}
                 </p>
-                <Button asChild disabled={!gates.uploadsOpen}>
-                  <Link href={gates.uploadsOpen ? "/dashboard/submit" : "/dashboard"}>
+                {gates.uploadsOpen ? (
+                  <YoutubeSubmitForm />
+                ) : (
+                  <Button disabled>
                     <Youtube />
-                    {gates.uploadsOpen
-                      ? "Submit my YouTube link"
-                      : "Submissions not open yet"}
-                  </Link>
-                </Button>
+                    Submissions not open yet
+                  </Button>
+                )}
               </>
             )}
 
@@ -321,6 +330,23 @@ export default async function ContestantDashboard() {
           </ol>
         </CardContent>
       </Card>
+
+      <div>
+        <p className="label-eyebrow">Results</p>
+        <h2 className="heading-hero mt-2 text-xl sm:text-2xl">My scorecard</h2>
+        <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground">
+          Six criteria, each judge&apos;s overall mark, and their written feedback.
+        </p>
+      </div>
+      <ScorecardPanel
+        finalScore={contestant.finalScore}
+        rank={contestant.rank}
+        isWinner={contestant.isWinner}
+        isRunnerUp={contestant.isRunnerUp}
+        ratings={contestant.submission?.ratings ?? []}
+        released={hackathon.resultsPublished}
+        resultsAt={hackathon.resultsAt}
+      />
     </div>
   );
 }

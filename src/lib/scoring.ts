@@ -4,7 +4,7 @@ import { PODIUM_SIZE, RATING_CRITERIA } from "@/lib/constants";
 import { prisma } from "@/lib/prisma";
 import { round } from "@/lib/utils";
 
-type CriterionScores = Pick<
+export type CriterionScores = Pick<
   Rating,
   | "creativity"
   | "storytelling"
