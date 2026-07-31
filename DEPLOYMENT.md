@@ -365,6 +365,25 @@ above is a prerequisite either way.
 reminder cadence moved to `.github/workflows/reminders.yml`. Vercel validates
 `crons` before building, so this rejects the deployment rather than failing it.
 
+**Every route 404s (`NOT_FOUND`) but files in `public/` still serve.**
+The project was detected as a **static site**, not Next.js: Vercel ran the build,
+then published only `public/` and threw the server output away. The tell is that
+`/logo.png` returns an image while `/` and `/api/health` return `NOT_FOUND` —
+including `/robots.txt`, which this app generates from `src/app/robots.ts`.
+
+Deployment Protection is a red herring here; the 404 persists with a protection
+bypass token (`vercel curl <url>/api/health`), which proves it is not an auth
+wall.
+
+`vercel.json` now pins it, so the setting lives in version control rather than in
+dashboard state that can silently change:
+
+```json
+{ "framework": "nextjs" }
+```
+
+Note `vercel.json` rejects unknown keys, so it cannot carry `//` comments.
+
 **Build fails: "The pattern ... defined in `functions` doesn't match any
 Serverless Functions inside the `api` directory."**
 `vercel.json`'s `functions` block does not address App Router route handlers —
