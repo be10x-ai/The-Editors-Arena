@@ -97,9 +97,25 @@ export function Hero({
           />
         </Reveal>
 
+        {/* The official tagline, set as a struck rule under the crest — it says
+            what this is, which the headline below deliberately does not. */}
+        <Reveal delay={0.08} className="mt-4 w-full">
+          <p className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-foreground/80 sm:text-xs sm:tracking-[0.26em]">
+            <span
+              aria-hidden
+              className="hidden h-px w-8 bg-gradient-to-r from-transparent to-primary/70 sm:block sm:w-14"
+            />
+            {BRAND.tagline}
+            <span
+              aria-hidden
+              className="hidden h-px w-8 bg-gradient-to-l from-transparent to-primary/70 sm:block sm:w-14"
+            />
+          </p>
+        </Reveal>
+
         {/* Both crest treatments, carrying the proposition rather than
             repeating the wordmark already stamped on the shield. */}
-        <Reveal delay={0.1}>
+        <Reveal delay={0.12}>
           <h1 className="mt-2">
             <span className="sr-only">
               {BRAND.name} — {BRAND.themeLine}
@@ -131,8 +147,8 @@ export function Hero({
 
         <Reveal delay={0.2}>
           <p className="mx-auto mt-9 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
-            {BRAND.tagline}. One day, real client footage, a published rubric, and a
-            named jury — then a hiring track for the editors who prove it.
+            One day, real client footage, a published rubric, and a named jury — then a
+            hiring track for the editors who prove it.
           </p>
         </Reveal>
 

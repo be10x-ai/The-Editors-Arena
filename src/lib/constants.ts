@@ -2,7 +2,12 @@ import type { EventStatus, HiringRecommendation } from "@prisma/client";
 
 export const BRAND = {
   name: "The Editor's Arena",
-  tagline: "India's Video Editing Challenge to Discover Next Generation Editors",
+  /**
+   * The official tagline. Carries the edition year, so it needs updating each
+   * edition — it is not derived from `Hackathon.edition` because it is baked into
+   * page metadata, which is generated per build rather than per request.
+   */
+  tagline: "India's Video Editing Hackathon — 2026 Edition",
   themeLine: "Real Footage. Real Deadlines. Real Editing Talent.",
   organiser: "House of EduTech",
   supportEmail: "arena@houseofedutech.in",
