@@ -80,7 +80,7 @@ export function Hero({
             </span>
             <span
               aria-hidden
-              className="type-chrome block text-[1.55rem] leading-[1.15] sm:text-[2.4rem] lg:text-[3rem]"
+              className="type-chrome block text-[1.09rem] leading-[1.2] sm:text-[1.68rem] lg:text-[2.1rem]"
             >
               REAL FOOTAGE. REAL DEADLINES.
             </span>
