@@ -13,7 +13,7 @@ const credentialsSchema = z.object({
 
 /**
  * Email and password for every role. The emailed one-time code was removed —
- * it made sign-in depend on outbound mail, so an unconfigured Gmail locked
+ * it made sign-in depend on outbound mail, so an unconfigured relay locked
  * everyone out, contestants included.
  */
 export const { handlers, auth, signIn, signOut } = NextAuth({

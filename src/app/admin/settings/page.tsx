@@ -85,9 +85,9 @@ export default async function AdminSettingsPage() {
                 hint: "Needs the service account plus GOOGLE_DRIVE_SUBMISSIONS_FOLDER_ID.",
               },
               {
-                label: "Gmail (email automation)",
-                ok: integrations.gmail,
-                hint: "Needs GMAIL_SENDER_EMAIL plus either a refresh token or domain-wide delegation.",
+                label: "Email (SMTP relay)",
+                ok: integrations.email,
+                hint: "Needs SMTP_HOST, SMTP_USER, SMTP_PASSWORD and MAIL_FROM_EMAIL.",
               },
               {
                 label: "Google Sheets (registration mirror)",

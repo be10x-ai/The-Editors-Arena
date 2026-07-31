@@ -22,7 +22,7 @@ export type RegistrationResult = { contestantId: string; email: string };
  * Public registration.
  *
  * Order matters: the contestant row and their ID are committed first, then the
- * side effects (email, reminders, sheet) run best-effort. A Gmail outage must
+ * side effects (email, reminders, sheet) run best-effort. A mail outage must
  * never cost someone their entry.
  */
 export async function registerContestant(

@@ -32,14 +32,26 @@ export const env = {
     submissionsFolderId: str("GOOGLE_DRIVE_SUBMISSIONS_FOLDER_ID"),
     sheetId: str("GOOGLE_SHEET_ID"),
     sheetTab: str("GOOGLE_SHEET_TAB", "Registrations"),
-    oauthClientId: str("GOOGLE_OAUTH_CLIENT_ID"),
-    oauthClientSecret: str("GOOGLE_OAUTH_CLIENT_SECRET"),
-    gmailRefreshToken: str("GMAIL_REFRESH_TOKEN"),
+  },
+
+  /**
+   * Outbound mail over plain SMTP — the same credentials you would paste into
+   * Supabase's Custom SMTP screen. Supabase itself cannot carry these emails:
+   * its mailer only handles Supabase Auth flows, and this app authenticates
+   * against its own users table.
+   */
+  smtp: {
+    host: str("SMTP_HOST"),
+    port: Number(str("SMTP_PORT", "587")),
+    user: str("SMTP_USER"),
+    password: str("SMTP_PASSWORD"),
+    /** Implicit TLS on 465; STARTTLS on 587. */
+    secure: bool("SMTP_SECURE", str("SMTP_PORT", "587") === "465"),
   },
 
   mail: {
-    senderEmail: str("GMAIL_SENDER_EMAIL"),
-    senderName: str("GMAIL_SENDER_NAME", "The Editor's Arena"),
+    senderEmail: str("MAIL_FROM_EMAIL", str("GMAIL_SENDER_EMAIL")),
+    senderName: str("MAIL_FROM_NAME", "The Editor's Arena"),
   },
 
   seed: {
@@ -66,11 +78,10 @@ export function hasServiceAccount(): boolean {
   return Boolean(env.google.clientEmail && env.google.privateKey);
 }
 
-export function hasGmailOAuth(): boolean {
+/** True when an SMTP relay is configured well enough to send. */
+export function hasSmtp(): boolean {
   return Boolean(
-    env.google.oauthClientId &&
-    env.google.oauthClientSecret &&
-    env.google.gmailRefreshToken,
+    env.smtp.host && env.smtp.user && env.smtp.password && env.mail.senderEmail,
   );
 }
 
@@ -81,9 +92,6 @@ export function integrationStatus() {
     drive:
       !env.dryRun && hasServiceAccount() && Boolean(env.google.submissionsFolderId),
     sheets: !env.dryRun && hasServiceAccount() && Boolean(env.google.sheetId),
-    gmail:
-      !env.dryRun &&
-      Boolean(env.mail.senderEmail) &&
-      (hasGmailOAuth() || hasServiceAccount()),
+    email: !env.dryRun && hasSmtp(),
   };
 }

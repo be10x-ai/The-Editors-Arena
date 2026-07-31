@@ -135,16 +135,16 @@ export default async function AdminControlPanel() {
       </div>
 
       {!integrations.dryRun &&
-      (!integrations.drive || !integrations.gmail || !integrations.sheets) ? (
+      (!integrations.drive || !integrations.email || !integrations.sheets) ? (
         <Alert variant="warning">
           <XCircle />
           <div>
             <AlertTitle>Some integrations are not configured</AlertTitle>
             <AlertDescription>
-              Drive {integrations.drive ? "✓" : "✗"} · Gmail{" "}
-              {integrations.gmail ? "✓" : "✗"} · Sheets{" "}
+              Drive {integrations.drive ? "✓" : "✗"} · Email{" "}
+              {integrations.email ? "✓" : "✗"} · Sheets{" "}
               {integrations.sheets ? "✓" : "✗"}. Uploads need Drive; reminders need
-              Gmail. Fix this before event day — see{" "}
+              email. Fix this before event day — see{" "}
               <Link href="/admin/settings" className="underline">
                 Settings
               </Link>

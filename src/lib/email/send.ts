@@ -1,5 +1,5 @@
 import { env, integrationStatus } from "@/lib/env";
-import { sendGmail } from "@/lib/google/gmail";
+import { sendSmtp } from "@/lib/email/smtp";
 import type { EmailContent } from "@/lib/email/templates";
 
 export type SendResult =
@@ -17,10 +17,10 @@ export type SendResult =
 export async function sendMail(to: string, content: EmailContent): Promise<SendResult> {
   const status = integrationStatus();
 
-  if (!status.gmail) {
+  if (!status.email) {
     const reason = env.dryRun
       ? "INTEGRATIONS_DRY_RUN=true"
-      : "Gmail credentials not configured";
+      : "SMTP credentials not configured";
     console.info(
       `[email:dry-run] → ${to} | ${content.subject} | (${reason})\n${content.text.slice(0, 400)}`,
     );
@@ -28,7 +28,7 @@ export async function sendMail(to: string, content: EmailContent): Promise<SendR
   }
 
   try {
-    const messageId = await sendGmail({
+    const messageId = await sendSmtp({
       to,
       subject: content.subject,
       html: content.html,
@@ -42,7 +42,7 @@ export async function sendMail(to: string, content: EmailContent): Promise<SendR
   }
 }
 
-/** Sends to many recipients with a small delay, to stay inside Gmail's rate limits. */
+/** Sends to many recipients with a small delay, to stay inside relay rate limits. */
 export async function sendMailBatch(
   messages: { to: string; content: EmailContent }[],
   delayMs = 120,

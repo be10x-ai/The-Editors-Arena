@@ -16,7 +16,7 @@ import { idleState } from "@/server/actions/types";
  * Contestants choose their password while registering.
  *
  * The one-time-code path was removed — it made sign-in depend on outbound email,
- * so with Gmail unconfigured nobody could get in at all.
+ * so with no mail relay configured nobody could get in at all.
  */
 export function LoginForm({ callbackUrl }: { callbackUrl: string }) {
   const [state, action] = useActionState(signInWithPassword, idleState as never);

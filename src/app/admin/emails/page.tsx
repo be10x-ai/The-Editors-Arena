@@ -65,7 +65,7 @@ export default async function AdminEmailsPage() {
     }),
   ]);
 
-  const gmailReady = integrationStatus().gmail;
+  const mailReady = integrationStatus().email;
   const dueNow = reminders.filter(
     (reminder) =>
       reminder.status === "SCHEDULED" && reminder.scheduledFor.getTime() <= Date.now(),
@@ -89,11 +89,11 @@ export default async function AdminEmailsPage() {
         </ActionButton>
       </div>
 
-      {!gmailReady ? (
+      {!mailReady ? (
         <Alert variant="warning">
-          <AlertTitle>Gmail is not configured</AlertTitle>
+          <AlertTitle>Email sending is not configured</AlertTitle>
           <AlertDescription>
-            Emails are being logged to the server console instead of sent. Set the Gmail
+            Emails are being logged to the server console instead of sent. Set the SMTP
             credentials and turn off{" "}
             <code className="font-mono">INTEGRATIONS_DRY_RUN</code>.
           </AlertDescription>

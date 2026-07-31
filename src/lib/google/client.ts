@@ -1,11 +1,10 @@
 import { google } from "googleapis";
-import type { drive_v3, gmail_v1, sheets_v4 } from "googleapis";
+import type { drive_v3, sheets_v4 } from "googleapis";
 
-import { env, hasGmailOAuth, hasServiceAccount } from "@/lib/env";
+import { env, hasServiceAccount } from "@/lib/env";
 
 const DRIVE_SCOPES = ["https://www.googleapis.com/auth/drive"];
 const SHEETS_SCOPES = ["https://www.googleapis.com/auth/spreadsheets"];
-const GMAIL_SCOPES = ["https://www.googleapis.com/auth/gmail.send"];
 
 export class IntegrationNotConfiguredError extends Error {
   constructor(service: string) {
@@ -16,28 +15,14 @@ export class IntegrationNotConfiguredError extends Error {
   }
 }
 
-function serviceAccountAuth(scopes: string[], subject?: string) {
+function serviceAccountAuth(scopes: string[]) {
   if (!hasServiceAccount())
     throw new IntegrationNotConfiguredError("Google service account");
   return new google.auth.JWT({
     email: env.google.clientEmail,
     key: env.google.privateKey,
     scopes,
-    // Domain-wide delegation: required for Gmail "send as" a real mailbox.
-    subject,
   });
-}
-
-function oauthAuth(scopes: string[]) {
-  const client = new google.auth.OAuth2({
-    clientId: env.google.oauthClientId,
-    clientSecret: env.google.oauthClientSecret,
-  });
-  client.setCredentials({
-    refresh_token: env.google.gmailRefreshToken,
-    scope: scopes.join(" "),
-  });
-  return client;
 }
 
 export function driveClient(): drive_v3.Drive {
@@ -46,21 +31,6 @@ export function driveClient(): drive_v3.Drive {
 
 export function sheetsClient(): sheets_v4.Sheets {
   return google.sheets({ version: "v4", auth: serviceAccountAuth(SHEETS_SCOPES) });
-}
-
-/**
- * Gmail prefers an OAuth2 refresh token (works with any Google account and needs
- * no Workspace admin), and falls back to service-account impersonation.
- */
-export function gmailClient(): gmail_v1.Gmail {
-  if (hasGmailOAuth()) {
-    return google.gmail({ version: "v1", auth: oauthAuth(GMAIL_SCOPES) });
-  }
-  if (!env.mail.senderEmail) throw new IntegrationNotConfiguredError("Gmail sender");
-  return google.gmail({
-    version: "v1",
-    auth: serviceAccountAuth(GMAIL_SCOPES, env.mail.senderEmail),
-  });
 }
 
 /** Raw bearer token — needed for the resumable-upload endpoints we call by hand. */
