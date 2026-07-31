@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { parseYoutubeId } from "@/lib/youtube";
+
 const url = z.string().trim().url("Enter a full URL including https://").max(500);
 
 /**
@@ -87,6 +89,21 @@ export const otpVerifySchema = z.object({
     .string()
     .trim()
     .regex(/^\d{6}$/, "Enter the 6-digit code"),
+});
+
+export const youtubeSubmissionSchema = z.object({
+  youtubeUrl: z
+    .string()
+    .trim()
+    .min(1, "Paste your YouTube link")
+    .max(500)
+    .refine((v) => parseYoutubeId(v) !== null, {
+      message: "That is not a YouTube video link. Use the full watch or youtu.be URL.",
+    }),
+  /** Typed confirmation, because the link cannot be changed afterwards. */
+  confirmFinal: z.literal(true, {
+    errorMap: () => ({ message: "Tick the box to confirm this is your final edit" }),
+  }),
 });
 
 export const setPasswordSchema = z

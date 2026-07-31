@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
-import { DriveVideoPlayer } from "@/components/judge/drive-video-player";
+import { SubmissionPlayer } from "@/components/judge/submission-player";
 import { RatingForm } from "@/components/judge/rating-form";
 import { SubmissionStatusBadge } from "@/components/shared/status-badges";
 import { Badge } from "@/components/ui/badge";
@@ -99,7 +99,9 @@ export default async function ReviewPage({
 
       <div className="grid gap-6 xl:grid-cols-[1.5fr_1fr]">
         <div className="space-y-6">
-          <DriveVideoPlayer
+          <SubmissionPlayer
+            youtubeVideoId={submission.youtubeVideoId}
+            youtubeUrl={submission.youtubeUrl}
             previewUrl={submission.previewUrl}
             viewUrl={submission.videoUrl}
             title={`Submission ${submission.contestant.contestantId}`}

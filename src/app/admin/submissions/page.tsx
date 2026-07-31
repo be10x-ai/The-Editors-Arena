@@ -145,7 +145,7 @@ export default async function AdminSubmissionsPage() {
                   </TableCell>
                   <TableCell>
                     <div className="flex flex-wrap items-center justify-end gap-1.5">
-                      {submission.previewUrl ? (
+                      {submission.youtubeVideoId || submission.previewUrl ? (
                         <Button asChild size="sm" variant="ghost">
                           <Link href={`/judge/review/${submission.id}`}>
                             <PlayCircle />
@@ -153,13 +153,17 @@ export default async function AdminSubmissionsPage() {
                           </Link>
                         </Button>
                       ) : null}
-                      {submission.videoUrl ? (
+                      {(submission.youtubeUrl ?? submission.videoUrl) ? (
                         <Button asChild size="sm" variant="ghost">
                           <a
-                            href={submission.videoUrl}
+                            href={(submission.youtubeUrl ?? submission.videoUrl)!}
                             target="_blank"
                             rel="noopener noreferrer"
-                            aria-label="Open in Drive"
+                            aria-label={
+                              submission.youtubeUrl
+                                ? "Open on YouTube"
+                                : "Open in Drive"
+                            }
                           >
                             <ExternalLink />
                           </a>

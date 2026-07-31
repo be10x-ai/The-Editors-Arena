@@ -1,18 +1,17 @@
-import { CheckCircle2, Clock, ExternalLink, Info, Lock } from "lucide-react";
+import { CheckCircle2, Clock, ExternalLink, Lock } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { VideoUploader } from "@/components/dashboard/video-uploader";
+import { YoutubeSubmitForm } from "@/components/dashboard/youtube-submit-form";
 import { SubmissionStatusBadge } from "@/components/shared/status-badges";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { integrationStatus } from "@/lib/env";
 import { computeGates, getActiveHackathon } from "@/lib/hackathon";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/rbac";
-import { formatBytes, formatIST } from "@/lib/utils";
+import { formatIST } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -31,21 +30,19 @@ export default async function SubmitPage() {
 
   const gates = computeGates(hackathon);
   const submission = contestant.submission;
-  const hasSubmitted =
-    submission?.status === "SUBMITTED" || submission?.status === "LATE";
-  const driveReady = integrationStatus().drive;
+  // REJECTED is deliberately not locked — an admin rejecting a link is how a
+  // contestant gets a second attempt.
+  const isLocked = submission?.status === "SUBMITTED" || submission?.status === "LATE";
 
   return (
     <div className="space-y-7">
       <div>
         <p className="label-eyebrow">Submission</p>
-        <h1 className="heading-hero mt-2 text-2xl sm:text-3xl">
-          Upload your final video
-        </h1>
+        <h1 className="heading-hero mt-2 text-2xl sm:text-3xl">Submit your edit</h1>
         <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">
-          Your file uploads straight to our Google Drive into a folder named after your
-          contestant ID. Judges watch it inside the portal — no downloads, no public
-          links.
+          Upload your finished edit to YouTube, then paste the link here. You get one
+          submission — once it is in, the link is locked and only the organisers can
+          change it.
         </p>
       </div>
 
@@ -53,78 +50,78 @@ export default async function SubmitPage() {
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between gap-3">
-              <CardTitle>
-                {hasSubmitted ? "Replace your submission" : "Upload"}
-              </CardTitle>
+              <CardTitle>{isLocked ? "Your submission" : "Paste your link"}</CardTitle>
               {submission ? <SubmissionStatusBadge status={submission.status} /> : null}
             </div>
           </CardHeader>
           <CardContent className="space-y-5">
-            {hasSubmitted && submission ? (
-              <Alert variant="success">
-                <CheckCircle2 />
-                <div>
-                  <AlertTitle>
-                    {submission.status === "LATE"
-                      ? "Received — flagged late"
-                      : "Already received"}
-                  </AlertTitle>
-                  <AlertDescription>
-                    <span className="block font-mono text-xs">
-                      {submission.fileName}
-                    </span>
-                    {formatBytes(submission.sizeBytes)} · uploaded{" "}
-                    {formatIST(submission.uploadedAt)} IST.
-                    {gates.uploadsOpen
-                      ? " Uploading again replaces it."
-                      : " The window is now closed."}
-                  </AlertDescription>
-                </div>
-              </Alert>
-            ) : null}
+            {isLocked && submission ? (
+              <>
+                <Alert variant="success">
+                  <CheckCircle2 />
+                  <div>
+                    <AlertTitle>
+                      {submission.status === "LATE"
+                        ? "Received — flagged late"
+                        : "Received and locked"}
+                    </AlertTitle>
+                    <AlertDescription>
+                      Submitted {formatIST(submission.uploadedAt)} IST. The jury watches
+                      this link. If it is wrong, contact the organisers — you cannot
+                      change it yourself.
+                    </AlertDescription>
+                  </div>
+                </Alert>
 
-            {!gates.uploadsOpen ? (
+                {submission.youtubeUrl ? (
+                  <div className="space-y-3">
+                    <p className="label-eyebrow">Submitted link</p>
+                    <p className="break-all rounded-xl border border-white/10 bg-white/[0.03] p-3 font-mono text-xs">
+                      {submission.youtubeUrl}
+                    </p>
+                    <Button asChild variant="secondary" size="sm">
+                      <a
+                        href={submission.youtubeUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <ExternalLink />
+                        Open on YouTube
+                      </a>
+                    </Button>
+                  </div>
+                ) : null}
+              </>
+            ) : !gates.uploadsOpen ? (
               <Alert variant={gates.deadlinePassed ? "destructive" : "warning"}>
                 {gates.deadlinePassed ? <Clock /> : <Lock />}
                 <div>
                   <AlertTitle>
                     {gates.deadlinePassed
                       ? "The deadline has passed"
-                      : "Uploads aren't open yet"}
+                      : "Submissions aren't open yet"}
                   </AlertTitle>
                   <AlertDescription>
                     {gates.deadlinePassed
                       ? `Submissions closed at ${formatIST(hackathon.submissionDeadline)} IST.`
-                      : `The organisers open uploads on event day. Deadline: ${formatIST(hackathon.submissionDeadline)} IST.`}
-                  </AlertDescription>
-                </div>
-              </Alert>
-            ) : !driveReady ? (
-              <Alert variant="destructive">
-                <Info />
-                <div>
-                  <AlertTitle>Uploads are temporarily unavailable</AlertTitle>
-                  <AlertDescription>
-                    Google Drive isn&apos;t configured on this deployment yet. Contact
-                    the organisers — do not wait until the deadline.
+                      : `The organisers open submissions on event day. Deadline: ${formatIST(hackathon.submissionDeadline)} IST.`}
                   </AlertDescription>
                 </div>
               </Alert>
             ) : (
-              <VideoUploader
-                maxUploadMb={hackathon.maxUploadMb}
-                hasExistingSubmission={hasSubmitted}
-              />
+              <>
+                {submission?.status === "REJECTED" && submission.rejectedReason ? (
+                  <Alert variant="warning">
+                    <Clock />
+                    <div>
+                      <AlertTitle>Your previous link was rejected</AlertTitle>
+                      <AlertDescription>{submission.rejectedReason}</AlertDescription>
+                    </div>
+                  </Alert>
+                ) : null}
+                <YoutubeSubmitForm />
+              </>
             )}
-
-            {submission?.videoUrl ? (
-              <Button asChild variant="secondary" size="sm">
-                <a href={submission.videoUrl} target="_blank" rel="noopener noreferrer">
-                  <ExternalLink />
-                  View my uploaded video
-                </a>
-              </Button>
-            ) : null}
           </CardContent>
         </Card>
 
@@ -136,16 +133,17 @@ export default async function SubmitPage() {
             <CardContent>
               <dl className="space-y-3 text-sm">
                 {[
-                  ["Formats", "MP4 or MOV"],
-                  ["Maximum size", `${hackathon.maxUploadMb} MB`],
+                  ["Where", "YouTube"],
+                  ["Visibility", "Public or Unlisted"],
                   ["Recommended export", "1920×1080, H.264"],
                   ["Deadline", `${formatIST(hackathon.submissionDeadline)} IST`],
                   [
-                    "Late uploads",
+                    "Late submissions",
                     hackathon.allowLateSubmission
                       ? "Accepted but flagged"
                       : "Not accepted",
                   ],
+                  ["Changes after submit", "Not possible"],
                 ].map(([label, value]) => (
                   <div key={label} className="flex justify-between gap-4">
                     <dt className="text-muted-foreground">{label}</dt>
@@ -158,23 +156,29 @@ export default async function SubmitPage() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Before you upload</CardTitle>
+              <CardTitle>Before you submit</CardTitle>
             </CardHeader>
             <CardContent>
               <ul className="space-y-2.5 text-sm leading-relaxed text-muted-foreground">
                 <li>
-                  • Watch your export end to end once. Silent audio and black frames are
-                  the two most common failures.
+                  • Set the video to{" "}
+                  <strong className="text-foreground">Unlisted</strong> if you would
+                  rather it not appear on your channel. Private will not play for the
+                  jury and scores zero.
                 </li>
                 <li>
-                  • Rename nothing — we rename the file to your contestant ID
-                  automatically.
+                  • Wait for YouTube to finish processing HD. A link submitted while it
+                  is still at 360p is what the judges will see.
                 </li>
                 <li>
-                  • Upload with time to spare. The deadline is when the transfer
-                  completes.
+                  • Watch it end to end on YouTube once. Silent audio and black frames
+                  are the two most common failures.
                 </li>
-                <li>• Keep the tab open until you see the confirmation.</li>
+                <li>
+                  • Open the link in a private window to confirm it plays for someone
+                  who is not signed in as you.
+                </li>
+                <li>• You get one submission. Paste carefully.</li>
               </ul>
             </CardContent>
           </Card>

@@ -328,7 +328,13 @@ model Submission {
 
   status SubmissionStatus @default(NOT_SUBMITTED)
 
-  // Google Drive
+  /// The entrant's YouTube link — the submission itself. Write-once: once status
+  /// leaves NOT_SUBMITTED the contestant cannot change it, only an admin can.
+  youtubeUrl     String?
+  /// Parsed out of youtubeUrl so the judge portal can embed without re-parsing.
+  youtubeVideoId String?
+
+  // Google Drive — retained for rows submitted before the switch to links.
   driveFolderId String?
   driveFileId   String?
   videoUrl      String?
