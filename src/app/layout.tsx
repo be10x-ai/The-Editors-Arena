@@ -41,7 +41,7 @@ const brush = localFont({
 export const metadata: Metadata = {
   metadataBase: new URL(env.appUrl),
   title: {
-    default: `${BRAND.name} — ${BRAND.tagline}`,
+    default: `${BRAND.name} · ${BRAND.tagline}`,
     template: `%s · ${BRAND.name}`,
   },
   description:
@@ -56,14 +56,14 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     siteName: BRAND.name,
-    title: `${BRAND.name} — ${BRAND.tagline}`,
+    title: `${BRAND.name} · ${BRAND.tagline}`,
     description:
       "Real footage. Real deadlines. Real editing talent. Compete, get scored by a named jury, and get hired.",
     url: env.appUrl,
   },
   twitter: {
     card: "summary_large_image",
-    title: `${BRAND.name} — ${BRAND.tagline}`,
+    title: `${BRAND.name} · ${BRAND.tagline}`,
     description: BRAND.themeLine,
   },
   robots: { index: true, follow: true },
