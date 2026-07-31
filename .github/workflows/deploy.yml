@@ -30,7 +30,12 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - name: Check the required secrets exist
+      # Unconfigured is the normal state while Vercel's own Git integration is
+      # doing the work, so an automatic run must not fail — a red X on every
+      # push trains people to ignore the check. A manual run is an explicit
+      # request to deploy, so that one fails loudly instead.
+      - name: Are the secrets configured?
+        id: guard
         env:
           TOKEN: ${{ secrets.VERCEL_TOKEN }}
           ORG: ${{ secrets.VERCEL_ORG_ID }}
@@ -40,27 +45,39 @@ jobs:
           [ -z "$TOKEN" ]   && missing="$missing VERCEL_TOKEN"
           [ -z "$ORG" ]     && missing="$missing VERCEL_ORG_ID"
           [ -z "$PROJECT" ] && missing="$missing VERCEL_PROJECT_ID"
-          if [ -n "$missing" ]; then
+          if [ -z "$missing" ]; then
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "ok=false" >> "$GITHUB_OUTPUT"
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             echo "::error::Missing repository secret(s):$missing — see the header of this workflow."
             exit 1
           fi
+          echo "::notice::Skipping CI deploy — no Vercel secrets set. Vercel's Git integration is handling deploys."
+          echo "Skipped: this fallback is not configured." >> "$GITHUB_STEP_SUMMARY"
 
       - uses: actions/checkout@v4
+        if: steps.guard.outputs.ok == 'true'
 
       - uses: actions/setup-node@v4
+        if: steps.guard.outputs.ok == 'true'
         with:
           node-version: "20"
           cache: npm
 
-      - run: npm install --global vercel@latest
+      - if: steps.guard.outputs.ok == 'true'
+        run: npm install --global vercel@latest
 
       - name: Pull the project's production config and env
+        if: steps.guard.outputs.ok == 'true'
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
         run: vercel pull --yes --environment=production --token="${{ secrets.VERCEL_TOKEN }}"
 
       - name: Build
+        if: steps.guard.outputs.ok == 'true'
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
@@ -68,6 +85,7 @@ jobs:
 
       - name: Deploy the prebuilt output
         id: deploy
+        if: steps.guard.outputs.ok == 'true'
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
@@ -79,6 +97,7 @@ jobs:
           echo "$url" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Smoke-test the deployment
+        if: steps.guard.outputs.ok == 'true'
         run: |
           url="${{ steps.deploy.outputs.url }}"
           # /api/health reports database and integration wiring, so a 200 here

@@ -27,9 +27,16 @@ jobs:
           APP_URL: ${{ secrets.APP_URL }}
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
         run: |
+          # Skip quietly on the schedule until configured. Failing here would
+          # post a failure every 15 minutes, which buries any real failure.
+          # A manual run is an explicit request, so that one fails loudly.
           if [ -z "$APP_URL" ] || [ -z "$CRON_SECRET" ]; then
-            echo "APP_URL or CRON_SECRET is not set on this repository." >&2
-            exit 1
+            if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+              echo "::error::APP_URL or CRON_SECRET is not set on this repository."
+              exit 1
+            fi
+            echo "::notice::Skipping — APP_URL / CRON_SECRET not set. Vercel's daily cron still runs."
+            exit 0
           fi
           # Keep the body out of the log on failure: it is not sensitive, but the
           # Authorization header must never be echoed.
