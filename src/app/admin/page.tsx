@@ -134,33 +134,13 @@ export default async function AdminControlPanel() {
         <EventStatusBadge status={hackathon.status} />
       </div>
 
-      {!integrations.dryRun &&
-      (!integrations.drive || !integrations.email || !integrations.sheets) ? (
-        <Alert variant="warning">
-          <XCircle />
-          <div>
-            <AlertTitle>Some integrations are not configured</AlertTitle>
-            <AlertDescription>
-              Drive {integrations.drive ? "✓" : "✗"} · Email{" "}
-              {integrations.email ? "✓" : "✗"} · Sheets{" "}
-              {integrations.sheets ? "✓" : "✗"}. Uploads need Drive; reminders need
-              email. Fix this before event day — see{" "}
-              <Link href="/admin/settings" className="underline">
-                Settings
-              </Link>
-              .
-            </AlertDescription>
-          </div>
-        </Alert>
-      ) : null}
-
       {integrations.dryRun ? (
         <Alert variant="info">
           <AlertTitle>Dry-run mode</AlertTitle>
           <AlertDescription>
             <code className="font-mono">INTEGRATIONS_DRY_RUN=true</code> — emails are
-            logged to the server console and Drive uploads are disabled. Turn it off
-            once the Google credentials are in place.
+            logged to the server console instead of sent. Turn it off once the SMTP
+            credentials are in place.
           </AlertDescription>
         </Alert>
       ) : null}

@@ -49,23 +49,16 @@ export default async function JudgeProfilePage() {
         </p>
       </div>
 
-      <div className="grid gap-5 lg:grid-cols-[1.3fr_1fr]">
-        <Card>
-          <CardHeader>
-            <CardTitle>Details</CardTitle>
-            <CardDescription>Shown to contestants on the landing page.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <OwnProfileForm
-              showJudgeFields
-              defaultName={judge?.name ?? user?.name ?? ""}
-              defaultTitle={judge?.title}
-              defaultOrganization={judge?.organization}
-              defaultBio={judge?.bio}
-              defaultExpertise={judge?.expertise ?? []}
-            />
-          </CardContent>
-        </Card>
+      <div className="grid items-start gap-5 lg:grid-cols-[1.3fr_1fr]">
+        <OwnProfileForm
+          description="Shown to contestants on the landing page."
+          showJudgeFields
+          defaultName={judge?.name ?? user?.name ?? ""}
+          defaultTitle={judge?.title}
+          defaultOrganization={judge?.organization}
+          defaultBio={judge?.bio}
+          defaultExpertise={judge?.expertise ?? []}
+        />
 
         <div className="space-y-5">
           <Card>

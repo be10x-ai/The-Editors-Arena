@@ -47,9 +47,11 @@ export function AssetCard({
                   entrant can see exactly what will appear and where, which is
                   what stops "where do I download it?" on the day. */}
               <div className="mt-5 space-y-3">
-                <Button disabled className="w-full sm:w-auto">
-                  <Download />
-                  Download {zipName}
+                {/* Secondary, not the gold primary: a disabled gold button still
+                    reads as the page's main action and invites clicking. */}
+                <Button disabled variant="secondary" className="w-full sm:w-auto">
+                  <Lock />
+                  {zipName}
                 </Button>
 
                 <div className="space-y-1.5">

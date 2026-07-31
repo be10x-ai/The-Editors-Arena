@@ -4,6 +4,7 @@ import {
   AssignmentCard,
   type AssignmentCardData,
 } from "@/components/judge/assignment-card";
+import { LiveRefresh } from "@/components/shared/live-refresh";
 import { StatCard } from "@/components/shared/stat-card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -85,6 +86,7 @@ export default async function JudgeQueuePage() {
 
   return (
     <div className="space-y-7">
+      <LiveRefresh />
       <div>
         <p className="label-eyebrow">Judge portal</p>
         <h1 className="heading-hero mt-2 text-2xl sm:text-3xl">My review queue</h1>

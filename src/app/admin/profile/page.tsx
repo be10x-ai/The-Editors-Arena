@@ -36,15 +36,8 @@ export default async function AdminProfilePage() {
         </p>
       </div>
 
-      <div className="grid gap-5 lg:grid-cols-[1.3fr_1fr]">
-        <Card>
-          <CardHeader>
-            <CardTitle>Details</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <OwnProfileForm defaultName={user?.name ?? ""} />
-          </CardContent>
-        </Card>
+      <div className="grid items-start gap-5 lg:grid-cols-[1.3fr_1fr]">
+        <OwnProfileForm defaultName={user?.name ?? ""} />
 
         <div className="space-y-5">
           <Card>
