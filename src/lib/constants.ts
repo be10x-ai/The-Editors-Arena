@@ -146,8 +146,8 @@ export const HEARD_FROM_OPTIONS = [
   "Other",
 ] as const;
 
-/** Number of top ranks that receive a prize (1 winner + 3 runners-up). */
-export const PODIUM_SIZE = 4;
+/** Number of top ranks that receive a prize (1 winner + 2 runners-up). */
+export const PODIUM_SIZE = 3;
 
 /** Chunk size used when streaming a file to Google Drive. */
 export const DRIVE_UPLOAD_CHUNK_BYTES = 8 * 1024 * 1024;

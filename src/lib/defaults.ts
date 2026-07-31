@@ -100,7 +100,7 @@ export const DEFAULT_PRIZES: {
   {
     position: 1,
     title: "Champion — The Editor's Arena 2026",
-    reward: "iPhone",
+    reward: "₹1 Lakh",
     description:
       "Plus a fast-tracked hiring interview, a paid trial project, and your edit featured across our channels with full credit.",
     quantity: 1,
@@ -110,43 +110,23 @@ export const DEFAULT_PRIZES: {
   {
     position: 2,
     title: "Runner-up",
-    reward: "AirPods",
+    reward: "₹10,000",
     description:
-      "Plus a place on our vetted freelance roster and a hiring conversation.",
-    quantity: 1,
+      "Two runners-up, ₹10,000 each. Plus a place on our vetted freelance roster and a hiring conversation.",
+    quantity: 2,
     icon: "medal",
     order: 2,
   },
   {
-    position: 3,
-    title: "Third place",
-    reward: "₹5,000 Amazon gift voucher",
-    description:
-      "Plus a place on our vetted freelance roster and a hiring conversation.",
-    quantity: 1,
-    icon: "gift",
-    order: 3,
-  },
-  {
-    position: 4,
-    title: "Fourth place",
-    reward: "₹5,000 Amazon gift voucher",
-    description:
-      "Plus a place on our vetted freelance roster and a hiring conversation.",
-    quantity: 1,
-    icon: "gift",
-    order: 4,
-  },
-  {
     // Beyond PODIUM_SIZE — not a rank, so the UI labels it separately.
-    position: 5,
+    position: 4,
     title: "Every valid participant",
     reward: "Individual scorecard",
     description:
       "A full breakdown of your scores on all six criteria plus written feedback from every judge who watched your edit.",
     quantity: 1,
     icon: "award",
-    order: 5,
+    order: 3,
   },
 ];
 
