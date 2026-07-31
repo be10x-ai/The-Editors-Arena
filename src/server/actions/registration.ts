@@ -41,7 +41,7 @@ export async function registerContestant(
     );
   }
 
-  const parsed = registrationSchema.safeParse({
+  const raw = {
     fullName: formData.get("fullName"),
     email: formData.get("email"),
     phone: formData.get("phone"),
@@ -50,16 +50,36 @@ export async function registerContestant(
     jobRole: formData.get("jobRole"),
     softwareSkills: formData.getAll("softwareSkills").filter(Boolean),
     portfolioUrl: formData.get("portfolioUrl"),
-    linkedinUrl: formData.get("linkedinUrl") ?? "",
-    socialUrl: formData.get("socialUrl") ?? "",
     heardFrom: formData.get("heardFrom") ?? undefined,
+    password: formData.get("password"),
+    confirmPassword: formData.get("confirmPassword"),
     consent: formData.get("consent") === "on" || formData.get("consent") === "true",
-  });
+  };
+
+  /**
+   * Echoed back on rejection so the form can refill itself — React 19 resets an
+   * uncontrolled form once its action settles, and re-typing a twenty-field
+   * form is not acceptable. Passwords are deliberately excluded.
+   */
+  const echo: Record<string, string | string[]> = {
+    fullName: String(raw.fullName ?? ""),
+    email: String(raw.email ?? ""),
+    phone: String(raw.phone ?? ""),
+    city: String(raw.city ?? ""),
+    experienceYears: String(raw.experienceYears ?? ""),
+    jobRole: String(raw.jobRole ?? ""),
+    softwareSkills: raw.softwareSkills.map(String),
+    portfolioUrl: String(raw.portfolioUrl ?? ""),
+    heardFrom: String(raw.heardFrom ?? ""),
+  };
+
+  const parsed = registrationSchema.safeParse(raw);
 
   if (!parsed.success) {
     return errorState(
       "Please fix the highlighted fields.",
       parsed.error.flatten().fieldErrors as Record<string, string[]>,
+      echo,
     );
   }
 
@@ -67,7 +87,11 @@ export async function registerContestant(
 
   const hackathon = await getActiveHackathon();
   if (!hackathon) {
-    return errorState("Registration is not open yet. Please check back shortly.");
+    return errorState(
+      "Registration is not open yet. Please check back shortly.",
+      undefined,
+      echo,
+    );
   }
 
   const gates = computeGates(hackathon);
@@ -89,6 +113,7 @@ export async function registerContestant(
         ? `This email is already registered as ${existing.contestant.contestantId}. Sign in instead.`
         : "This email already has an account. Sign in instead.",
       { email: ["Already registered"] },
+      echo,
     );
   }
 
@@ -126,8 +151,6 @@ export async function registerContestant(
             jobRole: input.jobRole,
             softwareSkills: input.softwareSkills,
             portfolioUrl: input.portfolioUrl,
-            linkedinUrl: input.linkedinUrl,
-            socialUrl: input.socialUrl,
             heardFrom: input.heardFrom,
             status: "REGISTERED",
           },

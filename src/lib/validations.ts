@@ -58,8 +58,6 @@ export const registrationSchema = z
       .min(1, "Pick at least one tool you work in")
       .max(15),
     portfolioUrl: url,
-    linkedinUrl: optionalUrl,
-    socialUrl: optionalUrl,
     heardFrom: z.string().trim().max(80).optional(),
     password: z.string().min(8, "Use at least 8 characters").max(200),
     confirmPassword: z.string().min(8, "Use at least 8 characters").max(200),

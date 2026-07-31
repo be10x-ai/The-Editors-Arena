@@ -47,9 +47,26 @@ function FieldError({ errors }: { errors?: string[] }) {
 
 export function RegistrationForm() {
   const [state, formAction] = useActionState(registerContestant, idleState as never);
-  const [skills, setSkills] = React.useState<string[]>([]);
 
   const fieldErrors = state.fieldErrors ?? {};
+  const values = state.values ?? {};
+  /** Text value the server echoed for a field, for use as `defaultValue`. */
+  const prev = (name: string) => {
+    const v = values[name];
+    return typeof v === "string" ? v : "";
+  };
+  const prevSkills = Array.isArray(values.softwareSkills) ? values.softwareSkills : [];
+
+  const [skills, setSkills] = React.useState<string[]>(prevSkills);
+
+  // A rejected submit returns a fresh `values`; re-seed so the chips match what
+  // was actually sent rather than whatever the component happened to hold.
+  const seededFrom = React.useRef<string>("");
+  const seedKey = prevSkills.join("|");
+  if (seedKey && seedKey !== seededFrom.current) {
+    seededFrom.current = seedKey;
+    if (seedKey !== skills.join("|")) setSkills(prevSkills);
+  }
 
   React.useEffect(() => {
     if (state.status === "error" && state.message) toast.error(state.message);
@@ -85,6 +102,7 @@ export function RegistrationForm() {
             <Input
               id="fullName"
               name="fullName"
+              defaultValue={prev("fullName")}
               autoComplete="name"
               placeholder="Ananya Sharma"
               required
@@ -98,6 +116,7 @@ export function RegistrationForm() {
             <Input
               id="email"
               name="email"
+              defaultValue={prev("email")}
               type="email"
               autoComplete="email"
               placeholder="you@example.com"
@@ -115,6 +134,7 @@ export function RegistrationForm() {
             <Input
               id="phone"
               name="phone"
+              defaultValue={prev("phone")}
               type="tel"
               autoComplete="tel"
               placeholder="+91 98765 43210"
@@ -129,6 +149,7 @@ export function RegistrationForm() {
             <Input
               id="city"
               name="city"
+              defaultValue={prev("city")}
               autoComplete="address-level2"
               placeholder="Bengaluru"
               required
@@ -147,7 +168,11 @@ export function RegistrationForm() {
         <div className="grid gap-5 sm:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="experienceYears">Years of video editing experience *</Label>
-            <Select name="experienceYears" required>
+            <Select
+              name="experienceYears"
+              required
+              defaultValue={prev("experienceYears") || undefined}
+            >
               <SelectTrigger id="experienceYears">
                 <SelectValue placeholder="Select experience" />
               </SelectTrigger>
@@ -164,7 +189,7 @@ export function RegistrationForm() {
 
           <div className="space-y-2">
             <Label htmlFor="jobRole">Current job role *</Label>
-            <Select name="jobRole" required>
+            <Select name="jobRole" required defaultValue={prev("jobRole") || undefined}>
               <SelectTrigger id="jobRole">
                 <SelectValue placeholder="Select role" />
               </SelectTrigger>
@@ -182,35 +207,44 @@ export function RegistrationForm() {
 
         <div className="space-y-3">
           <Label>Editing software skills *</Label>
+          {/* Buttons plus hidden inputs rather than checkboxes. React 19 resets
+              the form once the action settles, which set every checkbox back to
+              unchecked in the DOM while React state still said selected — so the
+              chips looked picked but submitted nothing, and validation kept
+              rejecting "Pick at least one tool". Hidden inputs rendered straight
+              from state cannot drift that way. */}
+          {skills.map((software) => (
+            <input
+              key={software}
+              type="hidden"
+              name="softwareSkills"
+              value={software}
+            />
+          ))}
           <div className="flex flex-wrap gap-2">
             {SOFTWARE_OPTIONS.map((software) => {
               const checked = skills.includes(software);
               return (
-                <label
+                <button
                   key={software}
+                  type="button"
+                  aria-pressed={checked}
+                  onClick={() =>
+                    setSkills((current) =>
+                      current.includes(software)
+                        ? current.filter((value) => value !== software)
+                        : [...current, software],
+                    )
+                  }
                   className={cn(
-                    "cursor-pointer select-none rounded-full border px-3.5 py-2 text-sm font-medium transition",
+                    "select-none rounded-full border px-3.5 py-2 text-sm font-medium transition",
                     checked
                       ? "border-amber-400/50 bg-amber-500/20 text-foreground"
                       : "border-white/12 bg-white/[0.03] text-muted-foreground hover:border-white/25 hover:text-foreground",
                   )}
                 >
-                  <input
-                    type="checkbox"
-                    name="softwareSkills"
-                    value={software}
-                    checked={checked}
-                    onChange={(event) =>
-                      setSkills((current) =>
-                        event.target.checked
-                          ? [...current, software]
-                          : current.filter((value) => value !== software),
-                      )
-                    }
-                    className="sr-only"
-                  />
                   {software}
-                </label>
+                </button>
               );
             })}
           </div>
@@ -223,6 +257,7 @@ export function RegistrationForm() {
             <Input
               id="portfolioUrl"
               name="portfolioUrl"
+              defaultValue={prev("portfolioUrl")}
               type="url"
               inputMode="url"
               placeholder="https://yourportfolio.com"
@@ -236,35 +271,9 @@ export function RegistrationForm() {
             </p>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="linkedinUrl">LinkedIn profile</Label>
-            <Input
-              id="linkedinUrl"
-              name="linkedinUrl"
-              type="url"
-              inputMode="url"
-              placeholder="https://linkedin.com/in/…"
-              aria-invalid={Boolean(fieldErrors.linkedinUrl)}
-            />
-            <FieldError errors={fieldErrors.linkedinUrl} />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="socialUrl">Instagram / YouTube portfolio</Label>
-            <Input
-              id="socialUrl"
-              name="socialUrl"
-              type="url"
-              inputMode="url"
-              placeholder="https://youtube.com/@…"
-              aria-invalid={Boolean(fieldErrors.socialUrl)}
-            />
-            <FieldError errors={fieldErrors.socialUrl} />
-          </div>
-
           <div className="space-y-2 sm:col-span-2">
             <Label htmlFor="heardFrom">How did you hear about this?</Label>
-            <Select name="heardFrom">
+            <Select name="heardFrom" defaultValue={prev("heardFrom") || undefined}>
               <SelectTrigger id="heardFrom">
                 <SelectValue placeholder="Optional" />
               </SelectTrigger>
