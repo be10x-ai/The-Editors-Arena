@@ -16,6 +16,7 @@ import {
   DEFAULT_TIMELINE,
 } from "@/lib/defaults";
 import { computeGates, countdownTarget } from "@/lib/hackathon";
+import { formatISTDate } from "@/lib/utils";
 import { prisma } from "@/lib/prisma";
 import { homeFor } from "@/lib/rbac";
 
@@ -143,6 +144,11 @@ export default async function LandingPage() {
         isAuthenticated={Boolean(session?.user)}
         dashboardHref={homeFor(session?.user?.role ?? null)}
         registrationOpen={gates.registrationOpen}
+        closedLabel={
+          gates.registrationNotYetOpen
+            ? `Opens ${formatISTDate(gates.registrationOpensAt)}`
+            : "Registration closed"
+        }
       />
 
       <main>

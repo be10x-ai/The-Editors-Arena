@@ -1,13 +1,15 @@
 import { ArrowRight, Film, Sparkles, Trophy, Users } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 
 import { CountdownTimer } from "@/components/landing/countdown-timer";
+import { DustMotes } from "@/components/landing/dust-motes";
 import { Reveal } from "@/components/landing/reveal";
 import { LogoMark } from "@/components/shared/logo";
 import { Button } from "@/components/ui/button";
 import { BRAND } from "@/lib/constants";
 import type { Gates } from "@/lib/hackathon";
-import { formatISTDate } from "@/lib/utils";
+import { formatIST, formatISTDate } from "@/lib/utils";
 
 export function Hero({
   gates,
@@ -23,12 +25,40 @@ export function Hero({
   prizeHeadline: string;
 }) {
   return (
-    <section className="aurora relative isolate overflow-hidden pb-20 pt-24 sm:pb-28 sm:pt-28">
-      <div aria-hidden className="grid-backdrop absolute inset-0 -z-10" />
+    <section className="relative isolate overflow-hidden pb-12 pt-24 sm:pb-16 sm:pt-28">
+      {/* Arena backdrop. Anchored to the top at its own aspect rather than
+          stretched over the whole section: the hero is far taller than the
+          artwork, and object-cover across that height would crop the wreckage
+          framing out entirely. It fades to page black before the countdown. */}
       <div
         aria-hidden
-        className="absolute inset-x-0 bottom-0 -z-10 h-40 bg-gradient-to-t from-background to-transparent"
-      />
+        /* `isolate` keeps the beam's screen blend inside this box — without it
+           the blend reaches the page backdrop and washes the hero content. */
+        className="absolute inset-x-0 top-0 isolate -z-10 h-[clamp(34rem,88vh,62rem)] overflow-hidden"
+      >
+        {/* Wrapper carries the drift so the scrims below stay put — animating
+            the image and its overlays together would slide the vignette off. */}
+        <div className="ken-burns absolute inset-0">
+          <Image
+            src="/hero-bg.jpg"
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover object-[50%_42%]"
+          />
+        </div>
+
+        <div aria-hidden className="beam-breathe absolute inset-0" />
+
+        <DustMotes className="absolute inset-0 size-full" />
+
+        {/* Pull the middle down so the wordmark keeps its contrast over the
+            floor detail, without flattening the gold shaft at the right. */}
+        <div className="absolute inset-0 bg-[radial-gradient(68%_60%_at_50%_44%,rgba(10,10,9,0.84),rgba(10,10,9,0.42)_58%,transparent_100%)]" />
+        <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-background/80 to-transparent" />
+        <div className="absolute inset-x-0 bottom-0 h-56 bg-gradient-to-t from-background via-background/70 to-transparent" />
+      </div>
 
       <div className="container relative z-10 flex flex-col items-center text-center">
         {/* The crest, plate dropped out so the metal floats on the page. */}
@@ -90,7 +120,9 @@ export function Hero({
           </div>
           {!gates.registrationOpen && !gates.hasStarted ? (
             <p className="mt-3 text-sm text-orange-300/90">
-              Registration is closed for this edition.
+              {gates.registrationNotYetOpen
+                ? `Registration opens ${formatIST(gates.registrationOpensAt)} IST.`
+                : "Registration is closed for this edition."}
             </p>
           ) : null}
         </Reveal>

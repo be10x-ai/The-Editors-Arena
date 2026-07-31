@@ -15,7 +15,7 @@ export function FaqSection({ faqs }: { faqs: Faq[] }) {
   if (faqs.length === 0) return null;
 
   return (
-    <section id="faq" className="relative scroll-mt-24 py-20 sm:py-28">
+    <section id="faq" className="relative scroll-mt-24 py-12 sm:py-16">
       <div className="container">
         <div className="grid gap-12 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16">
           <div>

@@ -41,6 +41,14 @@ export function computeGates(hackathon: Hackathon) {
     now >= hackathon.registrationOpensAt.getTime() &&
     now <= hackathon.registrationClosesAt.getTime();
 
+  /**
+   * Before the window opens. Distinct from `registrationClosed`: "not yet" and
+   * "no longer" are opposite messages, and collapsing them into `!open` told
+   * every visitor registration had closed during the run-up to launch.
+   */
+  const registrationNotYetOpen =
+    status === "NOT_STARTED" && now < hackathon.registrationOpensAt.getTime();
+
   const eventLive =
     status === "RUNNING" || status === "SUBMISSION_OPEN" || status === "JUDGING";
 
@@ -65,6 +73,8 @@ export function computeGates(hackathon: Hackathon) {
   return {
     status,
     registrationOpen,
+    registrationNotYetOpen,
+    registrationOpensAt: hackathon.registrationOpensAt,
     registrationClosed:
       !registrationOpen && status === "NOT_STARTED"
         ? now > hackathon.registrationClosesAt.getTime()

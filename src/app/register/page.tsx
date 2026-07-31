@@ -127,12 +127,16 @@ export default async function RegisterPage() {
                       <AlertTitle>
                         {gates?.hasStarted
                           ? "The hackathon has already started"
-                          : "Registration has closed"}
+                          : gates?.registrationNotYetOpen
+                            ? "Registration opens soon"
+                            : "Registration has closed"}
                       </AlertTitle>
                       <AlertDescription>
                         {gates?.hasStarted
                           ? "Entries closed when the event went live. Sign in if you already registered."
-                          : `Registration closed at ${formatIST(hackathon.registrationClosesAt)} IST. Follow us for the next edition.`}
+                          : gates?.registrationNotYetOpen
+                            ? `Registration opens ${formatIST(hackathon.registrationOpensAt)} IST. Come back then — entry takes two minutes.`
+                            : `Registration closed at ${formatIST(hackathon.registrationClosesAt)} IST. Follow us for the next edition.`}
                       </AlertDescription>
                     </div>
                   </Alert>

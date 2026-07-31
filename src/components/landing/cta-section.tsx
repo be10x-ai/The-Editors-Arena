@@ -13,7 +13,7 @@ export function CtaSection({
   registrationClosesAt: Date;
 }) {
   return (
-    <section className="relative py-20 sm:py-24">
+    <section className="relative py-12 sm:py-16">
       <div className="container">
         <Reveal>
           <div className="glass relative overflow-hidden rounded-3xl px-6 py-12 text-center sm:px-12 sm:py-16">

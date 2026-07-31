@@ -116,55 +116,17 @@
      so the texture lives *inside* the letterforms rather than behind them.
      ------------------------------------------------------------------ */
 
-  /* Milled steel: brushed streaks, mottled cracks, a hard bevel band, and a
-     six-step extrude stacked underneath. Gradient runs #ECECEC → #6E6E6E. */
+  /* The setup line. Deliberately plain — bold body display type, no metal, no
+     extrude. It is the quiet half of the pair; all the weight belongs to the
+     gold line under it. The single dark shadow is only so it holds up over the
+     arena backdrop in the hero. */
   .type-chrome {
-    font-family: var(--font-chrome), var(--font-display), system-ui, sans-serif;
-    /* Russo One is single-weight and already heavy; synthesised bold smears the
-       squared corners the extrude depends on. Raise this if you swap in a
-       licensed multi-weight face. */
-    font-weight: 400;
-    letter-spacing: 0.005em;
-    background-image:
-      /* vertical brush streaks */
-      repeating-linear-gradient(
-        90deg,
-        rgba(255, 255, 255, 0.09) 0 1px,
-        transparent 1px 3px
-      ),
-      /* cracks / weathering */
-        radial-gradient(58% 34% at 18% 26%, rgba(0, 0, 0, 0.3) 0%, transparent 62%),
-      radial-gradient(48% 40% at 78% 72%, rgba(0, 0, 0, 0.24) 0%, transparent 66%),
-      /* bevel + emboss band */
-        linear-gradient(
-          180deg,
-          #ffffff 0%,
-          #ececec 20%,
-          #cfcfcf 42%,
-          #6e6e6e 60%,
-          #a6a6a6 70%,
-          #f2f2f2 88%,
-          #b8b8b8 100%
-        );
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    /* 3D extrude, then the cast shadow that seats it on the page. Steps are in
-       `em` so the depth tracks the type size — a fixed 6px extrude that reads
-       as machined at 80px reads as smudge at 24px. */
-    text-shadow:
-      0 0.018em 0 #6f6f6f,
-      0 0.036em 0 #616161,
-      0 0.054em 0 #525252,
-      0 0.072em 0 #434343,
-      0 0.09em 0 #343434,
-      0 0.108em 0 #262626,
-      0 0.125em 0.01em rgba(0, 0, 0, 0.6),
-      0 0.18em 0.28em rgba(0, 0, 0, 0.85);
+    @apply font-display font-bold tracking-tight text-foreground;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.75);
   }
 
-  /* Struck gold: warm gradient, brush streaks, outer glow, and a slight
-     perspective warp so it sits on the plate the way the logo's does. */
+  /* Struck gold: warm gradient, pitted dust, and a slight perspective warp so
+     it sits on the plate the way the logo's does. */
   .type-arena {
     font-family: var(--font-brush), var(--font-display), system-ui, sans-serif;
     /* Single-weight, and upright by design — the lean comes from the skew below,
@@ -174,10 +136,29 @@
     text-transform: uppercase;
     letter-spacing: 0.005em;
     background-image:
-      repeating-linear-gradient(
-        86deg,
-        rgba(255, 255, 255, 0.14) 0 1px,
-        transparent 1px 4px
+      /* Dust and pitting, as on the crest's gold. Four dot layers tiled at
+         coprime sizes: the tiles never line up, so the eye reads scattered
+         grit. A repeating-linear-gradient here produced visible 1px stripes,
+         which is exactly what this replaces. */
+      radial-gradient(
+        circle at 28% 34%,
+        rgba(58, 30, 0, 0.42) 0.7px,
+        transparent 0.9px
+      ),
+      radial-gradient(
+        circle at 71% 66%,
+        rgba(58, 30, 0, 0.32) 0.6px,
+        transparent 0.8px
+      ),
+      radial-gradient(
+        circle at 46% 82%,
+        rgba(255, 244, 205, 0.34) 0.55px,
+        transparent 0.75px
+      ),
+      radial-gradient(
+        circle at 84% 18%,
+        rgba(58, 30, 0, 0.24) 0.5px,
+        transparent 0.7px
       ),
       linear-gradient(
         180deg,
@@ -187,23 +168,29 @@
         #b9860c 74%,
         #f3cb55 100%
       );
+    background-size:
+      13px 11px,
+      19px 17px,
+      23px 29px,
+      31px 37px,
+      100% 100%;
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
-    filter: url(#brush-rough) drop-shadow(0 0 14px rgba(240, 178, 19, 0.45))
-      drop-shadow(0 0 40px rgba(240, 178, 19, 0.2));
-    /* Leans harder than the old 3deg — the crest's ARENA is pitched well right. */
-    transform: perspective(700px) rotateX(6deg) skewX(-8deg);
+    /* No glow and no displacement filter: Road Rage's outlines are already torn,
+       and a gold bloom softened the strokes it should be showing off. The one
+       shadow left is tight and dark — it separates the letters from the arena
+       floor behind them without blurring the edges. */
+    filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.85))
+      drop-shadow(0 0 1px rgba(0, 0, 0, 0.6));
+    /* Road Rage draws its own rightward lean (italicAngle is 0, the strokes do
+       the work), so this only adds the crest's slight extra pitch. */
+    transform: perspective(700px) rotateX(5deg) skewX(-2deg);
     transform-origin: 50% 100%;
   }
 
   /* The warp and the displacement filter are decorative; drop them where
      motion/effects are unwelcome or unsupported. */
-  @supports not (filter: url(#brush-rough)) {
-    .type-arena {
-      filter: drop-shadow(0 0 14px rgba(240, 178, 19, 0.45));
-    }
-  }
 
   /* Section-scale wash: gold spill from the right, steel glint from the left,
      exactly as the crest is lit. */
@@ -242,6 +229,32 @@
     @apply h-px w-full bg-gradient-to-r from-transparent via-primary/45 to-transparent;
   }
 
+  /* ------------------------------------------------------------------
+     Hero plate motion. Three slow, independent cycles — a drifting camera,
+     a breathing light shaft, and the canvas dust — so the still reads as a
+     locked-off video take rather than a static image. Periods are deliberately
+     coprime (46s / 11s) so the loop never visibly repeats.
+     The global prefers-reduced-motion rule collapses all of them.
+     ------------------------------------------------------------------ */
+  .ken-burns {
+    animation: ken-burns 46s ease-in-out infinite alternate;
+    will-change: transform;
+  }
+
+  .beam-breathe {
+    /* An additive gold cone sitting on the artwork's own shaft, screened so it
+       only ever brightens. */
+    background: linear-gradient(
+      205deg,
+      rgba(255, 214, 110, 0.5) 0%,
+      rgba(240, 178, 19, 0.22) 26%,
+      transparent 58%
+    );
+    mix-blend-mode: screen;
+    animation: beam-breathe 11s ease-in-out infinite;
+    will-change: opacity;
+  }
+
   /* The perforated film band across the top of the crest, as a divider. */
   .filmstrip {
     height: 14px;
@@ -277,6 +290,25 @@
      floats with its own glow. The art is lit on black, so `screen` is exact. */
   .crest-blend {
     mix-blend-mode: screen;
+  }
+}
+
+@keyframes ken-burns {
+  from {
+    transform: scale(1.045) translate3d(0.6%, 0.5%, 0);
+  }
+  to {
+    transform: scale(1.13) translate3d(-1.1%, -1.3%, 0);
+  }
+}
+
+@keyframes beam-breathe {
+  0%,
+  100% {
+    opacity: 0.42;
+  }
+  50% {
+    opacity: 0.92;
   }
 }
 

@@ -1,8 +1,8 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Protest_Guerrilla, Russo_One, Sora } from "next/font/google";
+import { Inter, Sora } from "next/font/google";
+import localFont from "next/font/local";
 import { Toaster } from "sonner";
 
-import { CrestFilters } from "@/components/shared/crest-filters";
 import { BRAND } from "@/lib/constants";
 import { env } from "@/lib/env";
 import { cn } from "@/lib/utils";
@@ -23,35 +23,17 @@ const display = Sora({
 });
 
 /**
- * The crest's two voices.
+ * "ARENA" is set in Road Rage, the face the crest itself uses, self-hosted from
+ * `public/fonts` so there is no third-party request at runtime.
  *
- * The brand spec calls for TT Supermolot ExtraBold / Ethnocentric on "EDITOR'S"
- * and Road Rage on "ARENA". All three are commercially licensed and are not
- * bundled here.
+ * LICENCE OUTSTANDING: Road Rage is free for personal use only (Youssef
+ * Habchi). This is a commercial recruitment platform. See
+ * `public/fonts/README.md`.
  *
- * Russo One stands in for EDITOR'S — wide, squared and heavy, the closest open
- * face to Eurostile Extended / Ethnocentric. Protest Guerrilla stands in for
- * ARENA: its outlines are genuinely torn rather than a clean italic, which is
- * what the brush lettering needs.
- *
- * Both are single-weight, so `.type-chrome` / `.type-arena` in globals.css set
- * `font-weight: 400` — synthesised bold smears these outlines. If you swap in
- * the licensed faces, raise those two weights to match.
- *
- * To switch: drop the woff2 files in `public/fonts/`, swap these two
- * `next/font/google` calls for `next/font/local`, and keep the `--font-chrome`
- * / `--font-brush` variable names. Nothing else changes.
+ * The setup line above it is just Sora bold — see `.type-chrome` in globals.css.
  */
-const chrome = Russo_One({
-  subsets: ["latin"],
-  weight: ["400"],
-  variable: "--font-chrome",
-  display: "swap",
-});
-
-const brush = Protest_Guerrilla({
-  subsets: ["latin"],
-  weight: ["400"],
+const brush = localFont({
+  src: "../../public/fonts/road-rage.woff2",
   variable: "--font-brush",
   display: "swap",
 });
@@ -103,12 +85,10 @@ export default function RootLayout({
         className={cn(
           sans.variable,
           display.variable,
-          chrome.variable,
           brush.variable,
           "min-h-dvh bg-background font-sans text-foreground",
         )}
       >
-        <CrestFilters />
         {children}
         <Toaster
           position="top-center"

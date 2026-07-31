@@ -36,7 +36,7 @@ export function PrizeSection({ prizes }: { prizes: Prize[] }) {
   if (prizes.length === 0) return null;
 
   return (
-    <section id="prizes" className="relative scroll-mt-24 py-20 sm:py-28">
+    <section id="prizes" className="relative scroll-mt-24 py-12 sm:py-16">
       <div aria-hidden className="aurora absolute inset-0 -z-10 opacity-60" />
 
       <div className="container">

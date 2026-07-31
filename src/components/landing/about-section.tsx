@@ -48,7 +48,7 @@ const CRITERION_ICONS = {
 
 export function AboutSection() {
   return (
-    <section id="about" className="relative scroll-mt-24 py-20 sm:py-28">
+    <section id="about" className="relative scroll-mt-24 py-12 sm:py-16">
       <div className="container">
         <SectionHeading
           eyebrow="About the hackathon"

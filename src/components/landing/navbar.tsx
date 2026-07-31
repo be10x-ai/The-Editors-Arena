@@ -20,10 +20,13 @@ export function Navbar({
   isAuthenticated,
   dashboardHref,
   registrationOpen,
+  closedLabel,
 }: {
   isAuthenticated: boolean;
   dashboardHref: string;
   registrationOpen: boolean;
+  /** Shown on the disabled CTA — "Registration closed" reads wrong pre-launch. */
+  closedLabel: string;
 }) {
   const [scrolled, setScrolled] = React.useState(false);
   const [open, setOpen] = React.useState(false);
@@ -79,7 +82,7 @@ export function Navbar({
               </Button>
               <Button asChild size="sm" disabled={!registrationOpen}>
                 <Link href={registrationOpen ? "/register" : "#about"}>
-                  {registrationOpen ? "Register Now" : "Registration closed"}
+                  {registrationOpen ? "Register Now" : closedLabel}
                 </Link>
               </Button>
             </>
