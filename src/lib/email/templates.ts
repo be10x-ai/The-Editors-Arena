@@ -49,8 +49,7 @@ function layout(opts: { heading: string; preheader: string; body: string }): str
           ${opts.body}
         </td></tr>
         <tr><td style="padding:20px 32px;border-top:1px solid ${COLORS.border};font:400 12px/1.6 -apple-system,Segoe UI,Roboto,sans-serif;color:${COLORS.muted};">
-          ${escapeHtml(BRAND.name)} · ${escapeHtml(BRAND.organiser)}<br>
-          Questions? Reply to this email or write to ${escapeHtml(env.mail.senderEmail || BRAND.supportEmail)}.
+          ${escapeHtml(BRAND.name)} · ${escapeHtml(BRAND.organiser)}
         </td></tr>
       </table>
     </td></tr>
