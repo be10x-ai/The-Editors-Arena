@@ -42,12 +42,6 @@ async function main() {
       "Copy the mailbox password from your provider's control panel.",
     );
   }
-  if (env.smtp.port === 465 && !env.smtp.secure) {
-    fail(
-      'Port 465 needs SMTP_SECURE="true".',
-      "465 is implicit TLS; the handshake stalls without it. Use 587 for STARTTLS.",
-    );
-  }
   if (!to) fail("No recipient.", "Pass one as an argument, or set SMTP_USER.");
 
   // sendMail swallows send failures by design, so a dry run would report a
@@ -62,14 +56,10 @@ async function main() {
   // Verify credentials first: a clean auth error is far easier to read than a
   // send that fails halfway through.
   const { verifySmtp } = await import("@/lib/email/smtp");
+  // verifySmtp already translates the transport's own error into something
+  // actionable, so it is printed as-is rather than guessed at again here.
   const check = await verifySmtp();
-  if (!check.ok) {
-    fail(
-      `The relay rejected the credentials: ${check.error}`,
-      "Check SMTP_USER is the full address, and that SMTP_PASSWORD is the " +
-        "mailbox password from the host's control panel.",
-    );
-  }
+  if (!check.ok) fail(check.error ?? "The relay refused the connection.");
   console.log("\n  ✓ credentials accepted");
 
   const result = await sendMail(to, otpEmail({ code: "123456", ttlMinutes: 10 }));

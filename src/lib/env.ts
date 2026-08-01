@@ -16,6 +16,35 @@ function bool(key: string, fallback = false): boolean {
   return raw === "true" || raw === "1" || raw === "yes";
 }
 
+/**
+ * Whether to open the SMTP connection already encrypted.
+ *
+ * On the standard ports this is protocol, not preference: 465 is implicit TLS
+ * and 587/25 are STARTTLS, and there is no working combination the other way
+ * round. Declaring it wrong fails with `tls_validate_record_header:wrong
+ * version number`, which reads like a certificate problem and is not one — so
+ * the port decides, and SMTP_SECURE is honoured only on non-standard ports.
+ */
+function smtpSecure(): boolean {
+  const port = Number(str("SMTP_PORT", "587"));
+  const raw = process.env.SMTP_SECURE?.trim().toLowerCase();
+  const declared = raw ? raw === "true" || raw === "1" || raw === "yes" : null;
+
+  const forced = port === 465 ? true : port === 587 || port === 25 ? false : null;
+
+  if (forced !== null) {
+    if (declared !== null && declared !== forced) {
+      console.warn(
+        `[smtp] SMTP_SECURE="${raw}" is wrong for port ${port} — using ${forced}. ` +
+          `465 is implicit TLS; 587 and 25 are STARTTLS.`,
+      );
+    }
+    return forced;
+  }
+
+  return declared ?? false;
+}
+
 export const env = {
   appUrl: str("NEXT_PUBLIC_APP_URL", "http://localhost:3000"),
   nodeEnv: str("NODE_ENV", "development"),
@@ -46,8 +75,7 @@ export const env = {
     port: Number(str("SMTP_PORT", "587")),
     user: str("SMTP_USER"),
     password: str("SMTP_PASSWORD"),
-    /** Implicit TLS on 465; STARTTLS on 587. */
-    secure: bool("SMTP_SECURE", str("SMTP_PORT", "587") === "465"),
+    secure: smtpSecure(),
   },
 
   mail: {
