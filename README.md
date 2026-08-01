@@ -35,7 +35,7 @@ Built to run multiple editions: an edition is a `Hackathon` row, not a code bran
 | Language | TypeScript, strict |
 | UI | Tailwind CSS 3.4 + shadcn-style Radix primitives + Framer Motion |
 | Database | PostgreSQL + Prisma ORM |
-| Auth | Auth.js / NextAuth v5 — credentials (password) and email one-time codes |
+| Auth | Supabase Auth — password, plus an emailed code as recovery |
 | Submissions | Unlisted YouTube links, embedded for judging |
 | Email | SMTP via `nodemailer` (queued, retried, auditable) |
 | Storage | Supabase Storage — contestant profile photos only (optional) |

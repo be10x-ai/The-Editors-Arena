@@ -2,7 +2,7 @@
   "name": "the-editor-arena",
   "version": "1.0.0",
   "private": true,
-  "description": "The Editor Arena — Hackathon Management Platform for the Video Editing Hiring Hackathon",
+  "description": "The Editor Arena \u2014 Hackathon Management Platform for the Video Editing Hiring Hackathon",
   "scripts": {
     "dev": "next dev",
     "build": "prisma generate && next build",
@@ -18,7 +18,8 @@
     "db:seed": "prisma db seed",
     "email:test": "tsx --env-file=.env --env-file-if-exists=.env.local scripts/test-email.ts",
     "storage:setup": "tsx --env-file=.env --env-file-if-exists=.env.local scripts/ensure-avatar-bucket.ts",
-    "db:reset": "prisma migrate reset --force"
+    "db:reset": "prisma migrate reset --force",
+    "auth:migrate": "tsx --env-file=.env --env-file-if-exists=.env.local scripts/migrate-auth-users.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
@@ -40,6 +41,7 @@
     "@radix-ui/react-switch": "^1.1.2",
     "@radix-ui/react-tabs": "^1.1.2",
     "@radix-ui/react-tooltip": "^1.1.6",
+    "@supabase/ssr": "^0.12.4",
     "@supabase/supabase-js": "^2.111.0",
     "bcryptjs": "^2.4.3",
     "class-variance-authority": "^0.7.1",
@@ -50,7 +52,6 @@
     "framer-motion": "^11.15.0",
     "lucide-react": "^0.469.0",
     "next": "^15.1.4",
-    "next-auth": "^5.0.0-beta.25",
     "nodemailer": "^8.0.11",
     "pdf-lib": "^1.17.1",
     "react": "^19.0.0",

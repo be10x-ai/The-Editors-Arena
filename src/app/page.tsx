@@ -8,7 +8,6 @@ import { Hero } from "@/components/landing/hero";
 import { Navbar } from "@/components/landing/navbar";
 import { PrizeSection } from "@/components/landing/prize-section";
 import { TimelineSection } from "@/components/landing/timeline-section";
-import { auth } from "@/lib/auth";
 import {
   DEFAULT_FAQS,
   DEFAULT_HACKATHON,
@@ -18,7 +17,7 @@ import {
 import { computeGates, countdownTarget } from "@/lib/hackathon";
 import { formatISTDate } from "@/lib/utils";
 import { prisma } from "@/lib/prisma";
-import { homeFor } from "@/lib/rbac";
+import { getSessionUser, homeFor } from "@/lib/rbac";
 
 // Live event state, live registration count — never statically cached.
 export const dynamic = "force-dynamic";
@@ -131,7 +130,7 @@ async function getLandingData(): Promise<LandingData> {
 }
 
 export default async function LandingPage() {
-  const [data, session] = await Promise.all([getLandingData(), auth()]);
+  const [data, sessionUser] = await Promise.all([getLandingData(), getSessionUser()]);
   const { hackathon } = data;
 
   const gates = computeGates(hackathon);
@@ -141,8 +140,8 @@ export default async function LandingPage() {
   return (
     <>
       <Navbar
-        isAuthenticated={Boolean(session?.user)}
-        dashboardHref={homeFor(session?.user?.role ?? null)}
+        isAuthenticated={Boolean(sessionUser)}
+        dashboardHref={homeFor(sessionUser?.role ?? null)}
         registrationOpen={gates.registrationOpen}
         closedLabel={
           gates.registrationNotYetOpen

@@ -6,8 +6,7 @@ import { LogoLockup } from "@/components/shared/logo";
 import { LoginForm } from "@/components/forms/login-form";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent } from "@/components/ui/card";
-import { auth } from "@/lib/auth";
-import { homeFor } from "@/lib/rbac";
+import { getSessionUser, homeFor } from "@/lib/rbac";
 
 export const dynamic = "force-dynamic";
 
@@ -28,8 +27,8 @@ export default async function LoginPage({
   searchParams: Promise<{ callbackUrl?: string; error?: string }>;
 }) {
   const params = await searchParams;
-  const session = await auth();
-  if (session?.user) redirect(params.callbackUrl || homeFor(session.user.role));
+  const sessionUser = await getSessionUser();
+  if (sessionUser) redirect(params.callbackUrl || homeFor(sessionUser.role));
 
   // Only allow same-origin callbacks — never bounce a session to another host.
   const callbackUrl =

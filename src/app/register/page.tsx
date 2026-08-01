@@ -9,10 +9,9 @@ import { CountdownTimer } from "@/components/landing/countdown-timer";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { auth } from "@/lib/auth";
 import { BRAND } from "@/lib/constants";
 import { computeGates, getActiveHackathon } from "@/lib/hackathon";
-import { homeFor } from "@/lib/rbac";
+import { getSessionUser, homeFor } from "@/lib/rbac";
 import { formatIST } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -24,9 +23,9 @@ export const metadata: Metadata = {
 };
 
 export default async function RegisterPage() {
-  const session = await auth();
+  const sessionUser = await getSessionUser();
   // A signed-in contestant has already registered; send them where they can act.
-  if (session?.user) redirect(homeFor(session.user.role));
+  if (sessionUser) redirect(homeFor(sessionUser.role));
 
   const hackathon = await getActiveHackathon();
   const gates = hackathon ? computeGates(hackathon) : null;

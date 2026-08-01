@@ -1,7 +1,9 @@
 import type { Role } from "@prisma/client";
 import { redirect } from "next/navigation";
+import { cache } from "react";
 
-import { auth } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+import { supabaseServer } from "@/lib/supabase/server";
 
 export type SessionUser = {
   id: string;
@@ -20,19 +22,53 @@ export class AuthorizationError extends Error {
   }
 }
 
-export async function getSessionUser(): Promise<SessionUser | null> {
-  const session = await auth();
-  if (!session?.user?.id) return null;
+/**
+ * The signed-in user, or null.
+ *
+ * Identity comes from Supabase Auth; role and event linkage come from our own
+ * `users` row, matched on email. Email is the login identifier and is unique on
+ * both sides, so no extra join column is needed — and the app deliberately
+ * forbids self-service email changes, which is what keeps the two in step.
+ *
+ * `getUser()` rather than `getSession()`: the latter trusts whatever cookie
+ * arrived, which a client can forge. `getUser()` verifies it with the auth
+ * server.
+ *
+ * Cached per request, because a page and its actions may ask several times and
+ * this is now a database round trip rather than a JWT read.
+ */
+export const getSessionUser = cache(async (): Promise<SessionUser | null> => {
+  const supabase = await supabaseServer();
+  const {
+    data: { user: authUser },
+  } = await supabase.auth.getUser();
+
+  const email = authUser?.email?.toLowerCase().trim();
+  if (!email) return null;
+
+  const user = await prisma.user.findUnique({
+    where: { email },
+    include: {
+      contestant: { select: { id: true, contestantId: true } },
+      judge: { select: { id: true, isActive: true } },
+    },
+  });
+
+  // Authenticated with Supabase but no application record, or deactivated:
+  // treat as signed out rather than half-signed-in with no role.
+  if (!user || !user.isActive) return null;
+  if (user.role === "JUDGE" && user.judge && !user.judge.isActive) return null;
+
   return {
-    id: session.user.id,
-    email: session.user.email ?? "",
-    name: session.user.name ?? "",
-    role: session.user.role,
-    contestantRowId: session.user.contestantRowId ?? null,
-    contestantId: session.user.contestantId ?? null,
-    judgeId: session.user.judgeId ?? null,
+    id: user.id,
+    email: user.email,
+    name: user.name,
+    role: user.role,
+    contestantRowId: user.contestant?.id ?? null,
+    contestantId: user.contestant?.contestantId ?? null,
+    judgeId: user.judge?.id ?? null,
   };
-}
+});
 
 /**
  * Page-level guard: redirects to login (or the caller's own dashboard when the

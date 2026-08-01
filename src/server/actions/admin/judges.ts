@@ -4,7 +4,8 @@ import crypto from "node:crypto";
 
 import { revalidatePath } from "next/cache";
 
-import { hashPassword } from "@/lib/auth";
+import { hashPassword } from "@/lib/password";
+import { ensureAuthUser } from "@/lib/supabase/auth-admin";
 import { recordAudit } from "@/lib/audit";
 import { judgeInviteEmail } from "@/lib/email/templates";
 import { sendMail } from "@/lib/email/send";
@@ -111,6 +112,16 @@ export async function upsertJudge(
         meta: { email: input.email, passwordReset: Boolean(input.password) },
       });
 
+      if (input.password) {
+        // Supabase Auth holds the credential now; the local hash above is only
+        // kept so the row stays self-contained.
+        await ensureAuthUser({
+          email: input.email,
+          password: input.password,
+          name: input.name,
+        });
+      }
+
       revalidatePath("/admin/judges");
       return successState(`${input.name} updated.`);
     }
@@ -159,6 +170,14 @@ export async function upsertJudge(
         },
         select: { id: true },
       });
+    });
+
+    // Before the invite goes out, or the judge receives a password that does
+    // not yet work anywhere.
+    await ensureAuthUser({
+      email: input.email,
+      password,
+      name: input.name,
     });
 
     if (sendInvite) {

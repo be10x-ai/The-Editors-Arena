@@ -116,8 +116,7 @@ for Production *and* Preview:
 ```env
 NEXT_PUBLIC_APP_URL="https://arena.yourdomain.com"
 DATABASE_URL / DIRECT_DATABASE_URL
-AUTH_SECRET                       # openssl rand -base64 32
-AUTH_TRUST_HOST="true"
+NEXT_PUBLIC_SUPABASE_ANON_KEY     # Supabase -> Settings -> API (anon/public)
 SMTP_HOST / SMTP_PORT / SMTP_SECURE / SMTP_USER / SMTP_PASSWORD
 MAIL_FROM_EMAIL / MAIL_FROM_NAME
 NEXT_PUBLIC_SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY   # optional, photos only

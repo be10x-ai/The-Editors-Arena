@@ -1,16 +1,12 @@
 "use server";
 
-import { AuthError } from "next-auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
-import { hashPassword, signIn, signOut } from "@/lib/auth";
-import { sendMail } from "@/lib/email/send";
-import { otpEmail } from "@/lib/email/templates";
-import { issueOtp, OTP_TTL } from "@/lib/otp";
 import { prisma } from "@/lib/prisma";
 import { clientKey, hit, LIMITS } from "@/lib/rate-limit";
 import { getSessionUser, homeFor } from "@/lib/rbac";
+import { supabaseServer } from "@/lib/supabase/server";
 import {
   loginPasswordSchema,
   otpRequestSchema,
@@ -18,6 +14,12 @@ import {
   setPasswordSchema,
 } from "@/lib/validations";
 import { errorState, successState, type ActionState } from "@/server/actions/types";
+
+/** Same-origin only — never bounce a session to another host. */
+function safeCallback(value: FormDataEntryValue | null): string {
+  const raw = String(value ?? "");
+  return raw.startsWith("/") && !raw.startsWith("//") ? raw : "";
+}
 
 export async function signInWithPassword(
   _prev: ActionState,
@@ -46,33 +48,31 @@ export async function signInWithPassword(
     );
   }
 
-  const callbackUrl = String(formData.get("callbackUrl") || "");
+  const callbackUrl = safeCallback(formData.get("callbackUrl"));
+  const supabase = await supabaseServer();
 
-  try {
-    await signIn("credentials", {
-      email: parsed.data.email,
-      password: parsed.data.password,
-      redirectTo: callbackUrl || "/dashboard",
-    });
-  } catch (error) {
-    if (isRedirectError(error)) throw error;
-    if (error instanceof AuthError) {
-      return errorState("Those credentials don't match an account.");
-    }
-    throw error;
-  }
+  const { error } = await supabase.auth.signInWithPassword({
+    email: parsed.data.email,
+    password: parsed.data.password,
+  });
+  // Deliberately not distinguishing wrong-password from no-such-account: the
+  // difference tells an attacker which addresses are registered.
+  if (error) return errorState("Those credentials don't match an account.");
 
-  return successState("Signed in.");
+  await noteSignIn(parsed.data.email);
+  redirect(callbackUrl || (await homeForCurrentUser()));
 }
 
 /**
- * Emails a 6-digit sign-in code — the way back in for someone who forgot their
- * password, since `setOwnPassword` needs a session they cannot get.
+ * Emails a sign-in code — the way back in for someone who has forgotten their
+ * password, since setOwnPassword needs a session they cannot get.
  *
- * Always reports the same thing whether or not the address has an account. The
- * response must not become a way to test which emails are registered, so send
- * failures are logged for the operator rather than shown to the visitor; the
- * password form is still right there, so nobody is stranded by a dead relay.
+ * `shouldCreateUser: false` matters: without it Supabase would happily mint an
+ * account for any address typed into the box, and this app's accounts are
+ * created by registration and by admins, never by asking for a code.
+ *
+ * The reply is identical whether or not the address exists, so it cannot be
+ * used to test which emails are registered.
  */
 export async function requestLoginCode(
   _prev: ActionState<{ email: string }>,
@@ -98,29 +98,21 @@ export async function requestLoginCode(
   }
 
   const { email } = parsed.data;
-  const user = await prisma.user.findUnique({
-    where: { email },
-    select: { isActive: true },
+  const supabase = await supabaseServer();
+  const { error } = await supabase.auth.signInWithOtp({
+    email,
+    options: { shouldCreateUser: false },
   });
 
-  if (user?.isActive) {
-    const code = await issueOtp(email);
-    const result = await sendMail(email, otpEmail({ code, ttlMinutes: OTP_TTL }));
-
-    if (!result.ok) {
-      console.error(`[otp] could not email a code to ${email}: ${result.error}`);
-    } else if (result.skipped) {
-      console.warn(`[otp] code for ${email} was not sent (${result.reason})`);
-    }
-  }
+  if (error) console.error(`[otp] could not send a code to ${email}: ${error.message}`);
 
   return successState(
-    `If that address has an account, a 6-digit code is on its way. It expires in ${OTP_TTL} minutes.`,
+    "If that address has an account, a 6-digit code is on its way. It expires shortly.",
     { email },
   );
 }
 
-/** Completes the fallback sign-in. The code is single-use — see `consumeOtp`. */
+/** Completes the fallback sign-in. Supabase burns the code on success. */
 export async function signInWithCode(
   _prev: ActionState,
   formData: FormData,
@@ -148,27 +140,24 @@ export async function signInWithCode(
     );
   }
 
-  const callbackUrl = String(formData.get("callbackUrl") || "");
+  const callbackUrl = safeCallback(formData.get("callbackUrl"));
+  const supabase = await supabaseServer();
 
-  try {
-    await signIn("otp", {
-      email: parsed.data.email,
-      otp: parsed.data.otp,
-      redirectTo: callbackUrl || "/dashboard",
-    });
-  } catch (error) {
-    if (isRedirectError(error)) throw error;
-    if (error instanceof AuthError) {
-      return errorState("That code is wrong, already used, or has expired.");
-    }
-    throw error;
-  }
+  const { error } = await supabase.auth.verifyOtp({
+    email: parsed.data.email,
+    token: parsed.data.otp,
+    type: "email",
+  });
+  if (error) return errorState("That code is wrong, already used, or has expired.");
 
-  return successState("Signed in.");
+  await noteSignIn(parsed.data.email);
+  redirect(callbackUrl || (await homeForCurrentUser()));
 }
 
 export async function signOutAction(): Promise<void> {
-  await signOut({ redirectTo: "/" });
+  const supabase = await supabaseServer();
+  await supabase.auth.signOut();
+  redirect("/");
 }
 
 /** Lets any signed-in user set or replace their own password. */
@@ -190,10 +179,9 @@ export async function setOwnPassword(
     );
   }
 
-  await prisma.user.update({
-    where: { id: user.id },
-    data: { passwordHash: await hashPassword(parsed.data.password) },
-  });
+  const supabase = await supabaseServer();
+  const { error } = await supabase.auth.updateUser({ password: parsed.data.password });
+  if (error) return errorState(error.message);
 
   return successState("Password updated. You can now sign in with it.");
 }
@@ -204,12 +192,14 @@ export async function goHome(): Promise<never> {
   redirect(homeFor(user?.role ?? null));
 }
 
-function isRedirectError(error: unknown): boolean {
-  return (
-    typeof error === "object" &&
-    error !== null &&
-    "digest" in error &&
-    typeof (error as { digest?: unknown }).digest === "string" &&
-    (error as { digest: string }).digest.startsWith("NEXT_REDIRECT")
-  );
+async function homeForCurrentUser(): Promise<string> {
+  const user = await getSessionUser();
+  return homeFor(user?.role ?? null);
+}
+
+/** Best-effort: a failed timestamp write must not block the sign-in. */
+async function noteSignIn(email: string): Promise<void> {
+  await prisma.user
+    .update({ where: { email }, data: { lastLoginAt: new Date() } })
+    .catch(() => undefined);
 }

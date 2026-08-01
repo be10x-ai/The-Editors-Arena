@@ -9,9 +9,8 @@ import { LeaderboardTable } from "@/components/leaderboard/leaderboard-table";
 import { EventStatusBadge } from "@/components/shared/status-badges";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
-import { auth } from "@/lib/auth";
 import { computeGates, getActiveHackathon } from "@/lib/hackathon";
-import { homeFor } from "@/lib/rbac";
+import { getSessionUser, homeFor } from "@/lib/rbac";
 import { computeRanking } from "@/lib/scoring";
 import { formatIST } from "@/lib/utils";
 
@@ -24,9 +23,12 @@ export const metadata: Metadata = {
 };
 
 export default async function LeaderboardPage() {
-  const [hackathon, session] = await Promise.all([getActiveHackathon(), auth()]);
+  const [hackathon, sessionUser] = await Promise.all([
+    getActiveHackathon(),
+    getSessionUser(),
+  ]);
 
-  const isStaff = session?.user?.role === "ADMIN" || session?.user?.role === "JUDGE";
+  const isStaff = sessionUser?.role === "ADMIN" || sessionUser?.role === "JUDGE";
   const gates = hackathon ? computeGates(hackathon) : null;
   const visible = Boolean(gates?.resultsVisible) || isStaff;
 
@@ -48,10 +50,10 @@ export default async function LeaderboardPage() {
             <Button asChild variant="ghost" size="sm">
               <Link href="/">Home</Link>
             </Button>
-            {session?.user ? (
+            {sessionUser ? (
               <>
                 <Button asChild size="sm">
-                  <Link href={homeFor(session.user.role)}>My dashboard</Link>
+                  <Link href={homeFor(sessionUser.role)}>My dashboard</Link>
                 </Button>
                 <SignOutButton />
               </>
@@ -130,7 +132,7 @@ export default async function LeaderboardPage() {
               ) : null}
               <LeaderboardTable
                 rows={rows}
-                highlightContestantId={session?.user?.contestantId ?? null}
+                highlightContestantId={sessionUser?.contestantId ?? null}
               />
             </>
           )}

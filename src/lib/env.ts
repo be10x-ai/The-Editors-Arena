@@ -92,6 +92,8 @@ export const env = {
    */
   supabase: {
     url: str("NEXT_PUBLIC_SUPABASE_URL"),
+    /** Safe in the browser; row-level security still applies to it. */
+    anonKey: str("NEXT_PUBLIC_SUPABASE_ANON_KEY", str("SUPABASE_ANON_KEY")),
     serviceRoleKey: str("SUPABASE_SERVICE_ROLE_KEY"),
   },
 

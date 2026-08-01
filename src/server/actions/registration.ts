@@ -11,6 +11,7 @@ import { sendMail } from "@/lib/email/send";
 import { mintContestantId } from "@/lib/contestant-id";
 import { computeGates, getActiveHackathon } from "@/lib/hackathon";
 import { prisma } from "@/lib/prisma";
+import { ensureAuthUser } from "@/lib/supabase/auth-admin";
 import { clientKey, hit, LIMITS } from "@/lib/rate-limit";
 import { registrationSchema } from "@/lib/validations";
 import { errorState, successState, type ActionState } from "@/server/actions/types";
@@ -118,6 +119,28 @@ export async function registerContestant(
 
   let created: { id: string; contestantId: string; email: string } | null = null;
 
+  // Supabase Auth owns the password now, so the account has to exist before we
+  // claim the entrant is registered — created first and deliberately, because
+  // failing afterwards would leave someone with a contestant ID they cannot
+  // sign in to. ensureAuthUser is idempotent, so a retry after a failed
+  // transaction reuses the account rather than colliding with it.
+  try {
+    await ensureAuthUser({
+      email: input.email,
+      password: input.password,
+      name: input.fullName,
+    });
+  } catch (error) {
+    console.error("[register] could not create the auth account", error);
+    return errorState(
+      "We could not finish creating your account. Please try again in a moment.",
+      undefined,
+      echo,
+    );
+  }
+
+  // Retained so the existing rows keep a hash and a future migration away from
+  // Supabase Auth is not a forced password reset for everyone.
   const passwordHash = await bcrypt.hash(input.password, 10);
 
   // The unique index on contestantId is the real guard; two entrants hitting
