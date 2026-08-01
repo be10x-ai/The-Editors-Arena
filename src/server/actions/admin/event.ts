@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import { recordAudit } from "@/lib/audit";
 import { processDueReminders, queueBroadcast } from "@/lib/email/reminders";
-import { parseDriveFileId } from "@/lib/google/drive";
+import { parseDriveFileId } from "@/lib/drive-link";
 import { canTransition, requireActiveHackathon } from "@/lib/hackathon";
 import { prisma } from "@/lib/prisma";
 import { assertAdmin } from "@/lib/rbac";

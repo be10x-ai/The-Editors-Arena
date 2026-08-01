@@ -5,7 +5,6 @@ import { revalidatePath } from "next/cache";
 import { recordAudit } from "@/lib/audit";
 import { registrationEmail } from "@/lib/email/templates";
 import { sendMail } from "@/lib/email/send";
-import { syncContestant } from "@/lib/google/sheets";
 import { requireActiveHackathon } from "@/lib/hackathon";
 import { prisma } from "@/lib/prisma";
 import { assertAdmin } from "@/lib/rbac";
@@ -59,7 +58,6 @@ export async function disqualifyContestant(
   });
 
   await persistRanking(contestant.hackathonId);
-  await syncContestant(contestant.id).catch(() => undefined);
 
   await recordAudit({
     actorId: user.id,
@@ -114,7 +112,6 @@ export async function reinstateContestant(
   });
 
   await persistRanking(contestant.hackathonId);
-  await syncContestant(contestant.id).catch(() => undefined);
 
   await recordAudit({
     actorId: user.id,
@@ -252,7 +249,6 @@ export async function rejectSubmission(
   });
 
   await persistRanking(submission.hackathonId);
-  await syncContestant(submission.contestant.id).catch(() => undefined);
 
   await recordAudit({
     actorId: user.id,
@@ -285,11 +281,19 @@ export async function restoreSubmission(
 
   const submission = await prisma.submission.findUnique({
     where: { id: submissionId },
-    select: { id: true, isLate: true, driveFileId: true, hackathonId: true },
+    select: {
+      id: true,
+      isLate: true,
+      youtubeUrl: true,
+      driveFileId: true,
+      hackathonId: true,
+    },
   });
   if (!submission) return errorState("That submission no longer exists.");
-  if (!submission.driveFileId) {
-    return errorState("There is no uploaded file to restore.");
+  // Entries are YouTube links now; driveFileId only ever fills on legacy rows,
+  // so checking it alone made this reject every current submission.
+  if (!submission.youtubeUrl && !submission.driveFileId) {
+    return errorState("There is nothing submitted to restore.");
   }
 
   await prisma.submission.update({

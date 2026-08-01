@@ -9,7 +9,6 @@ import { registrationEmail } from "@/lib/email/templates";
 import { scheduleRemindersForContestant } from "@/lib/email/reminders";
 import { sendMail } from "@/lib/email/send";
 import { mintContestantId } from "@/lib/contestant-id";
-import { syncContestant } from "@/lib/google/sheets";
 import { computeGates, getActiveHackathon } from "@/lib/hackathon";
 import { prisma } from "@/lib/prisma";
 import { clientKey, hit, LIMITS } from "@/lib/rate-limit";
@@ -212,9 +211,6 @@ export async function registerContestant(
       hackathon,
     ).catch((error) => {
       console.error("[register] could not schedule reminders", error);
-    }),
-    syncContestant(created.id).catch((error) => {
-      console.error("[register] sheet sync failed", error);
     }),
   ]);
 

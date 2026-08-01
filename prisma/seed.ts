@@ -77,8 +77,6 @@ async function main() {
       judgesPerSubmission: DEFAULT_HACKATHON.judgesPerSubmission,
       status: "NOT_STARTED",
       isActive: true,
-      sheetId: process.env.GOOGLE_SHEET_ID?.trim() || null,
-      sheetTabName: env("GOOGLE_SHEET_TAB", "Registrations"),
     },
   });
   console.log(`✓ Hackathon: ${hackathon.name} (${hackathon.slug})`);

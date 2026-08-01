@@ -4,7 +4,6 @@ import { revalidatePath } from "next/cache";
 
 import { recordAudit } from "@/lib/audit";
 import { processDueReminders, rescheduleAllReminders } from "@/lib/email/reminders";
-import { ensureSheet, syncAllContestants } from "@/lib/google/sheets";
 import { requireActiveHackathon } from "@/lib/hackathon";
 import { prisma } from "@/lib/prisma";
 import { assertAdmin } from "@/lib/rbac";
@@ -41,8 +40,6 @@ export async function saveHackathonSettings(
     maxUploadMb: formData.get("maxUploadMb"),
     allowLateSubmission: formData.get("allowLateSubmission") === "on",
     judgesPerSubmission: formData.get("judgesPerSubmission"),
-    sheetId: formData.get("sheetId") ?? "",
-    sheetTabName: formData.get("sheetTabName") ?? "Registrations",
   });
 
   if (!parsed.success) {
@@ -104,8 +101,6 @@ export async function saveHackathonSettings(
       maxUploadMb: input.maxUploadMb,
       allowLateSubmission: input.allowLateSubmission,
       judgesPerSubmission: input.judgesPerSubmission,
-      sheetId: input.sheetId || null,
-      sheetTabName: input.sheetTabName,
     },
   });
 
@@ -136,47 +131,6 @@ export async function saveHackathonSettings(
       ? `Settings saved. Reminders re-queued for ${rescheduled} contestant${rescheduled === 1 ? "" : "s"}.`
       : "Settings saved.",
   );
-}
-
-/** Pushes every contestant row into Google Sheets. */
-export async function resyncSheet(): Promise<ActionState> {
-  let user;
-  try {
-    user = await assertAdmin();
-  } catch (error) {
-    return errorState(toMessage(error));
-  }
-
-  const hackathon = await requireActiveHackathon();
-
-  try {
-    await ensureSheet(hackathon.id);
-    const count = await syncAllContestants(hackathon.id);
-
-    await recordAudit({
-      actorId: user.id,
-      actorRole: user.role,
-      action: "sheet.resynced",
-      entity: "Hackathon",
-      entityId: hackathon.id,
-      meta: { rows: count },
-    });
-
-    revalidatePath("/admin/settings");
-    return successState(
-      count === 0
-        ? "Sheet is configured but there are no contestants to sync yet."
-        : `Synced ${count} row${count === 1 ? "" : "s"} to Google Sheets.`,
-    );
-  } catch (error) {
-    console.error("[settings] sheet resync failed", error);
-    return errorState(
-      toMessage(
-        error,
-        "Could not reach Google Sheets. Check the service-account access.",
-      ),
-    );
-  }
 }
 
 /** Drains the reminder queue on demand instead of waiting for the cron. */

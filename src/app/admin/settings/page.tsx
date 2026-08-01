@@ -138,30 +138,6 @@ export default async function AdminSettingsPage() {
                 </div>
               </div>
 
-              <div>
-                <p className="label-eyebrow mb-3">Google Sheet</p>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label htmlFor="sheetId">Spreadsheet ID</Label>
-                    <Input
-                      id="sheetId"
-                      name="sheetId"
-                      defaultValue={hackathon.sheetId ?? ""}
-                      placeholder="Falls back to GOOGLE_SHEET_ID"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="sheetTabName">Tab name</Label>
-                    <Input
-                      id="sheetTabName"
-                      name="sheetTabName"
-                      defaultValue={hackathon.sheetTabName}
-                      required
-                    />
-                  </div>
-                </div>
-              </div>
-
               <SubmitButton pendingLabel="Saving…">
                 <Save />
                 Save settings

@@ -3,7 +3,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
-  serverExternalPackages: ["exceljs", "googleapis", "pdf-lib", "bcryptjs"],
+  serverExternalPackages: ["exceljs", "pdf-lib", "bcryptjs"],
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "drive.google.com" },

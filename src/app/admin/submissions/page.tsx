@@ -63,10 +63,10 @@ export default async function AdminSubmissionsPage() {
     <div className="space-y-7">
       <div>
         <p className="label-eyebrow">Submissions</p>
-        <h1 className="heading-hero mt-2 text-2xl sm:text-3xl">Uploaded videos</h1>
+        <h1 className="heading-hero mt-2 text-2xl sm:text-3xl">Submitted videos</h1>
         <p className="mt-3 text-sm text-muted-foreground">
-          Every file lives in Drive under{" "}
-          <code className="font-mono text-xs">Hackathon_Submissions/&lt;ID&gt;/</code>.
+          Each entry is an unlisted YouTube link on the contestant&apos;s own
+          account. Older entries may still be Drive uploads.
         </p>
       </div>
 

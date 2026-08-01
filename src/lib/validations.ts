@@ -182,8 +182,6 @@ export const hackathonSettingsSchema = z.object({
   maxUploadMb: z.coerce.number().int().min(50).max(20480),
   allowLateSubmission: z.boolean().default(false),
   judgesPerSubmission: z.coerce.number().int().min(1).max(15),
-  sheetId: z.string().trim().max(200).optional().or(z.literal("")),
-  sheetTabName: z.string().trim().min(1).max(80),
 });
 
 export const assetSettingsSchema = z.object({
