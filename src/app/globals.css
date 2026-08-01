@@ -48,6 +48,14 @@
   html {
     scroll-behavior: smooth;
     -webkit-tap-highlight-color: transparent;
+
+    /* Reserve the scrollbar track whether or not the page needs one.
+       Without this, a short page has no scrollbar and a long one does, so the
+       viewport differs by its width and every centred container jumps
+       sideways as you move between pages. Radix's scroll lock measures the
+       real gap, which is zero once the gutter is stable, so opening a dialog
+       no longer shifts the page either. */
+    scrollbar-gutter: stable;
   }
 
   body {
