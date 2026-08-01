@@ -42,7 +42,15 @@ export default async function AdminSubmissionsPage() {
       contestant: {
         select: { contestantId: true, fullName: true, city: true, status: true },
       },
-      _count: { select: { ratings: true, assignments: true } },
+      // Only finalised scorecards count as reviewed. Counting every Rating row
+      // included drafts, so a judge who had opened a submission and saved
+      // nothing still read as having reviewed it.
+      _count: {
+        select: {
+          ratings: { where: { isSubmitted: true } },
+          assignments: true,
+        },
+      },
     },
   });
 
@@ -70,7 +78,7 @@ export default async function AdminSubmissionsPage() {
         </p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard label="Received" value={received} icon={Video} tone="emerald" />
         <StatCard label="Late" value={late} icon={Clock} tone="orange" />
         <StatCard label="Rejected" value={rejected} tone="rose" />
@@ -97,8 +105,11 @@ export default async function AdminSubmissionsPage() {
                 <TableHead className="hidden lg:table-cell">File</TableHead>
                 <TableHead className="hidden sm:table-cell">Uploaded</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead className="hidden text-right md:table-cell">
-                  Reviews
+                <TableHead
+                  className="text-right"
+                  title="Judges who have submitted a final scorecard, out of those assigned"
+                >
+                  Reviewed
                 </TableHead>
                 <TableHead className="text-right">Avg</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
@@ -137,8 +148,17 @@ export default async function AdminSubmissionsPage() {
                       </p>
                     ) : null}
                   </TableCell>
-                  <TableCell className="hidden text-right tabular-nums text-muted-foreground md:table-cell">
-                    {submission._count.ratings}/{submission._count.assignments}
+                  <TableCell className="whitespace-nowrap text-right tabular-nums">
+                    <span
+                      className={
+                        submission._count.assignments > 0 &&
+                        submission._count.ratings >= submission._count.assignments
+                          ? "font-semibold text-emerald-300"
+                          : "text-muted-foreground"
+                      }
+                    >
+                      {submission._count.ratings}/{submission._count.assignments}
+                    </span>
                   </TableCell>
                   <TableCell className="text-right font-display font-semibold tabular-nums">
                     {formatScore(submission.averageScore)}
