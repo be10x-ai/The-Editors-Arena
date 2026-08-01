@@ -45,6 +45,38 @@ function smtpSecure(): boolean {
   return declared ?? false;
 }
 
+/**
+ * The From address on every outgoing email.
+ *
+ * A relay will not send as a domain it has not authenticated. A stale
+ * MAIL_FROM_EMAIL left over from a different provider therefore fails every
+ * message with a 550 — not some of them, all of them — while the credentials
+ * themselves are perfectly good, which makes it look like a mail outage.
+ *
+ * A different local part on the same domain is normal and left alone
+ * (arena@ sending through the noreply@ mailbox). A different *domain* is not
+ * survivable, so the authenticated mailbox wins and the mismatch is logged.
+ */
+function senderEmail(): string {
+  const mailbox = str("SMTP_USER");
+  const declared = str("MAIL_FROM_EMAIL");
+
+  if (!declared) return mailbox;
+  if (!mailbox) return declared;
+
+  const domain = (address: string) => address.split("@")[1]?.toLowerCase() ?? "";
+  if (domain(declared) && domain(mailbox) && domain(declared) !== domain(mailbox)) {
+    console.warn(
+      `[smtp] MAIL_FROM_EMAIL="${declared}" is on a different domain to ` +
+        `SMTP_USER="${mailbox}" — the relay would refuse it, so sending as ` +
+        `"${mailbox}" instead. Point MAIL_FROM_EMAIL at the authenticated mailbox.`,
+    );
+    return mailbox;
+  }
+
+  return declared;
+}
+
 export const env = {
   appUrl: str("NEXT_PUBLIC_APP_URL", "http://localhost:3000"),
   nodeEnv: str("NODE_ENV", "development"),
@@ -79,7 +111,7 @@ export const env = {
   },
 
   mail: {
-    senderEmail: str("MAIL_FROM_EMAIL"),
+    senderEmail: senderEmail(),
     senderName: str("MAIL_FROM_NAME", "The Editor's Arena"),
   },
 
