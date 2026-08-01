@@ -357,10 +357,19 @@ Only YouTube URLs are accepted, and the parser wants a recognisable video id —
 `youtube.com/watch?v=…`, `youtu.be/…` or a `/shorts/` link. A channel or playlist
 URL will not pass. Unlisted is fine; private is not, since judges cannot open it.
 
-**Profile photo upload fails.**
-`NEXT_PUBLIC_SUPABASE_URL` or `SUPABASE_SERVICE_ROLE_KEY` is missing, or the
-public `avatars` bucket does not exist yet. Everything else keeps working without
-them — only photos are affected.
+**Profile photo upload fails with "Bucket not found".**
+The `avatars` bucket does not exist yet:
+
+```bash
+npm run storage:setup
+```
+
+Idempotent, and it refuses to continue if the bucket exists but is private —
+which would break image URLs silently rather than at upload.
+
+**Profile photo upload fails some other way.**
+`NEXT_PUBLIC_SUPABASE_URL` or `SUPABASE_SERVICE_ROLE_KEY` is missing. Everything
+else keeps working without them — only photos are affected.
 
 **Emails never arrive.**
 `/admin/emails` shows the real error per row. Common causes: consent screen still
