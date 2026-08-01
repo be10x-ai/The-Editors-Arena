@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="color-scheme" content="dark light" />
+    <meta name="supported-color-schemes" content="dark light" />
+    <title>Your verification code</title>
+  </head>
+  <body style="margin:0;padding:0;background:#0a0a09;">
+    <span style="display:none;font-size:0;line-height:0;max-height:0;overflow:hidden;color:#0a0a09;"
+      >Your code for confirming a sensitive change.&#8203;&nbsp;&#8203;&nbsp;&#8203;&nbsp;&#8203;&nbsp;&#8203;&nbsp;&#8203;&nbsp;</span
+    >
+
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#0a0a09;padding:32px 12px;">
+      <tr>
+        <td align="center">
+          <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;background:#171613;border:1px solid #2c2a25;border-radius:16px;overflow:hidden;">
+            <tr>
+              <td style="padding:28px 32px 8px;">
+                <p style="margin:0;font:700 13px/1.2 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;letter-spacing:.18em;text-transform:uppercase;color:#f0b213;">
+                  The Editor&rsquo;s Arena
+                </p>
+                <h1 style="margin:12px 0 0;font:700 26px/1.25 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#eeece6;">
+                  Your verification code
+                </h1>
+              </td>
+            </tr>
+
+            <tr>
+              <td style="padding:8px 32px 32px;font:400 15px/1.65 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#eeece6;">
+                <p style="margin:0 0 14px;">
+                  Confirm it&rsquo;s you before this change goes through. Enter the code on
+                  the page you already have open.
+                </p>
+
+                <!-- Reauthentication issues a code only — Supabase populates no
+                     ConfirmationURL here, so there is deliberately no button. -->
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:24px 0;">
+                  <tr>
+                    <td align="center" style="padding:20px 18px;background:rgba(240,178,19,.12);border:1px solid rgba(240,178,19,.35);border-radius:12px;">
+                      <p style="margin:0 0 8px;font:600 11px/1 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#a8a49a;">
+                        Verification code
+                      </p>
+                      <p style="margin:0;font:700 34px/1.2 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#eeece6;letter-spacing:.24em;">
+                        {{ .Token }}
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+
+                <p style="margin:0;padding-top:16px;border-top:1px solid #2c2a25;font-size:13px;color:#a8a49a;">
+                  The code works once and expires shortly. Nobody from The Editor&rsquo;s
+                  Arena will ever ask you for it &mdash; not by email, phone or WhatsApp.
+                  If you didn&rsquo;t start this, ignore the email and the change will not
+                  go through.
+                </p>
+              </td>
+            </tr>
+
+            <tr>
+              <td style="padding:20px 32px;border-top:1px solid #2c2a25;font:400 12px/1.6 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#a8a49a;">
+                The Editor&rsquo;s Arena &middot; House of EduTech
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
