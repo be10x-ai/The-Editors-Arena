@@ -125,12 +125,18 @@ export default async function AdminRatingsPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Submission</TableHead>
+                {/* Pinned so the row stays identifiable once the criteria push
+                    the table into horizontal scroll. */}
+                <TableHead className="sticky left-0 z-20 bg-card">Submission</TableHead>
                 <TableHead>Judge</TableHead>
+                {/* Six numeric columns at px-4 with letter-spacing cost ~700px on
+                    their own, which is what unbalanced this table. Compact, and
+                    held back until there is genuinely room for them. */}
                 {RATING_CRITERIA.map((criterion) => (
                   <TableHead
                     key={criterion.key}
-                    className="hidden text-right xl:table-cell"
+                    title={criterion.label}
+                    className="hidden px-2.5 text-right 2xl:table-cell"
                   >
                     {criterion.label.split(" ")[0]}
                   </TableHead>
@@ -147,7 +153,7 @@ export default async function AdminRatingsPage() {
             <TableBody>
               {ratings.map((rating) => (
                 <TableRow key={rating.id}>
-                  <TableCell>
+                  <TableCell className="sticky left-0 z-10 bg-card">
                     <p className="font-mono text-xs tracking-wider text-amber-300">
                       {rating.submission.contestant.contestantId}
                     </p>
@@ -155,11 +161,13 @@ export default async function AdminRatingsPage() {
                       {rating.submission.contestant.fullName}
                     </p>
                   </TableCell>
-                  <TableCell className="text-sm">{rating.judge.name}</TableCell>
+                  <TableCell className="whitespace-nowrap text-sm">
+                    {rating.judge.name}
+                  </TableCell>
                   {RATING_CRITERIA.map((criterion) => (
                     <TableCell
                       key={criterion.key}
-                      className="hidden text-right tabular-nums text-muted-foreground xl:table-cell"
+                      className="hidden px-2.5 text-right tabular-nums text-muted-foreground 2xl:table-cell"
                     >
                       {rating[criterion.key].toFixed(1)}
                     </TableCell>
