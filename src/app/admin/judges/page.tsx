@@ -32,7 +32,16 @@ export default async function AdminJudgesPage() {
     orderBy: { createdAt: "asc" },
     include: {
       user: { select: { lastLoginAt: true, isActive: true } },
-      _count: { select: { assignments: true, ratings: true } },
+      // Drafts are not reviews. Counting every Rating row credited a judge for
+      // work they had started and not finished, and kept crediting them after
+      // an admin unlocked a scorecard — which is precisely when an organiser
+      // looks at this number to see who still owes a review.
+      _count: {
+        select: {
+          assignments: true,
+          ratings: { where: { isSubmitted: true } },
+        },
+      },
     },
   });
 
