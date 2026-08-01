@@ -183,28 +183,32 @@ export const DEFAULT_JUDGES: {
   expertise: string[];
   bio: string;
 }[] = [
+  // Interchangeable by design. Every judge scores the same six criteria against
+  // the same rubric, so a seeded panel of specialists implied a division of
+  // labour the scoring model does not have — and made the first seat look
+  // senior to the rest. Admins rename each seat to the real person on the day.
   {
-    name: "Senior Video Editor",
+    name: "Jury 01",
     email: "judge1@editorarena.in",
-    title: "Senior Video Editor",
+    title: "Jury member",
     organization: "House of EduTech",
-    expertise: ["Long-form editing", "Podcast", "Pacing"],
-    bio: "Cuts the flagship long-form output and knows exactly what a publishable edit looks like at volume.",
+    expertise: [],
+    bio: "",
   },
   {
-    name: "Creative Director",
+    name: "Jury 02",
     email: "judge2@editorarena.in",
-    title: "Creative Director",
+    title: "Jury member",
     organization: "House of EduTech",
-    expertise: ["Narrative", "Brand", "Art direction"],
-    bio: "Owns creative standards end to end and judges storytelling before technique.",
+    expertise: [],
+    bio: "",
   },
   {
-    name: "Motion Graphics Lead",
+    name: "Jury 03",
     email: "judge3@editorarena.in",
-    title: "Motion Graphics Lead",
+    title: "Jury member",
     organization: "House of EduTech",
-    expertise: ["After Effects", "Typography", "Design systems"],
-    bio: "Evaluates whether graphics carry meaning or just decorate the frame.",
+    expertise: [],
+    bio: "",
   },
 ];
