@@ -108,7 +108,7 @@ export function registrationEmail(args: {
     ${detailRows(eventDetails(args.hackathon))}
     <p style="margin:0 0 8px;font-weight:600;">What happens next</p>
     <ol style="margin:0 0 16px;padding-left:20px;color:${COLORS.text};">
-      <li style="margin-bottom:6px;">Sign in to your dashboard with this email — request a one-time code, no password needed.</li>
+      <li style="margin-bottom:6px;">Sign in to your dashboard with this email and the password you chose while registering. Forgotten it? Pick <em>Email me a code instead</em> on the sign-in page.</li>
       <li style="margin-bottom:6px;">We'll email you reminders at 3 days, 2 days, 1 day and 1 hour before the start.</li>
       <li style="margin-bottom:6px;">When the hackathon begins, the task files unlock on your dashboard. The ZIP password is announced at the same moment — not before.</li>
       <li style="margin-bottom:6px;">Edit, then upload your final video (MP4 or MOV) through the portal before the deadline.</li>
@@ -127,7 +127,7 @@ Submission deadline: ${formatIST(args.hackathon.submissionDeadline)}
 Results: ${formatIST(args.hackathon.resultsAt)}
 
 What happens next
-1. Sign in at ${loginUrl()} using this email — request a one-time code.
+1. Sign in at ${loginUrl()} with this email and the password you chose while registering. Forgotten it? Choose "Email me a code instead".
 2. Reminders arrive 3 days, 2 days, 1 day and 1 hour before the start.
 3. Task files unlock on your dashboard when the hackathon begins; the ZIP password is announced at the same moment.
 4. Upload your final video (MP4 or MOV) through the portal before the deadline.
