@@ -2,7 +2,7 @@
 
 Hackathon management platform for a professional video-editing hiring competition.
 Handles the whole lifecycle: registration → contestant IDs → automated email
-reminders → gated asset release → direct-to-Drive video submission → multi-judge
+reminders → gated asset release → YouTube link submission → multi-judge
 scoring → automatic ranking → hiring report.
 
 Built to run multiple editions: an edition is a `Hackathon` row, not a code branch.
@@ -17,9 +17,8 @@ Built to run multiple editions: an edition is a `Hackathon` row, not a code bran
 - [The lifecycle](#the-lifecycle)
 - [Roles and access](#roles-and-access)
 - [Scoring and ranking](#scoring-and-ranking)
-- [Submissions: why direct-to-Drive](#submissions-why-direct-to-drive)
+- [Submissions: why YouTube links](#submissions-why-youtube-links)
 - [Email automation](#email-automation)
-- [Google Sheets mirror](#google-sheets-mirror)
 - [Reports](#reports)
 - [Security model](#security-model)
 - [Project structure](#project-structure)
@@ -37,9 +36,9 @@ Built to run multiple editions: an edition is a `Hackathon` row, not a code bran
 | UI | Tailwind CSS 3.4 + shadcn-style Radix primitives + Framer Motion |
 | Database | PostgreSQL + Prisma ORM |
 | Auth | Auth.js / NextAuth v5 — credentials (password) and email one-time codes |
-| Storage | Google Drive API (resumable uploads, embedded playback) |
-| Email | Gmail API (queued, retried, auditable) |
-| Spreadsheet | Google Sheets API (idempotent registration mirror) |
+| Submissions | Unlisted YouTube links, embedded for judging |
+| Email | SMTP via `nodemailer` (queued, retried, auditable) |
+| Storage | Supabase Storage — contestant profile photos only (optional) |
 | Reports | `pdf-lib` (PDF) and `exceljs` (XLSX) |
 | Hosting | Vercel-compatible (cron included) |
 
@@ -54,7 +53,7 @@ npm install
 # 2. Configure
 cp .env.example .env
 #    Minimum to boot: DATABASE_URL, DIRECT_DATABASE_URL, AUTH_SECRET.
-#    Leave INTEGRATIONS_DRY_RUN=true until Google credentials exist —
+#    Leave INTEGRATIONS_DRY_RUN=true until SMTP credentials exist —
 #    emails then log to the console instead of failing.
 openssl rand -base64 32     # paste into AUTH_SECRET
 
@@ -87,18 +86,17 @@ content), so a misconfigured deployment never shows a blank marketing site.
 ┌─────────────────────────────────────────────────────────────────┐
 │  Registration          → mint EA2026NNNN inside a transaction   │
 │                        → queue welcome + 4 reminders            │
-│                        → mirror row into Google Sheets          │
 └───────────────┬─────────────────────────────────────────────────┘
                 ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │  Contestant dashboard  gated by EventStatus + admin release     │
-│  assets (locked) → ZIP password (locked) → upload → scorecard   │
+│  assets (locked) → ZIP password (locked) → submit → scorecard   │
 └───────────────┬─────────────────────────────────────────────────┘
-                │ browser → Google Drive (resumable, direct)
+                │ contestant pastes an unlisted YouTube link
                 ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │  Judge portal          only assigned submissions                │
-│  embedded Drive player + 6 criteria + overall + feedback        │
+│  embedded YouTube player + 6 criteria + overall + feedback      │
 │  draft → submit (locks; admin can unlock)                       │
 └───────────────┬─────────────────────────────────────────────────┘
                 ▼
@@ -178,28 +176,34 @@ and the UI, the cross-check and the reports all follow.
 
 ---
 
-## Submissions: why direct-to-Drive
+## Submissions: why YouTube links
 
-A serverless request body caps out around 4.5 MB on Vercel, so a multi-gigabyte
-export can never be proxied through the app. Instead:
+Entrants export a multi-gigabyte video, and moving that file is the whole
+problem. A serverless request body caps out around 4.5 MB on Vercel, so it can
+never be proxied through the app — and hosting the files ourselves means storage
+cost, transcoding, and a player to maintain.
 
-1. `POST /api/submissions/upload-session` — validates the window, size and MIME
-   type, creates `Hackathon_Submissions/<CONTESTANT_ID>/` on Drive, and returns a
-   one-time resumable session URI.
-2. The browser `PUT`s the file straight to Google with progress reporting.
-3. `POST /api/submissions/complete` — re-reads the file *from Drive* (never
-   trusting the client's numbers), verifies it belongs to that contestant, grants
-   link-read access for the embedded player, records the submission, emails a
-   receipt and updates the Sheet.
+A link sidesteps all of it. The contestant uploads an unlisted video to their own
+YouTube account and pastes the URL. YouTube absorbs the bandwidth, the
+transcoding and the playback, and judges get scrubbing and quality selection for
+free.
 
-Files are renamed server-side to `EA20260001_Final_Video.mp4`. Late uploads are
-either refused or accepted-and-flagged, per the `allowLateSubmission` setting.
+`src/lib/youtube.ts` parses the id out of `watch?v=`, `youtu.be/` and `/shorts/`
+forms, and the id is stored alongside the raw URL so the judge portal can embed
+without re-parsing. The link is write-once: after the submission leaves
+`NOT_SUBMITTED` only an admin can change it. Late submissions are either refused
+or accepted-and-flagged, per the `allowLateSubmission` setting.
+
+The trade-off is that entrants must have a YouTube account, and an accidentally
+*private* video is invisible to judges — unlisted is what the instructions ask
+for. Legacy Drive columns remain on `Submission` for entries made before the
+switch, and the judge player still falls back to them.
 
 ---
 
 ## Email automation
 
-Gmail API, via a queue (`EmailReminder`) rather than fire-and-forget:
+Plain SMTP, via a queue (`EmailReminder`) rather than fire-and-forget:
 
 | Trigger | Email |
 |---|---|
@@ -220,19 +224,7 @@ Gmail API, via a queue (`EmailReminder`) rather than fire-and-forget:
   retriable — on `/admin/emails`.
 - Changing the start date re-queues every pending reminder automatically.
 - A send failure never rolls back the action that triggered it. Registration
-  succeeds even if Gmail is down.
-
----
-
-## Google Sheets mirror
-
-Every registration is mirrored to a sheet with the columns the ops team asked
-for (ID, name, email, phone, experience, portfolio, registration date, status,
-submission status, final score, rank). Writes are keyed on Contestant ID in
-column A, so syncing is idempotent and a manual edit is simply overwritten on the
-next update. `/admin/settings` has a full re-sync button.
-
-The sheet is a convenience, never a source of truth.
+  succeeds even if the mail relay is down.
 
 ---
 
@@ -303,8 +295,8 @@ src/
     auth.ts auth.config.ts rbac.ts otp.ts     identity & access
     hackathon.ts                              event state + access gates
     scoring.ts                                weighted scores, ranking engine
-    google/                                   client, drive, sheets, gmail
-    email/                                    templates, send, reminder queue
+    google/                                   client, drive, sheets
+    email/                                    templates, smtp, send, reminders
     reports/                                  hiring-report, pdf, excel
     validations.ts constants.ts defaults.ts   schemas, rubric, seed content
   server/actions/                             registration, judging, admin/*
@@ -334,6 +326,5 @@ src/
 ## Deployment
 
 See **[DEPLOYMENT.md](./DEPLOYMENT.md)** for the full walkthrough: Postgres,
-Google Cloud service account, Drive folder permissions, Sheets, Gmail
-(domain-wide delegation *or* OAuth refresh token), Vercel cron, environment
-variables, a go-live checklist and an event-day runbook.
+Postgres, SMTP mail, Vercel cron, environment variables, a go-live checklist and
+an event-day runbook.

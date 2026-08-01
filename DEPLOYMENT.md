@@ -1,29 +1,29 @@
 # Deployment Guide — The Editor's Arena
 
-Target: Vercel + managed PostgreSQL + a Google Cloud service account.
+Target: Vercel + managed PostgreSQL + an SMTP mailbox.
 Everything below also works on any Node 20+ host; only the cron wiring differs.
 
-Budget about 90 minutes for a first-time setup, most of it in Google Cloud.
+Budget about 30 minutes for a first-time setup.
 
 ---
 
 ## 0. Order of operations
 
 1. [Database](#1-database)
-2. [Google Cloud project + service account](#2-google-cloud-project--service-account)
-3. [Google Drive](#3-google-drive)
-4. [Google Sheets](#4-google-sheets)
-5. [Gmail sending](#5-gmail-sending)
-6. [Deploy to Vercel](#6-deploy-to-vercel)
-7. [Migrate + seed](#7-migrate--seed)
-8. [Cron](#8-cron)
-9. [Go-live checklist](#9-go-live-checklist)
-10. [Event-day runbook](#10-event-day-runbook)
-11. [Troubleshooting](#11-troubleshooting)
+2. [Email sending](#2-email-sending)
+3. [Deploy to Vercel](#3-deploy-to-vercel)
+4. [Migrate + seed](#4-migrate--seed)
+5. [Cron](#5-cron)
+6. [Go-live checklist](#6-go-live-checklist)
+7. [Event-day runbook](#7-event-day-runbook)
+8. [Troubleshooting](#8-troubleshooting)
 
-Keep `INTEGRATIONS_DRY_RUN=true` until step 5 is done. In dry-run the app runs
-normally but logs emails instead of sending them and disables Drive uploads, so a
-half-configured deployment can't email 500 people by accident.
+Keep `INTEGRATIONS_DRY_RUN=true` until step 2 is done. In dry-run the app runs
+normally but logs emails instead of sending them, so a half-configured
+deployment can't email 500 people by accident.
+
+Entries are YouTube links, so there is no file storage to configure. Supabase
+Storage is used only for contestant profile photos, and is optional.
 
 ---
 
@@ -49,129 +49,57 @@ that it does not sleep — a cold database during the upload window is a bad hou
 
 ---
 
-## 2. Google Cloud project + service account
+## 2. Email sending
 
-1. Create a project at <https://console.cloud.google.com> (e.g. `editor-arena`).
-2. **APIs & Services → Library** — enable all three:
-   - Google Drive API
-   - Google Sheets API
-   - Gmail API
-3. **IAM & Admin → Service Accounts → Create**
-   - Name: `editor-arena`
-   - No project roles are needed (access is granted per-resource by sharing).
-4. Open the service account → **Keys → Add key → Create new key → JSON**.
-5. From the JSON file, copy into your environment:
+The app talks SMTP directly, through one seam — `src/lib/email/send.ts`. Any
+host with a mailbox works; take the values from that host's control panel.
 
 ```env
-GOOGLE_SERVICE_ACCOUNT_EMAIL="editor-arena@your-project.iam.gserviceaccount.com"
-GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nMIIEv...\n-----END PRIVATE KEY-----\n"
+SMTP_HOST="smtp.yourhost.com"
+SMTP_PORT="465"
+SMTP_SECURE="true"                # true on 465 (implicit TLS), false on 587
+SMTP_USER="noreply@yourdomain.com"
+SMTP_PASSWORD="…"
+MAIL_FROM_EMAIL="noreply@yourdomain.com"   # keep identical to SMTP_USER
+MAIL_FROM_NAME="The Editor's Arena"
 ```
 
-The private key must keep its `\n` escapes and stay inside double quotes. Paste
-it into Vercel exactly as it appears in the JSON file.
+Two things bite here. `SMTP_SECURE` must be `true` on port 465 — leave it false
+and the connection hangs rather than erroring. And `MAIL_FROM_EMAIL` must be the
+authenticated mailbox; most relays reject, or silently rewrite, a From address
+they do not own.
 
-> Delete the downloaded JSON once the values are in your secret store. It is a
-> full credential and `.gitignore` already blocks `*service-account*.json`.
+The site's own domain is irrelevant to sending, so a `*.vercel.app` deployment
+is fine.
 
----
+Verify before trusting it:
 
-## 3. Google Drive
-
-A service account has **no storage quota of its own**, which matters:
-
-- **Shared Drive (recommended).** Create a Shared Drive, add the service-account
-  email as **Content manager**, and put a `Hackathon Submissions` folder inside
-  it. Set `GOOGLE_DRIVE_ID` to the Shared Drive ID. Files are owned by the Drive,
-  not by a person, so nothing breaks when someone leaves the company.
-- **My Drive (works, with a caveat).** Share a folder with the service-account
-  email as **Editor**. Uploads consume *your* quota and are owned by the service
-  account. Leave `GOOGLE_DRIVE_ID` empty.
-
-Then set the parent folder:
-
-```env
-GOOGLE_DRIVE_SUBMISSIONS_FOLDER_ID="1AbCdEf…"   # from the folder URL
-GOOGLE_DRIVE_ID=""                              # Shared Drive ID, or empty
+```bash
+npm run email:test              # sends to SMTP_USER
+npm run email:test you@example.com
 ```
 
-The app creates `Hackathon_Submissions/<CONTESTANT_ID>/` beneath that folder on
-first upload.
+It checks the credentials first, so a bad password is a clear rejection rather
+than a half-finished send.
 
-**Task ZIP.** Upload it anywhere in Drive, share it so entrants can download
-(link-view is fine — it is password-protected), then paste the link into
-**Admin → Control panel → Task asset distribution**. Set the ZIP password there
-too. Neither is visible to contestants until you release them.
+### If you also use Supabase Custom SMTP
 
-Storage estimate: a 6-hour cohort of 60 editors submitting 300 MB–1 GB each needs
-roughly 20–60 GB, plus egress when judges stream. Check the plan before event day.
-
----
-
-## 4. Google Sheets
-
-1. Create a spreadsheet.
-2. Share it with the service-account email as **Editor**.
-3. Copy the ID from the URL — `/spreadsheets/d/<THIS>/edit`:
-
-```env
-GOOGLE_SHEET_ID="1XyZ…"
-GOOGLE_SHEET_TAB="Registrations"
-```
-
-The tab is created and its header row written on first sync. Nothing else needs
-setting up.
-
----
-
-## 5. Gmail sending
-
-Two options. Pick one.
-
-### Option A — OAuth refresh token (simplest; works with any Google account)
-
-1. **APIs & Services → OAuth consent screen** — configure it (External is fine;
-   add yourself as a test user).
-2. **Credentials → Create credentials → OAuth client ID → Web application.**
-   Add `https://developers.google.com/oauthplayground` as an authorised redirect
-   URI. Note the client ID and secret.
-3. Go to <https://developers.google.com/oauthplayground>:
-   - Gear icon → **Use your own OAuth credentials** → paste ID and secret.
-   - Scope: `https://www.googleapis.com/auth/gmail.send`
-   - Authorise as the mailbox that should send (e.g. `arena@yourdomain.com`),
-     then **Exchange authorization code for tokens**.
-4. Copy the refresh token:
-
-```env
-GOOGLE_OAUTH_CLIENT_ID="…apps.googleusercontent.com"
-GOOGLE_OAUTH_CLIENT_SECRET="…"
-GMAIL_REFRESH_TOKEN="1//…"
-GMAIL_SENDER_EMAIL="arena@yourdomain.com"
-GMAIL_SENDER_NAME="The Editor's Arena"
-```
-
-Refresh tokens for an app still in "Testing" expire after 7 days — publish the
-consent screen (or set it to Internal on Workspace) before the event.
-
-### Option B — Domain-wide delegation (Google Workspace only)
-
-1. Service account → **Advanced settings** → note the **Client ID**.
-2. Workspace Admin console → **Security → Access and data control → API controls
-   → Domain-wide delegation → Add new**:
-   - Client ID: the one above
-   - Scope: `https://www.googleapis.com/auth/gmail.send`
-3. Set only `GMAIL_SENDER_EMAIL` (the mailbox to impersonate) and leave the OAuth
-   variables empty.
+Supabase's Custom SMTP screen takes these same credentials, but it is a separate
+sender on the same mailbox — not a hop these emails pass through. It carries
+only Supabase Auth's six templates, and this app does not use Supabase Auth. Set
+both if you want; they do not conflict, and neither is required by the other.
 
 ### Sending limits
 
-Gmail allows ~500 recipients/day on consumer accounts and ~2,000 on Workspace.
-The queue paces sends and retries failures, but if a cohort plus reminders will
-exceed the daily cap, split the broadcast across days or move
-`src/lib/email/send.ts` to a transactional provider — it is the single seam.
+Shared-hosting mailboxes are usually capped per hour (often ~100) and per day.
+The queue paces sends and retries failures, but a full contestant list across
+four reminder waves can exceed a modest cap — check the plan's limit before the
+first broadcast, or the tail of the queue bounces. `/admin/emails` shows what
+failed and lets you retry.
 
 ---
 
-## 6. Deploy to Vercel
+## 3. Deploy to Vercel
 
 ```bash
 npm i -g vercel
@@ -190,23 +118,21 @@ NEXT_PUBLIC_APP_URL="https://arena.yourdomain.com"
 DATABASE_URL / DIRECT_DATABASE_URL
 AUTH_SECRET                       # openssl rand -base64 32
 AUTH_TRUST_HOST="true"
-GOOGLE_SERVICE_ACCOUNT_EMAIL / GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY
-GOOGLE_DRIVE_SUBMISSIONS_FOLDER_ID / GOOGLE_DRIVE_ID
-GOOGLE_SHEET_ID / GOOGLE_SHEET_TAB
-GMAIL_SENDER_EMAIL / GMAIL_SENDER_NAME
-GOOGLE_OAUTH_CLIENT_ID / GOOGLE_OAUTH_CLIENT_SECRET / GMAIL_REFRESH_TOKEN
+SMTP_HOST / SMTP_PORT / SMTP_SECURE / SMTP_USER / SMTP_PASSWORD
+MAIL_FROM_EMAIL / MAIL_FROM_NAME
+NEXT_PUBLIC_SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY   # optional, photos only
 CRON_SECRET                       # openssl rand -hex 24
-INTEGRATIONS_DRY_RUN="false"      # flip once steps 2–5 are verified
+INTEGRATIONS_DRY_RUN="false"      # flip once step 2 is verified
 ```
 
-`NEXT_PUBLIC_APP_URL` must be the real origin — it is used in email links and in
-the Drive CORS origin for uploads.
+`NEXT_PUBLIC_APP_URL` must be the real origin — every link in every email is
+built from it, so left at localhost the emails point at the recipient's machine.
 
 Add your custom domain under **Settings → Domains**.
 
 ---
 
-## 7. Migrate + seed
+## 4. Migrate + seed
 
 Run migrations against production once, from your machine:
 
@@ -234,13 +160,13 @@ Then, signed in as admin:
 1. `/admin/settings` — confirm every date (all IST) and the upload size limit.
 2. `/admin/content` — edit FAQs, prizes and the timeline to the real details.
 3. `/admin/judges` — add the real jury (email invites include their password).
-4. `/admin/settings` — check the integration panel shows Drive ✓ Gmail ✓ Sheets ✓.
+4. `/admin` — confirm the dry-run banner is gone, so email is live.
 
 Change the seeded admin and judge passwords before sharing any link.
 
 ---
 
-## 8. Cron
+## 5. Cron
 
 `vercel.json` already declares the schedule:
 
@@ -267,27 +193,27 @@ outage is recoverable by hand.
 
 ---
 
-## 9. Go-live checklist
+## 6. Go-live checklist
 
 Health first:
 
 ```bash
 curl https://arena.yourdomain.com/api/health
 # {"ok":true,"database":true,"hackathon":"editor-arena-2026:NOT_STARTED",
-#  "integrations":{"dryRun":false,"drive":true,"sheets":true,"gmail":true}}
+#  "integrations":{"dryRun":false,"email":true}}
 ```
 
 Then walk it:
 
 - [ ] Landing page: countdown correct, timeline and prizes match reality
 - [ ] Register a test contestant → ID issued, welcome email received
-- [ ] Sheet row appeared with the right columns
 - [ ] `/admin/emails` shows 4 reminders queued at the right IST times
-- [ ] Sign in with a one-time code; confirm the code is single-use
+- [ ] Sign in with the registration password
+- [ ] Sign in via "Email me a code instead"; confirm the code is single-use
 - [ ] Task ZIP link and password saved in the control panel, both still hidden
 - [ ] Advance to `RUNNING` → release assets → announce password → dashboard shows both
-- [ ] Advance to `SUBMISSION_OPEN` → upload a real 500 MB+ video end to end
-- [ ] File landed in `Hackathon_Submissions/<ID>/`; receipt email received
+- [ ] Advance to `SUBMISSION_OPEN` → submit a YouTube link end to end
+- [ ] Link accepted and playable in the judge portal; receipt email received
 - [ ] Advance to `JUDGING` → auto-assign → each judge sees their queue only
 - [ ] Submit one scorecard → leaderboard updates → scorecard is now read-only
 - [ ] Unlock that scorecard as admin → score leaves the average immediately
@@ -299,7 +225,7 @@ Do the big-file upload test from a normal home connection, not office fibre.
 
 ---
 
-## 10. Event-day runbook
+## 7. Event-day runbook
 
 Times assume a 09:30 IST start and a 15:45 IST deadline.
 
@@ -325,7 +251,7 @@ time alone, so a late start never leaks assets early or locks anyone out.
 
 ---
 
-## 11. Troubleshooting
+## 8. Troubleshooting
 
 **Pushing to `main` produces no Vercel deployment at all — no build, no error.**
 This is the failure mode where the dashboard says "Connected" but the Vercel
@@ -426,17 +352,15 @@ Apache; Vercel does not run Apache. Redirects, headers, rewrites and cron all
 live in `vercel.json` and `next.config.ts` instead — the security headers that
 would normally go in `.htaccess` are already set in `next.config.ts`.
 
-**Uploads fail with "Google Drive is not configured".**
-`INTEGRATIONS_DRY_RUN` is still `true`, or the service account / folder ID is
-missing. Check `/api/health`.
+**A submission link is rejected.**
+Only YouTube URLs are accepted, and the parser wants a recognisable video id —
+`youtube.com/watch?v=…`, `youtu.be/…` or a `/shorts/` link. A channel or playlist
+URL will not pass. Unlisted is fine; private is not, since judges cannot open it.
 
-**Drive returns 403 on the upload session.**
-The folder is not shared with the service-account email, or it is shared as Viewer
-rather than Editor / Content manager.
-
-**"Service Accounts do not have storage quota."**
-You are uploading into My Drive with no owner quota. Move the parent folder into a
-Shared Drive and set `GOOGLE_DRIVE_ID`.
+**Profile photo upload fails.**
+`NEXT_PUBLIC_SUPABASE_URL` or `SUPABASE_SERVICE_ROLE_KEY` is missing, or the
+public `avatars` bucket does not exist yet. Everything else keeps working without
+them — only photos are affected.
 
 **Emails never arrive.**
 `/admin/emails` shows the real error per row. Common causes: consent screen still

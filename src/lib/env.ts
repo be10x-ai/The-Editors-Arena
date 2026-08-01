@@ -24,16 +24,6 @@ export const env = {
   authSecret: str("AUTH_SECRET"),
   cronSecret: str("CRON_SECRET"),
 
-  google: {
-    clientEmail: str("GOOGLE_SERVICE_ACCOUNT_EMAIL"),
-    // Vercel stores newlines as literal "\n" — normalise both forms.
-    privateKey: str("GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY").replace(/\\n/g, "\n"),
-    driveId: str("GOOGLE_DRIVE_ID"),
-    submissionsFolderId: str("GOOGLE_DRIVE_SUBMISSIONS_FOLDER_ID"),
-    sheetId: str("GOOGLE_SHEET_ID"),
-    sheetTab: str("GOOGLE_SHEET_TAB", "Registrations"),
-  },
-
   /**
    * Supabase, used only for Storage — the database goes through Prisma and auth
    * is this app's own. The service-role key bypasses row-level security, so it
@@ -45,10 +35,11 @@ export const env = {
   },
 
   /**
-   * Outbound mail over plain SMTP — the same credentials you would paste into
-   * Supabase's Custom SMTP screen. Supabase itself cannot carry these emails:
-   * its mailer only handles Supabase Auth flows, and this app authenticates
-   * against its own users table.
+   * Outbound mail over plain SMTP, straight from this app to the relay.
+   *
+   * These are the same credentials Supabase's Custom SMTP screen takes, but the
+   * two are independent senders on one mailbox, not a chain: Supabase relays
+   * only its own Auth templates, and this app does not use Supabase Auth.
    */
   smtp: {
     host: str("SMTP_HOST"),
@@ -60,7 +51,7 @@ export const env = {
   },
 
   mail: {
-    senderEmail: str("MAIL_FROM_EMAIL", str("GMAIL_SENDER_EMAIL")),
+    senderEmail: str("MAIL_FROM_EMAIL"),
     senderName: str("MAIL_FROM_NAME", "The Editor's Arena"),
   },
 
@@ -83,11 +74,6 @@ export function requireEnv(key: string): string {
   return value;
 }
 
-/** True when the service-account credentials needed by Drive/Sheets exist. */
-export function hasServiceAccount(): boolean {
-  return Boolean(env.google.clientEmail && env.google.privateKey);
-}
-
 /** True when an SMTP relay is configured well enough to send. */
 export function hasSmtp(): boolean {
   return Boolean(
@@ -95,13 +81,10 @@ export function hasSmtp(): boolean {
   );
 }
 
-/** Reports which integrations are live — surfaced on the admin settings page. */
+/** Reports which integrations are live — surfaced on the admin dashboard. */
 export function integrationStatus() {
   return {
     dryRun: env.dryRun,
-    drive:
-      !env.dryRun && hasServiceAccount() && Boolean(env.google.submissionsFolderId),
-    sheets: !env.dryRun && hasServiceAccount() && Boolean(env.google.sheetId),
     email: !env.dryRun && hasSmtp(),
   };
 }

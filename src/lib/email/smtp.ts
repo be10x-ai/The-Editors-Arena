@@ -5,11 +5,10 @@ import { env } from "@/lib/env";
 /**
  * SMTP transport, created once per server instance.
  *
- * Deliberately provider-agnostic: point `SMTP_*` at Resend, Brevo, SES, Postmark
- * or anything else that speaks SMTP. These are the same credentials Supabase's
- * Custom SMTP screen takes — Supabase cannot relay these emails itself, because
- * its mailer only serves Supabase Auth flows and this app authenticates against
- * its own users table.
+ * Deliberately provider-agnostic: `SMTP_*` points at whatever relay the mailbox
+ * lives on. Supabase's Custom SMTP screen takes these same credentials, but it
+ * is a parallel sender, not a hop on the way out — it carries only Supabase
+ * Auth's own templates, and this app authenticates against its own users table.
  *
  * Cached because a fresh connection per email is slow and, on a warm serverless
  * instance, wasteful — nodemailer pools and reuses the socket.

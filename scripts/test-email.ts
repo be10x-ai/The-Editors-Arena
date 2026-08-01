@@ -34,12 +34,18 @@ async function main() {
     );
   }
   if (env.smtp.user.startsWith("REPLACE_ME")) {
-    fail("SMTP_USER is still the placeholder.", "Put your real Gmail address in .env");
+    fail("SMTP_USER is still the placeholder.", "Put the mailbox address in .env");
   }
   if (env.smtp.password.startsWith("REPLACE_ME")) {
     fail(
       "SMTP_PASSWORD is still the placeholder.",
-      "Create an app password at https://myaccount.google.com/apppasswords",
+      "Copy the mailbox password from your provider's control panel.",
+    );
+  }
+  if (env.smtp.port === 465 && !env.smtp.secure) {
+    fail(
+      'Port 465 needs SMTP_SECURE="true".',
+      "465 is implicit TLS; the handshake stalls without it. Use 587 for STARTTLS.",
     );
   }
   if (!to) fail("No recipient.", "Pass one as an argument, or set SMTP_USER.");
@@ -60,8 +66,8 @@ async function main() {
   if (!check.ok) {
     fail(
       `The relay rejected the credentials: ${check.error}`,
-      "For Gmail this is almost always a missing app password (your normal " +
-        "Google password will not work), or 2-Step Verification being off.",
+      "Check SMTP_USER is the full address, and that SMTP_PASSWORD is the " +
+        "mailbox password from the host's control panel.",
     );
   }
   console.log("\n  ✓ credentials accepted");
