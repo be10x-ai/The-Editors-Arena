@@ -28,7 +28,7 @@ const WHO = [
   {
     icon: ScrollText,
     title: "How it's judged",
-    body: "Five judges score every submission independently against a rubric published in advance. Your final score is the average of their overall marks, to two decimals.",
+    body: "Three judges score every submission independently against a rubric published in advance. Your final score is the average of their overall marks, to two decimals.",
   },
   {
     icon: Sparkles,

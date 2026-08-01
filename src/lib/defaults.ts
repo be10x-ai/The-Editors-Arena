@@ -28,7 +28,7 @@ export const DEFAULT_HACKATHON = {
   resultsAt: ist(2026, 9, 8, 18, 0),
   assetZipName: "Editor_Arena_Task_Files.zip",
   maxUploadMb: 4096,
-  judgesPerSubmission: 5,
+  judgesPerSubmission: 3,
 } as const;
 
 export const DEFAULT_TIMELINE: {
@@ -75,7 +75,7 @@ export const DEFAULT_TIMELINE: {
   {
     title: "Judging",
     description:
-      "Five judges score every submission independently against the published rubric.",
+      "Three judges score every submission independently against the published rubric.",
     occursAt: DEFAULT_HACKATHON.judgingEndsAt,
     order: 6,
   },
@@ -158,13 +158,13 @@ export const DEFAULT_FAQS: { question: string; answer: string; order: number }[]
   {
     question: "How will submissions be evaluated?",
     answer:
-      "Five judges review every submission independently through the portal — no shared channel, no discussion until scoring is closed. Each judge scores six criteria from 0.0 to 10.0 (creativity, storytelling, editing skill, motion graphics, sound design, technical quality), gives a holistic overall score, and writes feedback.",
+      "Three judges review every submission independently through the portal — no shared channel, no discussion until scoring is closed. Each judge scores six criteria from 0.0 to 10.0 (creativity, storytelling, editing skill, motion graphics, sound design, technical quality), gives a holistic overall score, and writes feedback.",
     order: 5,
   },
   {
     question: "How are winners selected?",
     answer:
-      "Your final score is the average of the five judges' overall scores, to two decimal places. Rank 1 is the Champion and takes ₹1 Lakh; ranks 2 and 3 are the runners-up and take ₹10,000 each. Ties share a rank. The full leaderboard is published when results are announced, within 60 minutes of the submission deadline.",
+      "Your final score is the average of the three judges' overall scores, to two decimal places. Rank 1 is the Champion and takes ₹1 Lakh; ranks 2 and 3 are the runners-up and take ₹10,000 each. Ties share a rank. The full leaderboard is published when results are announced, within 60 minutes of the submission deadline.",
     order: 6,
   },
   {
@@ -206,21 +206,5 @@ export const DEFAULT_JUDGES: {
     organization: "House of EduTech",
     expertise: ["After Effects", "Typography", "Design systems"],
     bio: "Evaluates whether graphics carry meaning or just decorate the frame.",
-  },
-  {
-    name: "Content Lead",
-    email: "judge4@editorarena.in",
-    title: "Content Lead",
-    organization: "House of EduTech",
-    expertise: ["Audience", "Retention", "Short-form"],
-    bio: "Represents the client view — would this actually perform with a real audience?",
-  },
-  {
-    name: "External Editor",
-    email: "judge5@editorarena.in",
-    title: "Independent Editor",
-    organization: "External jury member",
-    expertise: ["Documentary", "Sound design", "Colour"],
-    bio: "The outside voice on the panel, so the result means something beyond our own team.",
   },
 ];

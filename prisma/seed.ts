@@ -2,7 +2,7 @@
  * Seed script — `npm run db:seed`.
  *
  * Idempotent: safe to run repeatedly. It creates the 2026 edition, an admin,
- * five judges, and the landing-page content. Set SEED_DEMO_DATA=true to also
+ * three judges, and the landing-page content. Set SEED_DEMO_DATA=true to also
  * generate a realistic cohort with submissions, scorecards and ranks so every
  * screen can be reviewed before real registrations exist.
  */
