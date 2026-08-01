@@ -117,40 +117,45 @@ export async function updateContestantPhoto(
     return errorState("That image is over 2 MB.", { photo: ["Maximum 2 MB"] });
   }
 
-  const existing = await prisma.contestant.findUnique({
-    where: { id: user.contestantRowId },
-    select: { photoPath: true, contestantId: true },
-  });
-  if (!existing) return errorState("We can't find your entry.");
-
-  const extension =
-    file.type === "image/png" ? "png" : file.type === "image/webp" ? "webp" : "jpg";
-  // Cache-busting suffix: the bucket is public and CDN-cached, so reusing one
-  // path would leave the old picture served after a change.
-  const path = `${existing.contestantId}/${Date.now()}.${extension}`;
-
+  // Everything past here touches storage and the database. Anything thrown from
+  // a server action escapes to the error boundary and blanks the whole page —
+  // for an optional profile picture that is far too destructive, so the failure
+  // is contained and reported inline instead.
   try {
+    const existing = await prisma.contestant.findUnique({
+      where: { id: user.contestantRowId },
+      select: { photoPath: true, contestantId: true },
+    });
+    if (!existing) return errorState("We can't find your entry.");
+
+    const extension =
+      file.type === "image/png" ? "png" : file.type === "image/webp" ? "webp" : "jpg";
+    // Cache-busting suffix: the bucket is public and CDN-cached, so reusing one
+    // path would leave the old picture served after a change.
+    const path = `${existing.contestantId}/${Date.now()}.${extension}`;
+
     await uploadAvatar(path, await file.arrayBuffer(), file.type);
+
+    await prisma.contestant.update({
+      where: { id: user.contestantRowId },
+      data: { photoPath: path },
+    });
+
+    if (existing.photoPath) await removeAvatar(existing.photoPath);
+
+    await recordAudit({
+      actorId: user.id,
+      actorRole: user.role,
+      action: "profile.photo_updated",
+      entity: "Contestant",
+      entityId: user.contestantRowId,
+    });
+
+    revalidatePath("/dashboard/profile");
+    revalidatePath("/dashboard");
+    return successState("Photo updated.");
   } catch (error) {
+    console.error("[profile] photo upload failed", error);
     return errorState(toMessage(error, "The upload failed. Try again."));
   }
-
-  await prisma.contestant.update({
-    where: { id: user.contestantRowId },
-    data: { photoPath: path },
-  });
-
-  if (existing.photoPath) await removeAvatar(existing.photoPath);
-
-  await recordAudit({
-    actorId: user.id,
-    actorRole: user.role,
-    action: "profile.photo_updated",
-    entity: "Contestant",
-    entityId: user.contestantRowId,
-  });
-
-  revalidatePath("/dashboard/profile");
-  revalidatePath("/dashboard");
-  return successState("Photo updated.");
 }
