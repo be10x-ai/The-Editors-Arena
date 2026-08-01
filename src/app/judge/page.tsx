@@ -1,4 +1,5 @@
 import { Inbox, Lock, ShieldAlert } from "lucide-react";
+import Link from "next/link";
 
 import {
   AssignmentCard,
@@ -21,6 +22,41 @@ export default async function JudgeQueuePage() {
   const gates = hackathon ? computeGates(hackathon) : null;
 
   if (!user.judgeId) {
+    // Admins can open this portal, and most have no judge seat — that is normal,
+    // not a misconfiguration, so it should not greet them with a warning about
+    // their own account being broken.
+    if (user.role === "ADMIN") {
+      return (
+        <Alert variant="info">
+          <ShieldAlert />
+          <div>
+            <AlertTitle>This is the judging portal</AlertTitle>
+            <AlertDescription>
+              You&apos;re signed in as an admin, and admins don&apos;t score
+              submissions &mdash; scores have to be attributable to a named judge.
+              Nothing is wrong with your account.
+              <span className="mt-3 block">
+                <Link
+                  href="/admin/ratings"
+                  className="font-semibold text-amber-300 underline-offset-4 hover:underline"
+                >
+                  See every scorecard in the admin console
+                </Link>
+                , or add yourself on{" "}
+                <Link
+                  href="/admin/judges"
+                  className="font-semibold text-amber-300 underline-offset-4 hover:underline"
+                >
+                  the Judges page
+                </Link>{" "}
+                using this email address to score as well.
+              </span>
+            </AlertDescription>
+          </div>
+        </Alert>
+      );
+    }
+
     return (
       <Alert variant="warning">
         <ShieldAlert />
