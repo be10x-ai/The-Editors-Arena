@@ -29,27 +29,30 @@ export function StatCard({
 
   return (
     <Card className={cn("glass-hover p-5", className)}>
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <p className="label-eyebrow">{label}</p>
-          <p className="stat-value mt-2">{value}</p>
-          {hint ? (
-            <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">
-              {hint}
-            </p>
-          ) : null}
-        </div>
+      {/* Only the label shares a row with the icon. The value and hint sit
+          below at full width — previously all three were squeezed into one
+          narrow column, so a two-word label collided with the icon and a short
+          hint broke across three lines. */}
+      <div className="flex items-start justify-between gap-2">
+        <p className="label-eyebrow min-w-0 flex-1 break-words">{label}</p>
         {Icon ? (
           <span
             className={cn(
-              "grid size-10 shrink-0 place-items-center rounded-xl",
+              "grid size-9 shrink-0 place-items-center rounded-xl",
               tones[tone],
             )}
           >
-            <Icon className="size-5" />
+            <Icon className="size-[18px]" />
           </span>
         ) : null}
       </div>
+
+      <p className="stat-value mt-2">{value}</p>
+      {hint ? (
+        <p className="mt-1.5 text-xs leading-relaxed text-balance text-muted-foreground">
+          {hint}
+        </p>
+      ) : null}
     </Card>
   );
 }

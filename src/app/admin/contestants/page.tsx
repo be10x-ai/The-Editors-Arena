@@ -96,7 +96,7 @@ export default async function AdminContestantsPage({
         </Button>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard label="Total" value={total} icon={Users} tone="gold" />
         <StatCard label="Submitted" value={submittedCount} tone="emerald" />
         <StatCard label="Shortlisted" value={shortlisted} icon={Star} tone="gold" />
