@@ -13,6 +13,19 @@ import { env } from "@/lib/env";
  * a token rotation that lands mid-render is safely dropped here and reapplied
  * on the next hop.
  */
+/**
+ * Whether sign-in is possible at all.
+ *
+ * createServerClient throws on an empty URL or key, and the middleware runs on
+ * nearly every route — so without this guard a missing environment variable
+ * takes down the public landing page and registration, not just login. Checked
+ * before every client construction so the failure stays "nobody can sign in"
+ * rather than "the site is down".
+ */
+export function hasSupabaseAuth(): boolean {
+  return Boolean(env.supabase.url && env.supabase.anonKey);
+}
+
 export async function supabaseServer() {
   const store = await cookies();
 

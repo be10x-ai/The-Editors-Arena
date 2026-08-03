@@ -2,6 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 import { env } from "@/lib/env";
+import { hasSupabaseAuth } from "@/lib/supabase/server";
 
 const PROTECTED = ["/admin", "/judge", "/dashboard"];
 
@@ -22,6 +23,11 @@ const PROTECTED = ["/admin", "/judge", "/dashboard"];
  * at apparently random moments.
  */
 export async function middleware(request: NextRequest) {
+  // Unconfigured: let every request through untouched. Throwing here would take
+  // the public site down over a missing key, which is far worse than sign-in
+  // being unavailable.
+  if (!hasSupabaseAuth()) return NextResponse.next();
+
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient(env.supabase.url, env.supabase.anonKey, {

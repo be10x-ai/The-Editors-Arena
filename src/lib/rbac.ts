@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { cache } from "react";
 
 import { prisma } from "@/lib/prisma";
-import { supabaseServer } from "@/lib/supabase/server";
+import { hasSupabaseAuth, supabaseServer } from "@/lib/supabase/server";
 
 export type SessionUser = {
   id: string;
@@ -38,6 +38,8 @@ export class AuthorizationError extends Error {
  * this is now a database round trip rather than a JWT read.
  */
 export const getSessionUser = cache(async (): Promise<SessionUser | null> => {
+  if (!hasSupabaseAuth()) return null;
+
   const supabase = await supabaseServer();
   const {
     data: { user: authUser },
