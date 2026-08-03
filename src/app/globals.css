@@ -254,6 +254,47 @@
     will-change: transform;
   }
 
+  /* The toolchain drifting behind the arena.
+     The mask is the whole point: it hollows out the middle of the hero so the
+     crest, headline and countdown sit over clean plate, and fades both edges so
+     the rows arrive from nowhere rather than sliding in at a hard border.
+     Two rows travelling opposite ways read as parallax; one row reads as a
+     ticker, which this is not. Periods are coprime with the backdrop's 46s and
+     11s so nothing ever beats against it. */
+  .tool-marks {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding-block: 14vh;
+    opacity: 0.5;
+    -webkit-mask-image:
+      radial-gradient(58% 46% at 50% 46%, transparent 40%, black 100%),
+      linear-gradient(90deg, transparent, black 14%, black 86%, transparent);
+    mask-image:
+      radial-gradient(58% 46% at 50% 46%, transparent 40%, black 100%),
+      linear-gradient(90deg, transparent, black 14%, black 86%, transparent);
+    -webkit-mask-composite: source-in;
+    mask-composite: intersect;
+  }
+
+  .tool-marks-track {
+    display: flex;
+    width: max-content;
+    gap: 1.75rem;
+    will-change: transform;
+  }
+
+  /* -50% exactly, because the row renders its marks twice. */
+  .tool-marks-left {
+    animation: tool-marks-left 71s linear infinite;
+  }
+
+  .tool-marks-right {
+    animation: tool-marks-right 89s linear infinite;
+  }
+
   /* The two editors squaring up. They enter from the side they stand on, once,
      on load — the hero is above the fold so there is nothing to scroll-trigger.
      `both` fill matters: under prefers-reduced-motion the global rule collapses
@@ -316,6 +357,24 @@
      floats with its own glow. The art is lit on black, so `screen` is exact. */
   .crest-blend {
     mix-blend-mode: screen;
+  }
+}
+
+@keyframes tool-marks-left {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@keyframes tool-marks-right {
+  from {
+    transform: translate3d(-50%, 0, 0);
+  }
+  to {
+    transform: translate3d(0, 0, 0);
   }
 }
 

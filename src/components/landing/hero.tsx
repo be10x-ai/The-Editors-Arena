@@ -5,6 +5,7 @@ import Link from "next/link";
 import { CountdownTimer } from "@/components/landing/countdown-timer";
 import { DustMotes } from "@/components/landing/dust-motes";
 import { Reveal } from "@/components/landing/reveal";
+import { ToolMarks } from "@/components/landing/tool-marks";
 import { LogoMark } from "@/components/shared/logo";
 import { Button } from "@/components/ui/button";
 import { BRAND } from "@/lib/constants";
@@ -52,6 +53,12 @@ export function Hero({
         <div aria-hidden className="beam-breathe absolute inset-0" />
 
         <DustMotes className="absolute inset-0 size-full" />
+
+        {/* The toolchain the entrants actually work in. Placed here, inside the
+            backdrop stack, so the vignette and floor fade below settle over it
+            and it sits in the scene rather than on top of it. Its own mask
+            keeps the middle clear for the crest and the headline. */}
+        <ToolMarks />
 
         {/* The two editors, facing each other across the arena. Deliberately
             placed above the plate but *below* the scrims that follow, so the
