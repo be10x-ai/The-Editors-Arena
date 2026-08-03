@@ -333,9 +333,10 @@ export function RegistrationForm() {
       <div className="flex items-start gap-3 rounded-xl border border-white/10 bg-white/[0.03] p-4">
         <Checkbox id="consent" name="consent" required className="mt-0.5" />
         <Label htmlFor="consent" className="text-sm font-normal leading-relaxed">
-          I confirm I am 18 or older, the work I submit will be my own, and I accept the
-          competition rules, the confidentiality agreement on the provided footage, and
-          the licence to showcase my submission with credit.
+          I confirm I am 18 or older and that the editing work I submit will be my own.
+          I accept the competition rules, the confidentiality agreement on the provided
+          footage — which remains the organiser&apos;s property and may be used for this
+          hackathon only — and the licence to showcase my submission with credit.
         </Label>
       </div>
       <FieldError errors={fieldErrors.consent} />

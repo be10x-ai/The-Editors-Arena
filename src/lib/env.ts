@@ -118,7 +118,7 @@ export const env = {
   },
 
   seed: {
-    adminEmail: str("SEED_ADMIN_EMAIL", "admin@editorarena.in"),
+    adminEmail: str("SEED_ADMIN_EMAIL", "info@theeditorsarena.in"),
     adminPassword: str("SEED_ADMIN_PASSWORD", "ChangeThisAdmin#2026"),
     judgePassword: str("SEED_JUDGE_PASSWORD", "ChangeThisJudge#2026"),
     demoData: bool("SEED_DEMO_DATA", false),

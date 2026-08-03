@@ -73,9 +73,16 @@ export function Footer() {
           <p>
             © {new Date().getFullYear()} {BRAND.organiser}. All rights reserved.
           </p>
+          {/*
+            Two separate rights, and conflating them gave away the footage: the
+            source clips stay the organiser's and are only lent for the event,
+            while the entrant owns their editorial work. A submission embeds
+            both, so neither side can exploit it without the other's licence.
+          */}
           <p>
-            Submissions remain the property of their creators. By entering you grant us
-            a licence to showcase your work with credit.
+            Source footage remains the property of {BRAND.organiser}, licensed to
+            entrants for this hackathon only. Your edit stays yours and is always
+            credited; entering grants us a licence to showcase it.
           </p>
         </div>
       </div>

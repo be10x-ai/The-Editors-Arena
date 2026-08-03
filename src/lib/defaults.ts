@@ -189,7 +189,7 @@ export const DEFAULT_JUDGES: {
   // senior to the rest. Admins rename each seat to the real person on the day.
   {
     name: "Jury 01",
-    email: "judge1@editorarena.in",
+    email: "judge1@theeditorsarena.in",
     title: "Jury member",
     organization: "House of EduTech",
     expertise: [],
@@ -197,7 +197,7 @@ export const DEFAULT_JUDGES: {
   },
   {
     name: "Jury 02",
-    email: "judge2@editorarena.in",
+    email: "judge2@theeditorsarena.in",
     title: "Jury member",
     organization: "House of EduTech",
     expertise: [],
@@ -205,7 +205,7 @@ export const DEFAULT_JUDGES: {
   },
   {
     name: "Jury 03",
-    email: "judge3@editorarena.in",
+    email: "judge3@theeditorsarena.in",
     title: "Jury member",
     organization: "House of EduTech",
     expertise: [],

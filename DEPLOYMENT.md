@@ -58,9 +58,9 @@ host with a mailbox works; take the values from that host's control panel.
 SMTP_HOST="smtp.yourhost.com"
 SMTP_PORT="465"
 SMTP_SECURE="true"                # true on 465 (implicit TLS), false on 587
-SMTP_USER="noreply@yourdomain.com"
+SMTP_USER="noreply@theeditorsarena.in"
 SMTP_PASSWORD="…"
-MAIL_FROM_EMAIL="noreply@yourdomain.com"   # keep identical to SMTP_USER
+MAIL_FROM_EMAIL="noreply@theeditorsarena.in"   # keep identical to SMTP_USER
 MAIL_FROM_NAME="The Editor's Arena"
 ```
 
@@ -76,7 +76,7 @@ Verify before trusting it:
 
 ```bash
 npm run email:test              # sends to SMTP_USER
-npm run email:test you@example.com
+npm run email:test info@theeditorsarena.in
 ```
 
 It checks the credentials first, so a bad password is a clear rejection rather
@@ -114,7 +114,7 @@ Set every variable from `.env.example` in **Settings → Environment Variables**
 for Production *and* Preview:
 
 ```env
-NEXT_PUBLIC_APP_URL="https://arena.yourdomain.com"
+NEXT_PUBLIC_APP_URL="https://theeditorsarena.in"
 DATABASE_URL / DIRECT_DATABASE_URL
 NEXT_PUBLIC_SUPABASE_ANON_KEY     # Supabase -> Settings -> API (anon/public)
 SMTP_HOST / SMTP_PORT / SMTP_SECURE / SMTP_USER / SMTP_PASSWORD
@@ -143,7 +143,7 @@ Then seed the edition:
 
 ```bash
 DATABASE_URL="postgresql://…" \
-SEED_ADMIN_EMAIL="you@yourdomain.com" \
+SEED_ADMIN_EMAIL="info@theeditorsarena.in" \
 SEED_ADMIN_PASSWORD="a-real-password" \
 SEED_JUDGE_PASSWORD="another-real-password" \
 npm run db:seed
@@ -177,14 +177,14 @@ Vercel sends `Authorization: Bearer $CRON_SECRET` automatically. Verify after
 deploy:
 
 ```bash
-curl -H "Authorization: Bearer $CRON_SECRET" https://arena.yourdomain.com/api/cron/reminders
+curl -H "Authorization: Bearer $CRON_SECRET" https://theeditorsarena.in/api/cron/reminders
 # {"ok":true,"processed":0,"sent":0,"failed":0,"skipped":0,"purgedOtps":0,…}
 ```
 
 Not on Vercel? Any scheduler works:
 
 ```cron
-*/15 * * * * curl -fsS -H "Authorization: Bearer $CRON_SECRET" https://arena.yourdomain.com/api/cron/reminders
+*/15 * * * * curl -fsS -H "Authorization: Bearer $CRON_SECRET" https://theeditorsarena.in/api/cron/reminders
 ```
 
 The admin can also drain the queue on demand from `/admin/emails`, so a cron
@@ -197,7 +197,7 @@ outage is recoverable by hand.
 Health first:
 
 ```bash
-curl https://arena.yourdomain.com/api/health
+curl https://theeditorsarena.in/api/health
 # {"ok":true,"database":true,"hackathon":"editor-arena-2026:NOT_STARTED",
 #  "integrations":{"dryRun":false,"email":true}}
 ```

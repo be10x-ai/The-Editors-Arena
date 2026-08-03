@@ -6,7 +6,7 @@ export const BRAND = {
   tagline: "India's Premier Video Editing Hackathon",
   themeLine: "Real Footage. Real Deadlines. Real Editing Talent.",
   organiser: "House of EduTech",
-  supportEmail: "arena@houseofedutech.in",
+  supportEmail: "info@theeditorsarena.in",
 } as const;
 
 /**

@@ -2,7 +2,7 @@
  * Proves the SMTP relay works, end to end, without registering a contestant.
  *
  *   npm run email:test                  → sends to SMTP_USER (safest first run)
- *   npm run email:test you@example.com  → sends to someone else
+ *   npm run email:test info@theeditorsarena.in  → sends to someone else
  *
  * Runs the real transport and a real template, so a pass here means the app's
  * mail path is genuinely live — not that the config merely looks plausible.
