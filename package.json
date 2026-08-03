@@ -2,7 +2,7 @@
   "name": "the-editor-arena",
   "version": "1.0.0",
   "private": true,
-  "description": "The Editor Arena \u2014 Hackathon Management Platform for the Video Editing Hiring Hackathon",
+  "description": "The Editor Arena — Hackathon Management Platform for the Video Editing Hiring Hackathon",
   "scripts": {
     "dev": "next dev",
     "build": "prisma generate && next build",
@@ -10,6 +10,7 @@
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "postinstall": "prisma generate",
+    "prepare": "sh scripts/install-git-hooks.sh",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
