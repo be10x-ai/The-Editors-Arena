@@ -152,7 +152,7 @@ export default async function AdminContestantsPage({
             <TableBody>
               {contestants.map((contestant) => (
                 <TableRow key={contestant.id}>
-                  <TableCell className="font-mono text-xs tracking-wider text-amber-300">
+                  <TableCell className="font-mono text-xs tracking-wider text-sky-300">
                     {contestant.contestantId}
                   </TableCell>
                   <TableCell>
@@ -180,7 +180,7 @@ export default async function AdminContestantsPage({
                     <div className="flex flex-col items-start gap-1">
                       <ContestantStatusBadge status={contestant.status} />
                       {contestant.shortlisted ? (
-                        <span className="text-[10px] font-semibold uppercase tracking-wider text-amber-300">
+                        <span className="text-[10px] font-semibold uppercase tracking-wider text-sky-300">
                           Shortlisted
                         </span>
                       ) : null}
@@ -226,7 +226,7 @@ export default async function AdminContestantsPage({
                       >
                         <Star
                           className={
-                            contestant.shortlisted ? "text-amber-300" : undefined
+                            contestant.shortlisted ? "text-sky-300" : undefined
                           }
                         />
                       </ActionButton>

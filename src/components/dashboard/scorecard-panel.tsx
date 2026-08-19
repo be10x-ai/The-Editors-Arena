@@ -163,7 +163,7 @@ export function ScorecardPanel({
               {rating.feedback?.weaknesses ? (
                 <div>
                   <p className="label-eyebrow">To work on</p>
-                  <p className="mt-1 text-sm leading-relaxed text-amber-200/90">
+                  <p className="mt-1 text-sm leading-relaxed text-sky-200/90">
                     {rating.feedback.weaknesses}
                   </p>
                 </div>

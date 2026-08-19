@@ -71,7 +71,7 @@ export default async function LoginPage({
             Not registered yet?{" "}
             <Link
               href="/register"
-              className="font-semibold text-amber-300 underline-offset-4 hover:underline"
+              className="font-semibold text-sky-300 underline-offset-4 hover:underline"
             >
               Enter the arena
             </Link>

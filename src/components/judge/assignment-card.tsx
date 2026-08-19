@@ -11,7 +11,8 @@ export type AssignmentCardData = {
   contestantId: string;
   name: string;
   experienceYears: number;
-  jobRole: string;
+  /** Historical: no longer collected at registration. */
+  jobRole: string | null;
   city: string;
   portfolioUrl: string;
   uploadedAt: Date | null;
@@ -27,7 +28,7 @@ export function AssignmentCard({ data }: { data: AssignmentCardData }) {
       <CardContent className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0 space-y-2">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="font-mono text-xs font-semibold tracking-wider text-amber-300">
+            <span className="font-mono text-xs font-semibold tracking-wider text-sky-300">
               {data.contestantId}
             </span>
             {data.isSubmitted ? (
@@ -50,7 +51,7 @@ export function AssignmentCard({ data }: { data: AssignmentCardData }) {
               {data.experienceYears} yr{data.experienceYears === 1 ? "" : "s"}{" "}
               experience
             </span>
-            <span>{data.jobRole}</span>
+            <span>{data.jobRole ?? "—"}</span>
             <span>{data.city}</span>
             <span className="inline-flex items-center gap-1">
               <Clock className="size-3" />

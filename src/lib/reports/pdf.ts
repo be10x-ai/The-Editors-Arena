@@ -281,7 +281,7 @@ export async function renderHiringReportPdf(report: HiringReport): Promise<Uint8
       "Experience",
       `${row.experienceYears} year${row.experienceYears === 1 ? "" : "s"}`,
     );
-    layout.keyValue("Current role", row.jobRole);
+    layout.keyValue("Current role", row.jobRole ?? "—");
     layout.keyValue("City", row.city);
     layout.keyValue("Software", row.softwareSkills.join(", ") || "—");
     layout.keyValue("Email", row.email);

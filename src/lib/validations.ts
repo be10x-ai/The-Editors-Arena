@@ -36,20 +36,39 @@ export const registrationSchema = z
       .min(3, "Please enter your full name")
       .max(120)
       .regex(/^[\p{L}\p{M}.'\- ]+$/u, "Letters, spaces, hyphens and apostrophes only"),
-    email: z.string().trim().toLowerCase().email("Enter a valid email").max(200),
+    email: z
+      .string()
+      .trim()
+      .toLowerCase()
+      .max(200)
+      .email("Enter a valid email")
+      // Zod's .email() accepts "a@b" — no dot, no TLD. Every reminder, the
+      // contestant ID and the login code go to this address, so a typo here
+      // silently loses the entrant. Require a real dotted domain.
+      .refine((value) => /^[^@\s]+@[^@\s.]+(\.[^@\s.]+)+$/.test(value), {
+        message: "Enter a valid email, including the domain",
+      }),
     phone: z
       .string()
       .trim()
-      .min(10, "Enter a valid phone number")
-      .max(20)
-      .regex(/^[+0-9][0-9\s\-()]{8,19}$/, "Digits, spaces and + only"),
+      // Accepted as typed (spaces, dashes, +91, leading 0) and stored as ten
+      // digits, because this number is dialled and WhatsApped by a human.
+      .transform((value) => value.replace(/[\s\-()]/g, ""))
+      .refine((value) => /^(?:\+?91|0)?[6-9]\d{9}$/.test(value), {
+        message: "Enter a 10-digit Indian mobile number",
+      })
+      .transform((value) => value.replace(/^(?:\+?91|0)/, "")),
     city: z.string().trim().min(2, "Enter your city").max(80),
+    address: z
+      .string()
+      .trim()
+      .min(10, "Enter your full postal address")
+      .max(300, "Keep it under 300 characters"),
     experienceYears: z.coerce
       .number({ invalid_type_error: "Select your experience" })
       .int("Whole years only")
       .min(0)
       .max(50),
-    jobRole: z.string().trim().min(2, "Select your current role").max(80),
     softwareSkills: z
       .array(z.string().trim().min(1).max(60))
       .min(1, "Pick at least one tool you work in")

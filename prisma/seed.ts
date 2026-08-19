@@ -82,7 +82,7 @@ async function main() {
   console.log(`✓ Hackathon: ${hackathon.name} (${hackathon.slug})`);
 
   // --- Admin ---------------------------------------------------------------
-  const adminEmail = env("SEED_ADMIN_EMAIL", "info@theeditorsarena.in").toLowerCase();
+  const adminEmail = env("SEED_ADMIN_EMAIL", "editpod5@houseofedtech.in").toLowerCase();
   const adminPassword = env("SEED_ADMIN_PASSWORD", "ChangeThisAdmin#2026");
 
   await prisma.user.upsert({

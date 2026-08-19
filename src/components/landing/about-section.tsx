@@ -61,7 +61,7 @@ export function AboutSection() {
           {WHO.map((item, index) => (
             <Reveal key={item.title} delay={index * 0.06}>
               <Card className="glass-hover h-full p-6">
-                <span className="grid size-11 place-items-center rounded-xl bg-gradient-to-br from-amber-500/25 to-yellow-500/15 text-amber-200">
+                <span className="grid size-11 place-items-center rounded-xl bg-gradient-to-br from-sky-500/25 to-blue-500/15 text-sky-200">
                   <item.icon className="size-5" />
                 </span>
                 <h3 className="mt-4 font-display text-lg font-semibold">
@@ -102,7 +102,7 @@ export function AboutSection() {
                       <div className="min-w-0">
                         <div className="flex items-baseline gap-2">
                           <p className="font-semibold">{criterion.label}</p>
-                          <span className="text-xs font-medium tabular-nums text-amber-300">
+                          <span className="text-xs font-medium tabular-nums text-sky-300">
                             {Math.round(criterion.weight * 100)}%
                           </span>
                         </div>

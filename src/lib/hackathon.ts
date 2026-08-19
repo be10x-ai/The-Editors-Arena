@@ -2,6 +2,7 @@ import type { EventStatus, Hackathon } from "@prisma/client";
 import { unstable_noStore as noStore } from "next/cache";
 
 import { prisma } from "@/lib/prisma";
+import { endOfISTDay } from "@/lib/utils";
 
 /**
  * The active edition. Everything public reads through here, so a future
@@ -140,4 +141,46 @@ export function countdownTarget(hackathon: Hackathon): {
         reachedLabel: "Results Announced",
       };
   }
+}
+
+export type PublicCountdown = {
+  target: Date;
+  label: string;
+  reachedLabel: string;
+  /**
+   * When set, the timer re-arms to the next 23:59 IST each time it elapses,
+   * until this instant. Used for the nightly registration cutoff so the page
+   * never sits on a dead "closed" timer while registration is in fact open.
+   */
+  rollDailyUntil?: Date;
+};
+
+/**
+ * What the landing page counts down to.
+ *
+ * While registration is open the deadline that matters to a visitor is the
+ * registration cutoff, not the event start weeks later — so the hero counts to
+ * tonight's 23:59 IST and re-arms nightly, until the real close date takes
+ * over as the final target. Every other phase falls through to the event
+ * clock in `countdownTarget`.
+ */
+export function publicCountdown(hackathon: Hackathon): PublicCountdown {
+  const now = Date.now();
+  const closesAt = hackathon.registrationClosesAt.getTime();
+  const open =
+    hackathon.status === "NOT_STARTED" &&
+    now >= hackathon.registrationOpensAt.getTime() &&
+    now <= closesAt;
+
+  if (!open) return countdownTarget(hackathon);
+
+  // On the final day the nightly cutoff *is* the real close, so they converge.
+  const tonight = Math.min(endOfISTDay(now), closesAt);
+
+  return {
+    target: new Date(tonight),
+    label: "Free registration closes in",
+    reachedLabel: "Registration Closed",
+    rollDailyUntil: hackathon.registrationClosesAt,
+  };
 }

@@ -152,7 +152,7 @@ export default async function AdminContentPage() {
                 </div>
 
                 <details className="mt-4">
-                  <summary className="cursor-pointer text-sm font-medium text-amber-300">
+                  <summary className="cursor-pointer text-sm font-medium text-sky-300">
                     Edit
                   </summary>
                   <ActionForm action={upsertFaq} className="mt-4 space-y-4">
@@ -438,7 +438,7 @@ export default async function AdminContentPage() {
                 </div>
 
                 <details className="mt-4">
-                  <summary className="cursor-pointer text-sm font-medium text-amber-300">
+                  <summary className="cursor-pointer text-sm font-medium text-sky-300">
                     Edit
                   </summary>
                   <ActionForm action={upsertTimelineEvent} className="mt-4 space-y-4">

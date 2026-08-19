@@ -52,7 +52,7 @@ export function PortalNav({ items }: { items: PortalNavItem[] }) {
                 <Icon className="size-4 shrink-0" />
                 <span>{item.label}</span>
                 {item.badge !== undefined && item.badge > 0 ? (
-                  <span className="ml-auto hidden rounded-full bg-amber-500/25 px-2 py-0.5 text-[11px] font-semibold tabular-nums text-amber-200 lg:inline">
+                  <span className="ml-auto hidden rounded-full bg-sky-500/25 px-2 py-0.5 text-[11px] font-semibold tabular-nums text-sky-200 lg:inline">
                     {item.badge}
                   </span>
                 ) : null}

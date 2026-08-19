@@ -18,7 +18,7 @@ const badgeVariants = cva(
         warning: "border-orange-500/35 bg-orange-500/15 text-orange-300",
         danger: "border-rose-500/30 bg-rose-500/15 text-rose-300",
         info: "border-sky-500/30 bg-sky-500/15 text-sky-300",
-        gold: "border-amber-400/45 bg-gradient-to-b from-amber-400/25 to-amber-600/15 text-amber-200 shadow-[0_0_18px_-6px_rgba(240,178,19,0.6)]",
+        gold: "border-sky-400/45 bg-gradient-to-b from-sky-400/25 to-sky-600/15 text-sky-200 shadow-[0_0_18px_-6px_rgba(22,104,255,0.6)]",
       },
     },
     defaultVariants: { variant: "default" },

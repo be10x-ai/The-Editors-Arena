@@ -188,7 +188,7 @@ export default async function AdminControlPanel() {
                 <span
                   className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold ${
                     index < currentIndex
-                      ? "border-amber-500/30 bg-amber-500/10 text-amber-200"
+                      ? "border-sky-500/30 bg-sky-500/10 text-sky-200"
                       : index === currentIndex
                         ? EVENT_STATUS_META[status].tone
                         : "border-white/10 bg-white/[0.02] text-muted-foreground"
@@ -359,7 +359,7 @@ export default async function AdminControlPanel() {
                   />
                 </div>
               ) : (
-                <p className="mt-1.5 text-xs text-amber-300">
+                <p className="mt-1.5 text-xs text-sky-300">
                   No password set — save one above first.
                 </p>
               )}

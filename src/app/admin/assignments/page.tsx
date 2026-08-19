@@ -157,7 +157,7 @@ export default async function AdminAssignmentsPage() {
                   return (
                     <TableRow key={submission.id}>
                       <TableCell className="sticky left-0 bg-[#141311]">
-                        <p className="font-mono text-xs tracking-wider text-amber-300">
+                        <p className="font-mono text-xs tracking-wider text-sky-300">
                           {submission.contestant.contestantId}
                         </p>
                         <p className="mt-0.5 max-w-[160px] truncate text-sm">
@@ -183,7 +183,7 @@ export default async function AdminAssignmentsPage() {
                                 scored
                                   ? "text-emerald-300"
                                   : assigned
-                                    ? "text-amber-300"
+                                    ? "text-sky-300"
                                     : "text-muted-foreground/50"
                               }
                               aria-label={
@@ -203,7 +203,7 @@ export default async function AdminAssignmentsPage() {
                           className={
                             assignedIds.size >= hackathon.judgesPerSubmission
                               ? "text-emerald-300"
-                              : "text-amber-300"
+                              : "text-sky-300"
                           }
                         >
                           {assignedIds.size}/{hackathon.judgesPerSubmission}

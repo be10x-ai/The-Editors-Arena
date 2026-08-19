@@ -7,6 +7,20 @@ export function cn(...inputs: ClassValue[]) {
 
 const IST = "Asia/Kolkata";
 
+/** IST is a fixed +05:30 with no DST, so a constant offset is exact here. */
+const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000;
+
+/**
+ * 23:59 IST on the IST day containing `fromMs`, as an epoch millisecond.
+ *
+ * Lives here rather than in `lib/hackathon` because the countdown timer is a
+ * client component and that module pulls in Prisma.
+ */
+export function endOfISTDay(fromMs: number): number {
+  const istDayStart = Math.floor((fromMs + IST_OFFSET_MS) / 86_400_000) * 86_400_000;
+  return istDayStart + 86_400_000 - 60_000 - IST_OFFSET_MS;
+}
+
 /** Formats a date in the event timezone — the only timezone participants care about. */
 export function formatIST(
   date: Date | string | null | undefined,
@@ -58,6 +72,43 @@ export function toISTInputValue(date: Date | string | null | undefined): string 
   // en-CA gives ISO-ordered parts; hour can come back as "24" at midnight.
   const hour = get("hour") === "24" ? "00" : get("hour");
   return `${get("year")}-${get("month")}-${get("day")}T${hour}:${get("minute")}`;
+}
+
+/**
+ * Rupees in Indian digit grouping — ₹1,20,000, not ₹120,000. Whole rupees only;
+ * every amount we display (fees, prizes, donations) is a round number.
+ */
+export function formatInr(amount: number): string {
+  return new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    maximumFractionDigits: 0,
+  }).format(amount);
+}
+
+/**
+ * Pulls a rupee amount out of a free-text reward string ("₹50,000", "50000 INR").
+ * Prize rewards are admin-editable prose — "iPhone 16", "Individual scorecard" —
+ * so anything without digits returns null rather than 0, and a caller summing a
+ * prize pool can tell "not a cash prize" apart from "zero rupees".
+ */
+export function parseInrAmount(reward: string): number | null {
+  const digits = reward.replace(/[^0-9]/g, "");
+  if (!digits) return null;
+  const value = Number(digits);
+  return Number.isFinite(value) && value > 0 ? value : null;
+}
+
+/**
+ * Indian short scale — ₹1.8 Lakh, ₹1.2 Crore. Used where the exact rupee is
+ * noise and the magnitude is the point (a prize pool headline, a stat tile).
+ */
+export function formatInrCompact(amount: number): string {
+  const trim = (value: number) =>
+    value.toFixed(2).replace(/\.?0+$/, "");
+  if (amount >= 10_000_000) return `₹${trim(amount / 10_000_000)} Crore`;
+  if (amount >= 100_000) return `₹${trim(amount / 100_000)} Lakh`;
+  return formatInr(amount);
 }
 
 export function formatBytes(bytes: number | bigint | null | undefined): string {

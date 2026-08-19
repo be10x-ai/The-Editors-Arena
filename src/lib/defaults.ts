@@ -100,7 +100,7 @@ export const DEFAULT_PRIZES: {
   {
     position: 1,
     title: "Champion — The Editor's Arena 2026",
-    reward: "₹1 Lakh",
+    reward: "₹1,00,000",
     description:
       "Plus a fast-tracked hiring interview, a paid trial project, and your edit featured across our channels with full credit.",
     quantity: 1,
@@ -109,21 +109,20 @@ export const DEFAULT_PRIZES: {
   },
   {
     position: 2,
-    title: "Runner-up",
-    reward: "₹10,000",
+    title: "First Runner-up",
+    reward: "₹50,000",
     description:
-      "Two runners-up, ₹10,000 each. Plus a place on our vetted freelance roster and a hiring conversation.",
-    quantity: 2,
+      "Plus the same hiring track as the champion — interview, paid trial project, and a place on our vetted freelance roster.",
+    quantity: 1,
     icon: "medal",
     order: 2,
   },
   {
-    // Beyond PODIUM_SIZE — not a rank, so the UI labels it separately.
-    position: 4,
-    title: "Every valid participant",
-    reward: "Individual scorecard",
+    position: 3,
+    title: "Second Runner-up",
+    reward: "₹30,000",
     description:
-      "A full breakdown of your scores on all six criteria plus written feedback from every judge who watched your edit.",
+      "Plus a hiring conversation and a place on our vetted freelance roster.",
     quantity: 1,
     icon: "award",
     order: 3,
@@ -164,7 +163,7 @@ export const DEFAULT_FAQS: { question: string; answer: string; order: number }[]
   {
     question: "How are winners selected?",
     answer:
-      "Your final score is the average of the three judges' overall scores, to two decimal places. Rank 1 is the Champion and takes ₹1 Lakh; ranks 2 and 3 are the runners-up and take ₹10,000 each. Ties share a rank. The full leaderboard is published when results are announced, within 60 minutes of the submission deadline.",
+      "Your final score is the average of the three judges' overall scores, to two decimal places. Rank 1 is the Champion and takes ₹1,00,000, rank 2 takes ₹50,000, and rank 3 takes ₹30,000. Ties share a rank. The full leaderboard is published when results are announced, within 60 minutes of the submission deadline.",
     order: 6,
   },
   {
@@ -172,6 +171,18 @@ export const DEFAULT_FAQS: { question: string; answer: string; order: number }[]
     answer:
       "That is the point of the event. The top performers go into our hiring funnel — a fast-tracked interview followed by a paid trial project. Strong submissions outside the podium go onto our vetted freelance roster. Every valid participant receives their individual scorecard, which is yours to use however you like.",
     order: 7,
+  },
+  {
+    question: "Does it cost anything to enter?",
+    answer:
+      "No. A seat in this arena is worth ₹1,200 — the brief, the licensed client footage, three judges watching your work, and a written scorecard at the end. For this edition it is free, and it stays free right through to the results. There is no fee at registration, no fee to submit, and nothing to pay if you win.",
+    order: 8,
+  },
+  {
+    question: "How does the Assam Flood Relief donation work?",
+    answer:
+      "For every completed registration, House of EduTech donates ₹500 to the Assam Flood Relief fund. Nothing is deducted from you and nothing is added — you register free, and we pay the ₹500. The running total is shown live on this page: registrations × ₹500. The final amount and the receiving organisation are published after registration closes.",
+    order: 9,
   },
 ];
 

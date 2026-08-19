@@ -12,8 +12,8 @@ const COLORS = {
   border: "#2c2a25",
   text: "#eeece6",
   muted: "#a8a49a",
-  accent: "#f0b213",
-  accent2: "#c8910f",
+  accent: "#1668ff",
+  accent2: "#0b3fa8",
 };
 
 function escapeHtml(value: string): string {
@@ -59,7 +59,7 @@ function layout(opts: { heading: string; preheader: string; body: string }): str
 
 function idBadge(contestantId: string): string {
   return `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:20px 0;width:100%;">
-    <tr><td style="padding:16px 18px;background:rgba(240,178,19,.12);border:1px solid rgba(240,178,19,.35);border-radius:12px;">
+    <tr><td style="padding:16px 18px;background:rgba(22,104,255,.12);border:1px solid rgba(22,104,255,.35);border-radius:12px;">
       <p style="margin:0 0 6px;font:600 11px/1 -apple-system,Segoe UI,Roboto,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:${COLORS.muted};">Your Contestant ID</p>
       <p style="margin:0;font:700 24px/1.2 ui-monospace,SFMono-Regular,Menlo,monospace;color:${COLORS.text};letter-spacing:.06em;">${escapeHtml(contestantId)}</p>
     </td></tr></table>`;

@@ -118,7 +118,7 @@ export default async function AdminReportsPage() {
                       {row.rank ? `#${row.rank}` : "—"}
                     </TableCell>
                     <TableCell>
-                      <p className="font-mono text-xs tracking-wider text-amber-300">
+                      <p className="font-mono text-xs tracking-wider text-sky-300">
                         {row.contestantId}
                       </p>
                       <p className="mt-0.5 font-medium">{row.name}</p>
@@ -137,7 +137,7 @@ export default async function AdminReportsPage() {
                       <span
                         className={
                           (row.spread ?? 0) > 2
-                            ? "text-amber-300"
+                            ? "text-sky-300"
                             : "text-muted-foreground"
                         }
                       >

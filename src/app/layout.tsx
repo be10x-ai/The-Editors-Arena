@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Sora } from "next/font/google";
-import localFont from "next/font/local";
+import { Barlow, Chakra_Petch } from "next/font/google";
 import { Toaster } from "sonner";
 
 import { BRAND } from "@/lib/constants";
@@ -9,32 +8,35 @@ import { cn } from "@/lib/utils";
 
 import "./globals.css";
 
-const sans = Inter({
+/**
+ * Type is taken from the mark itself: the wordmark is a squared geometric with
+ * clipped corners, so both faces here are squared geometrics rather than the
+ * humanist pair they replace.
+ *
+ * Barlow carries body copy — slightly condensed, low-contrast, and it holds up
+ * at the 11–13px the stat labels and form hints run at.
+ */
+const sans = Barlow({
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
   variable: "--font-sans",
   display: "swap",
 });
 
-const display = Sora({
-  subsets: ["latin"],
-  weight: ["500", "600", "700", "800"],
-  variable: "--font-display",
-  display: "swap",
-});
-
 /**
- * "ARENA" is set in Road Rage, the face the crest itself uses, self-hosted from
- * `public/fonts` so there is no third-party request at runtime.
+ * Chakra Petch is the display face: the notched, angle-cut terminals are the
+ * same move the logo's E and R make, so headings read as the mark set in text.
  *
- * LICENCE OUTSTANDING: Road Rage is free for personal use only (Youssef
- * Habchi). This is a commercial recruitment platform. See
- * `public/fonts/README.md`.
- *
- * The setup line above it is just Sora bold — see `.type-chrome` in globals.css.
+ * It also retires Road Rage, the brush face the old gold crest used, which was
+ * licensed for personal use only and had no business on a commercial hiring
+ * platform. The struck-hit treatment it carried is now `.type-arena` in CSS —
+ * gradient and glow rather than torn brush edges.
  */
-const brush = localFont({
-  src: "../../public/fonts/road-rage.woff2",
-  variable: "--font-brush",
+const display = Chakra_Petch({
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+  style: ["normal", "italic"],
+  variable: "--font-display",
   display: "swap",
 });
 
@@ -85,7 +87,6 @@ export default function RootLayout({
         className={cn(
           sans.variable,
           display.variable,
-          brush.variable,
           "min-h-dvh bg-background font-sans text-foreground",
         )}
       >

@@ -11,7 +11,7 @@ const buttonVariants = cva(
       variant: {
         // Struck gold. Dark ink on the plate — white on gold does not pass.
         default:
-          "bg-gold-strike text-[#241a02] shadow-[0_1px_0_0_rgba(255,255,255,0.4)_inset,0_8px_24px_-8px_rgba(240,178,19,0.55)] hover:brightness-110 hover:shadow-[0_1px_0_0_rgba(255,255,255,0.5)_inset,0_10px_30px_-8px_rgba(240,178,19,0.7)]",
+          "bg-blue-strike text-white shadow-[0_1px_0_0_rgba(255,255,255,0.4)_inset,0_8px_24px_-8px_rgba(22,104,255,0.55)] hover:brightness-110 hover:shadow-[0_1px_0_0_rgba(255,255,255,0.5)_inset,0_10px_30px_-8px_rgba(22,104,255,0.7)]",
         // Brushed gunmetal.
         secondary:
           "border border-white/10 bg-steel-plate text-foreground backdrop-blur hover:border-white/25 hover:bg-white/[0.09]",

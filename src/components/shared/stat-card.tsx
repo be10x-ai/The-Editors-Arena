@@ -19,7 +19,7 @@ export function StatCard({
   className?: string;
 }) {
   const tones = {
-    gold: "text-amber-300 bg-amber-500/[0.12] ring-1 ring-inset ring-amber-400/20",
+    gold: "text-sky-300 bg-sky-500/[0.12] ring-1 ring-inset ring-sky-400/20",
     steel: "text-slate-200 bg-slate-400/[0.12] ring-1 ring-inset ring-slate-300/15",
     emerald: "text-emerald-300 bg-emerald-500/[0.12]",
     orange: "text-orange-300 bg-orange-500/[0.12]",

@@ -13,6 +13,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -22,7 +23,6 @@ import {
 } from "@/components/ui/select";
 import {
   HEARD_FROM_OPTIONS,
-  JOB_ROLE_OPTIONS,
   SOFTWARE_OPTIONS,
 } from "@/lib/constants";
 import { cn } from "@/lib/utils";
@@ -93,10 +93,12 @@ export function RegistrationForm() {
         </Alert>
       ) : null}
 
-      <fieldset className="space-y-5">
-        <legend className="label-eyebrow mb-4">1 · About you</legend>
+      <fieldset className="space-y-4">
+        {/* Deliberately one fieldset. Three numbered steps made a form of ten
+            short questions look like an application, and every rule between
+            them cost vertical space on the page people convert from. */}
 
-        <div className="grid gap-5 sm:grid-cols-2">
+        <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="fullName">Full name *</Label>
             <Input
@@ -124,9 +126,6 @@ export function RegistrationForm() {
               aria-invalid={Boolean(fieldErrors.email)}
             />
             <FieldError errors={fieldErrors.email} />
-            <p className="text-xs text-muted-foreground">
-              Your contestant ID, reminders and login codes all go here.
-            </p>
           </div>
 
           <div className="space-y-2">
@@ -158,14 +157,23 @@ export function RegistrationForm() {
             <FieldError errors={fieldErrors.city} />
           </div>
         </div>
-      </fieldset>
 
-      <div className="hairline" />
+        <div className="space-y-2">
+          <Label htmlFor="address">Address *</Label>
+          <Textarea
+            id="address"
+            name="address"
+            defaultValue={prev("address")}
+            autoComplete="street-address"
+            placeholder="Flat / house, street, area, state, PIN code"
+            rows={2}
+            required
+            aria-invalid={Boolean(fieldErrors.address)}
+          />
+          <FieldError errors={fieldErrors.address} />
+        </div>
 
-      <fieldset className="space-y-5">
-        <legend className="label-eyebrow mb-4">2 · Your work</legend>
-
-        <div className="grid gap-5 sm:grid-cols-2">
+        <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="experienceYears">Years of video editing experience *</Label>
             <Select
@@ -187,25 +195,9 @@ export function RegistrationForm() {
             <FieldError errors={fieldErrors.experienceYears} />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="jobRole">Current job role *</Label>
-            <Select name="jobRole" required defaultValue={prev("jobRole") || undefined}>
-              <SelectTrigger id="jobRole">
-                <SelectValue placeholder="Select role" />
-              </SelectTrigger>
-              <SelectContent>
-                {JOB_ROLE_OPTIONS.map((option) => (
-                  <SelectItem key={option} value={option}>
-                    {option}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <FieldError errors={fieldErrors.jobRole} />
-          </div>
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-2">
           <Label>Editing software skills *</Label>
           {/* Buttons plus hidden inputs rather than checkboxes. React 19 resets
               the form once the action settles, which set every checkbox back to
@@ -239,7 +231,7 @@ export function RegistrationForm() {
                   className={cn(
                     "select-none rounded-full border px-3.5 py-2 text-sm font-medium transition",
                     checked
-                      ? "border-amber-400/50 bg-amber-500/20 text-foreground"
+                      ? "border-sky-400/50 bg-sky-500/20 text-foreground"
                       : "border-white/12 bg-white/[0.03] text-muted-foreground hover:border-white/25 hover:text-foreground",
                   )}
                 >
@@ -251,7 +243,7 @@ export function RegistrationForm() {
           <FieldError errors={fieldErrors.softwareSkills} />
         </div>
 
-        <div className="grid gap-5 sm:grid-cols-2">
+        <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2 sm:col-span-2">
             <Label htmlFor="portfolioUrl">Portfolio or showreel link *</Label>
             <Input
@@ -287,13 +279,7 @@ export function RegistrationForm() {
             </Select>
           </div>
         </div>
-      </fieldset>
-
-      <div className="hairline" />
-
-      <fieldset>
-        <legend className="label-eyebrow mb-4">3 · Choose a password</legend>
-        <div className="grid gap-5 sm:grid-cols-2">
+        <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="password">Password *</Label>
             <Input
@@ -389,7 +375,7 @@ function RegistrationSuccess({
           <button
             type="button"
             onClick={copyId}
-            className="bg-amber-500/12 mt-2 flex w-full items-center justify-center gap-3 rounded-xl border border-amber-400/40 px-5 py-4 transition hover:bg-amber-500/20"
+            className="bg-sky-500/12 mt-2 flex w-full items-center justify-center gap-3 rounded-xl border border-sky-400/40 px-5 py-4 transition hover:bg-sky-500/20"
           >
             <span className="font-mono text-2xl font-bold tracking-[0.12em]">
               {contestantId}

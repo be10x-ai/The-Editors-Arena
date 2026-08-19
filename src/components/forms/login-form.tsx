@@ -186,7 +186,7 @@ function ModeLink({
     <button
       type="button"
       onClick={onClick}
-      className="block w-full text-center text-sm text-muted-foreground underline-offset-4 transition-colors hover:text-amber-300 hover:underline"
+      className="block w-full text-center text-sm text-muted-foreground underline-offset-4 transition-colors hover:text-sky-300 hover:underline"
     >
       {children}
     </button>

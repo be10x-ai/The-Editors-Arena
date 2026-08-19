@@ -152,7 +152,7 @@ export default async function AdminEmailsPage() {
               {reminders.map((reminder) => (
                 <TableRow key={reminder.id}>
                   <TableCell>
-                    <p className="font-mono text-xs tracking-wider text-amber-300">
+                    <p className="font-mono text-xs tracking-wider text-sky-300">
                       {reminder.contestant?.contestantId ?? "—"}
                     </p>
                     <p className="text-xs text-muted-foreground">{reminder.toEmail}</p>

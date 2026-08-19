@@ -82,11 +82,11 @@ export function AssetCard({
   }
 
   return (
-    <Card className="border-amber-500/25 bg-amber-500/[0.06]">
+    <Card className="border-sky-500/25 bg-sky-500/[0.06]">
       <CardContent className="p-6">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="flex min-w-0 items-start gap-4">
-            <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-amber-500/20 text-amber-200">
+            <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-sky-500/20 text-sky-200">
               <FileArchive className="size-5" />
             </span>
             <div className="min-w-0">
@@ -111,7 +111,7 @@ export function AssetCard({
 
         <div className="mt-6 rounded-xl border border-white/10 bg-black/25 p-4">
           <div className="flex items-center gap-2">
-            <KeyRound className="size-4 text-amber-300" />
+            <KeyRound className="size-4 text-sky-300" />
             <p className="label-eyebrow">Task ZIP password</p>
           </div>
 

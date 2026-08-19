@@ -49,12 +49,14 @@ const config: Config = {
           foreground: "hsl(var(--card-foreground))",
         },
         arena: {
-          gold: "#f0b213",
-          "gold-light": "#f7d774",
-          "gold-deep": "#a87c0d",
-          steel: "#b0becd",
-          "steel-deep": "#4a5058",
-          ink: "#0a0a09",
+          /* Sampled from the mark: the play triangle, its highlight edge, and
+             the deep navy the E is cut from. */
+          blue: "#1668ff",
+          "blue-light": "#4fa8ff",
+          "blue-deep": "#0b3fa8",
+          steel: "#9fb4cf",
+          "steel-deep": "#44546b",
+          ink: "#070d18",
         },
       },
       borderRadius: {
@@ -66,11 +68,11 @@ const config: Config = {
         "arena-grid":
           "linear-gradient(to right, rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.04) 1px, transparent 1px)",
         "arena-glow":
-          "radial-gradient(60% 60% at 50% 0%, rgba(240,178,19,0.24) 0%, rgba(10,10,9,0) 100%)",
-        /* Struck-gold fill for buttons and rails. */
-        "gold-strike":
-          "linear-gradient(180deg, #f7d774 0%, #f0b213 45%, #c8910f 100%)",
-        /* Brushed gunmetal for secondary surfaces. */
+          "radial-gradient(60% 60% at 50% 0%, rgba(22,104,255,0.26) 0%, rgba(7,13,24,0) 100%)",
+        /* Electric-blue fill for buttons and rails. */
+        "blue-strike":
+          "linear-gradient(180deg, #4fa8ff 0%, #1668ff 45%, #0b3fa8 100%)",
+        /* Brushed navy for secondary surfaces. */
         "steel-plate":
           "linear-gradient(180deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.02) 100%)",
       },

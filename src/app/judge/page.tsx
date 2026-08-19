@@ -38,14 +38,14 @@ export default async function JudgeQueuePage() {
               <span className="mt-3 block">
                 <Link
                   href="/admin/ratings"
-                  className="font-semibold text-amber-300 underline-offset-4 hover:underline"
+                  className="font-semibold text-sky-300 underline-offset-4 hover:underline"
                 >
                   See every scorecard in the admin console
                 </Link>
                 , or add yourself on{" "}
                 <Link
                   href="/admin/judges"
-                  className="font-semibold text-amber-300 underline-offset-4 hover:underline"
+                  className="font-semibold text-sky-300 underline-offset-4 hover:underline"
                 >
                   the Judges page
                 </Link>{" "}

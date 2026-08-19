@@ -180,7 +180,7 @@ export function OwnProfileForm({
                           "select-none rounded-full border px-3 py-1.5 text-xs font-medium transition",
                           !editing && "cursor-default opacity-70",
                           on
-                            ? "border-amber-400/50 bg-amber-500/20 text-foreground"
+                            ? "border-sky-400/50 bg-sky-500/20 text-foreground"
                             : "border-white/12 bg-white/[0.03] text-muted-foreground hover:border-white/25 hover:text-foreground",
                         )}
                       >

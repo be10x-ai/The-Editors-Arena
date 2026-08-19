@@ -207,7 +207,7 @@ export default async function AdminJudgesPage() {
                   ) : null}
 
                   <details className="mt-4">
-                    <summary className="cursor-pointer text-sm font-medium text-amber-300">
+                    <summary className="cursor-pointer text-sm font-medium text-sky-300">
                       Edit
                     </summary>
                     <ActionForm action={upsertJudge} className="mt-4 space-y-4">
