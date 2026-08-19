@@ -5,7 +5,7 @@ import { Reveal } from "@/components/landing/reveal";
 import { SectionHeading } from "@/components/landing/section-heading";
 import { Card } from "@/components/ui/card";
 import { PODIUM_SIZE } from "@/lib/constants";
-import { cn } from "@/lib/utils";
+import { cn, formatInrCompact, parseInrAmount } from "@/lib/utils";
 
 const ICONS = {
   trophy: Trophy,
@@ -25,15 +25,37 @@ function iconFor(name: string) {
  * back to its own title rather than claiming "Rank 5".
  */
 function rankLabel(prize: Prize): string {
-  if (prize.position > PODIUM_SIZE) return "Every participant";
   if (prize.position === 1) return "Champion";
   const suffix = prize.quantity > 1 ? ` × ${prize.quantity}` : "";
-  if (prize.position === 2) return `Runner-up${suffix}`;
+  if (prize.position === 2) return `First runner-up${suffix}`;
+  if (prize.position === 3) return `Second runner-up${suffix}`;
   return `Rank ${prize.position}${suffix}`;
 }
 
+/**
+ * Podium cash total, derived from the rows rather than written into the copy —
+ * an admin editing a reward in /admin/content must not be able to leave the
+ * headline claiming a pool that no longer exists. Non-cash rewards (a scorecard,
+ * a device) contribute nothing and are simply skipped.
+ */
+function podiumPool(prizes: Prize[]): number {
+  return prizes
+    .filter((prize) => prize.position <= PODIUM_SIZE)
+    .reduce((total, prize) => {
+      const amount = parseInrAmount(prize.reward);
+      return amount === null ? total : total + amount * Math.max(prize.quantity, 1);
+    }, 0);
+}
+
 export function PrizeSection({ prizes }: { prizes: Prize[] }) {
-  if (prizes.length === 0) return null;
+  // The landing page shows the podium only. The below-podium tier (every valid
+  // participant gets a scorecard) is still true and still promised in the FAQ
+  // and the hiring section — it just doesn't belong in a row of prizes, where
+  // it read as a consolation and pulled the eye off the three cash ranks.
+  const podium = prizes.filter((prize) => prize.position <= PODIUM_SIZE);
+  if (podium.length === 0) return null;
+
+  const pool = podiumPool(podium);
 
   return (
     <section id="prizes" className="relative scroll-mt-24 py-12 sm:py-16">
@@ -45,11 +67,15 @@ export function PrizeSection({ prizes }: { prizes: Prize[] }) {
           title="What the podium"
           accent="Takes Home"
           align="center"
-          description="Prizes are the smallest part of this. The scorecard, the portfolio piece and the hiring conversation are the reason to enter."
+          description={
+            pool > 0
+              ? `${formatInrCompact(pool)} across three ranks — and every one of them comes with the hiring track attached.`
+              : "Every rank on the podium comes with the hiring track attached."
+          }
         />
 
         <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {prizes.map((prize, index) => {
+          {podium.map((prize, index) => {
             const Icon = iconFor(prize.icon);
             const isWinner = prize.position === 1;
 
@@ -63,13 +89,13 @@ export function PrizeSection({ prizes }: { prizes: Prize[] }) {
                   className={cn(
                     "glass-hover relative h-full overflow-hidden p-7",
                     isWinner &&
-                      "border-amber-400/25 bg-gradient-to-br from-amber-500/[0.08] via-white/[0.02] to-transparent lg:flex lg:items-center lg:gap-8 lg:p-9",
+                      "border-sky-400/25 bg-gradient-to-br from-sky-500/[0.08] via-white/[0.02] to-transparent lg:flex lg:items-center lg:gap-8 lg:p-9",
                   )}
                 >
                   {isWinner ? (
                     <div
                       aria-hidden
-                      className="absolute -right-16 -top-16 size-52 rounded-full bg-amber-400/10 blur-3xl"
+                      className="absolute -right-16 -top-16 size-52 rounded-full bg-sky-400/10 blur-3xl"
                     />
                   ) : null}
 
@@ -77,15 +103,15 @@ export function PrizeSection({ prizes }: { prizes: Prize[] }) {
                     className={cn(
                       "relative grid size-14 shrink-0 place-items-center rounded-2xl",
                       isWinner
-                        ? "bg-gradient-to-br from-amber-400 to-yellow-600 text-black shadow-xl shadow-amber-950/40"
-                        : "bg-gradient-to-br from-amber-500/25 to-slate-400/15 text-amber-200",
+                        ? "bg-gradient-to-br from-sky-400 to-blue-600 text-black shadow-xl shadow-sky-950/40"
+                        : "bg-gradient-to-br from-sky-500/25 to-slate-400/15 text-sky-200",
                     )}
                   >
                     <Icon className="size-7" />
                   </span>
 
                   <div className={cn("relative", isWinner ? "mt-5 lg:mt-0" : "mt-5")}>
-                    <p className={cn("label-eyebrow", isWinner && "text-amber-300/80")}>
+                    <p className={cn("label-eyebrow", isWinner && "text-sky-300/80")}>
                       {rankLabel(prize)}
                     </p>
                     <h3

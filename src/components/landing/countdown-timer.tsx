@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import * as React from "react";
 
-import { cn } from "@/lib/utils";
+import { cn, endOfISTDay } from "@/lib/utils";
 
 type Remaining = { days: number; hours: number; minutes: number; seconds: number };
 
@@ -27,18 +27,46 @@ export function CountdownTimer({
   target,
   label,
   reachedLabel,
+  rollDailyUntil,
   className,
+  labelClassName,
   compact = false,
+  fluid = false,
 }: {
   target: string | Date;
   label: string;
   reachedLabel: string;
+  /**
+   * Nightly cutoff mode. When the target elapses, the timer re-arms to the next
+   * 23:59 IST instead of collapsing to `reachedLabel` — until this instant, the
+   * real deadline, which it never rolls past.
+   */
+  rollDailyUntil?: string | Date;
   className?: string;
+  /** Overrides the label styling — the hero sets it much louder than default. */
+  labelClassName?: string;
   compact?: boolean;
+  /**
+   * Let the units span the full width of the parent. Off by default (the timer
+   * is usually centred in a narrow column); on inside the hero band, where
+   * centring a max-w-xl grid in a full-width panel left a visible dead gap to
+   * its left.
+   */
+  fluid?: boolean;
 }) {
   const targetMs = React.useMemo(
     () => (typeof target === "string" ? new Date(target) : target).getTime(),
     [target],
+  );
+  const rollUntilMs = React.useMemo(
+    () =>
+      rollDailyUntil === undefined
+        ? null
+        : (typeof rollDailyUntil === "string"
+            ? new Date(rollDailyUntil)
+            : rollDailyUntil
+          ).getTime(),
+    [rollDailyUntil],
   );
 
   const [remaining, setRemaining] = React.useState<Remaining | null>(null);
@@ -46,10 +74,24 @@ export function CountdownTimer({
 
   React.useEffect(() => {
     setMounted(true);
-    setRemaining(diff(targetMs));
-    const id = setInterval(() => setRemaining(diff(targetMs)), 1000);
+
+    // Held in a ref-like local so a rolled-over target survives between ticks
+    // without re-running this effect (which would restart the interval).
+    let current = targetMs;
+
+    const tick = () => {
+      let next = diff(current);
+      if (next === null && rollUntilMs !== null && Date.now() < rollUntilMs) {
+        current = Math.min(endOfISTDay(Date.now()), rollUntilMs);
+        next = diff(current);
+      }
+      setRemaining(next);
+    };
+
+    tick();
+    const id = setInterval(tick, 1000);
     return () => clearInterval(id);
-  }, [targetMs]);
+  }, [targetMs, rollUntilMs]);
 
   const reached = mounted && remaining === null;
 
@@ -76,11 +118,13 @@ export function CountdownTimer({
 
   return (
     <div className={cn("w-full", className)}>
-      <p className="label-eyebrow mb-3">{label}</p>
+      <p className={cn("label-eyebrow mb-3", labelClassName)}>{label}</p>
       <div
         className={cn(
-          "mx-auto grid grid-cols-4",
-          compact ? "max-w-sm gap-2" : "max-w-xl gap-2.5 sm:gap-4",
+          "grid grid-cols-4",
+          fluid ? "w-full" : "mx-auto",
+          compact ? "max-w-sm gap-2" : "gap-2.5 sm:gap-4",
+          !fluid && !compact && "max-w-xl",
         )}
       >
         {units.map((unit, index) => (
@@ -96,7 +140,7 @@ export function CountdownTimer({
           >
             <div
               aria-hidden
-              className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amber-400/60 to-transparent"
+              className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-sky-400/60 to-transparent"
             />
             <p
               className={cn(

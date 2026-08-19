@@ -5,16 +5,21 @@ import { BRAND } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
 /**
- * The crest.
+ * The EA monogram.
  *
- * The artwork is a square plate lit on black, so it is composited two ways:
+ * The supplied artwork is lit on black; its alpha was rebuilt from luminance at
+ * build time, so the glow falls away to transparent instead of carrying a black
+ * plate. It therefore composites on any dark surface with no blend mode.
  *
- * - `tile` (default) frames it as a bevelled emblem — correct at nav scale,
- *   where the internal wordmark is too small to read anyway.
- * - `bare` drops the plate out with `mix-blend-screen`, letting the metal and
- *   its own glow float on the page. Only use this on a near-black surface;
- *   anywhere lighter the blend lifts the black instead of hiding it.
+ * - `tile` (default) frames it on a navy plate with a blue inner bevel.
+ * - `bare` places it directly on the page — preferred, since the mark already
+ *   carries its own glow.
+ *
+ * `size` always means rendered *height*. The mark is roughly 2:1, so width is
+ * derived; treating `size` as a square box left it drawn at half scale inside
+ * its own padding.
  */
+const MARK_ASPECT = 2.017;
 export function LogoMark({
   size = 36,
   variant = "tile",
@@ -26,7 +31,7 @@ export function LogoMark({
   className?: string;
   priority?: boolean;
 }) {
-  const src = size <= 80 ? "/logo-mark.png" : "/logo.png";
+  const src = size <= 120 ? "/logo-mark.png" : "/logo.png";
 
   if (variant === "bare") {
     return (
@@ -34,10 +39,11 @@ export function LogoMark({
         src={src}
         alt=""
         aria-hidden
-        width={size}
+        width={Math.round(size * MARK_ASPECT)}
         height={size}
         priority={priority}
-        className={cn("crest-blend select-none", className)}
+        className={cn("w-auto select-none", className)}
+        style={{ height: size }}
       />
     );
   }
@@ -46,8 +52,8 @@ export function LogoMark({
     <span
       className={cn(
         "relative grid shrink-0 place-items-center overflow-hidden rounded-xl",
-        "ring-white/12 bg-arena-ink ring-1 ring-inset",
-        "shadow-[0_2px_10px_-2px_rgba(0,0,0,0.9),inset_0_1px_0_0_rgba(240,178,19,0.22)]",
+        "bg-arena-ink ring-1 ring-inset ring-primary/25",
+        "shadow-[0_2px_10px_-2px_rgba(0,0,0,0.9),inset_0_1px_0_0_rgba(79,168,255,0.28)]",
         className,
       )}
       style={{ width: size, height: size }}
@@ -56,12 +62,11 @@ export function LogoMark({
         src={src}
         alt=""
         aria-hidden
-        width={size * 2}
-        height={size * 2}
+        width={Math.round(size * MARK_ASPECT)}
+        height={size}
         priority={priority}
-        /* The artwork carries its own padding; scale past the frame so the
-           shield fills the tile instead of floating in it. */
-        className="h-[125%] w-[125%] max-w-none select-none object-contain"
+        /* Fits to the tile's width, since the mark is wider than it is tall. */
+        className="h-auto w-[86%] max-w-none select-none object-contain"
       />
     </span>
   );

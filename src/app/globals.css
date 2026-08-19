@@ -4,39 +4,41 @@
 
 @layer base {
   :root {
-    /* Dark-first palette pulled from the crest: forged black plate, gunmetal
-       steel lettering, struck gold. There is no light theme by design — the
+    /* Dark-first palette pulled from the mark: deep navy plate, electric blue
+       filmstrip, cool light lettering. There is no light theme by design — the
        product is a creative-tools UI and reads as one. */
-    --background: 36 8% 4%;
-    --foreground: 40 14% 93%;
+    --background: 217 52% 5%;
+    --foreground: 213 30% 95%;
 
-    --card: 36 8% 8%;
-    --card-foreground: 40 14% 93%;
+    --card: 217 38% 9%;
+    --card-foreground: 213 30% 95%;
 
-    --popover: 36 9% 6%;
-    --popover-foreground: 40 14% 93%;
+    --popover: 217 44% 7%;
+    --popover-foreground: 213 30% 95%;
 
-    /* Struck gold — the "ARENA" hit in the crest. */
-    --primary: 43 89% 51%;
-    --primary-foreground: 36 45% 6%;
+    /* Electric blue — the play triangle and the "ARENA" line in the mark.
+       Held at 50% lightness rather than the brighter blue of the artwork so
+       white button text clears 4.5:1 instead of sitting at 3.8:1. */
+    --primary: 218 92% 50%;
+    --primary-foreground: 0 0% 100%;
 
-    /* Gunmetal — the plate the crest is stamped from. */
-    --secondary: 215 9% 16%;
-    --secondary-foreground: 210 12% 90%;
+    /* Navy steel — the plate the mark is stamped on. */
+    --secondary: 216 28% 17%;
+    --secondary-foreground: 213 25% 92%;
 
-    --muted: 36 7% 12%;
-    --muted-foreground: 40 8% 65%;
+    --muted: 217 30% 13%;
+    --muted-foreground: 213 18% 68%;
 
-    /* Brushed steel — the "EDITOR'S" lettering. */
-    --accent: 212 14% 74%;
-    --accent-foreground: 215 30% 8%;
+    /* Cool light — the "EDITOR'S" lettering. */
+    --accent: 210 32% 78%;
+    --accent-foreground: 217 45% 8%;
 
     --destructive: 0 72% 52%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 36 8% 17%;
-    --input: 36 8% 15%;
-    --ring: 43 89% 51%;
+    --border: 216 30% 19%;
+    --input: 216 30% 16%;
+    --ring: 218 92% 56%;
 
     --radius: 0.85rem;
   }
@@ -89,12 +91,12 @@
 }
 
 @layer components {
-  /* Forged panel — a machined plate rather than frosted glass. Warm top
-     bevel echoes the light catching the crest's raised edges. */
+  /* Forged panel — a machined plate rather than frosted glass. Cool top
+     bevel echoes the light catching the mark's raised filmstrip edge. */
   .glass {
     @apply border border-white/[0.08] bg-white/[0.03] backdrop-blur-xl;
     box-shadow:
-      inset 0 1px 0 0 rgb(240 178 19 / 0.08),
+      inset 0 1px 0 0 rgb(79 168 255 / 0.14),
       inset 0 0 0 1px rgb(255 255 255 / 0.015),
       0 24px 60px -32px rgb(0 0 0 / 0.95);
   }
@@ -103,12 +105,12 @@
     @apply transition duration-300 hover:border-primary/25 hover:bg-white/[0.055];
   }
 
-  /* Struck gold, top-lit — matches the "ARENA" wordmark. */
+  /* Electric blue, top-lit — matches the "ARENA" line in the mark. */
   .text-gradient {
-    @apply bg-gradient-to-b from-amber-200 via-amber-400 to-amber-600 bg-clip-text text-transparent;
+    @apply bg-gradient-to-b from-sky-200 via-sky-400 to-sky-600 bg-clip-text text-transparent;
   }
 
-  /* Brushed steel, top-lit — matches the "EDITOR'S" wordmark. */
+  /* Cool light, top-lit — matches the "EDITOR'S" lettering. */
   .text-steel {
     @apply bg-gradient-to-b from-zinc-100 via-zinc-300 to-zinc-500 bg-clip-text text-transparent;
   }
@@ -133,93 +135,69 @@
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.75);
   }
 
-  /* Struck gold: warm gradient, pitted dust, and a slight perspective warp so
-     it sits on the plate the way the logo's does. */
+  /* The struck hit, lifted from the mark's "ARENA" line: electric blue with a
+     hot highlight along the top edge and a cool falloff below.
+     Replaces the old gold brush face — Chakra Petch has a true italic, so the
+     lean is drawn rather than skewed, and the notched terminals do the work
+     the torn brush edges used to. */
   .type-arena {
-    font-family: var(--font-brush), var(--font-display), system-ui, sans-serif;
-    /* Single-weight, and upright by design — the lean comes from the skew below,
-       not from a synthesised oblique, which would shear the torn edges. */
-    font-weight: 400;
-    /* The crest's ARENA is a struck hit in caps; lowercase reads as a caption. */
+    font-family: var(--font-display), system-ui, sans-serif;
+    font-weight: 700;
+    font-style: italic;
     text-transform: uppercase;
     letter-spacing: 0.005em;
-    /* Road Rage's brush strokes overshoot their advance widths — the final T in
-       "TALENT" flicks well past its own box. `background-clip: text` only paints
-       inside the element box, so that overhang was clipping to transparent.
-       Symmetric inline padding gives the ink room without shifting the centring. */
-    padding-inline: 0.14em;
-    background-image:
-      /* Dust and pitting, as on the crest's gold. Four dot layers tiled at
-         coprime sizes: the tiles never line up, so the eye reads scattered
-         grit. A repeating-linear-gradient here produced visible 1px stripes,
-         which is exactly what this replaces. */
-      radial-gradient(
-        circle at 28% 34%,
-        rgba(58, 30, 0, 0.42) 0.7px,
-        transparent 0.9px
-      ),
-      radial-gradient(
-        circle at 71% 66%,
-        rgba(58, 30, 0, 0.32) 0.6px,
-        transparent 0.8px
-      ),
-      radial-gradient(
-        circle at 46% 82%,
-        rgba(255, 244, 205, 0.34) 0.55px,
-        transparent 0.75px
-      ),
-      radial-gradient(
-        circle at 84% 18%,
-        rgba(58, 30, 0, 0.24) 0.5px,
-        transparent 0.7px
-      ),
-      linear-gradient(
-        180deg,
-        #ffeeb4 0%,
-        #f7d774 18%,
-        #f0b213 46%,
-        #b9860c 74%,
-        #f3cb55 100%
-      );
-    background-size:
-      13px 11px,
-      19px 17px,
-      23px 29px,
-      31px 37px,
-      100% 100%;
+    /* The italic's overhang would clip against the text-fill box; symmetric
+       padding gives it room without shifting the centring. */
+    padding-inline: 0.1em;
+    background-image: linear-gradient(
+      178deg,
+      #eaf4ff 0%,
+      #9fd0ff 16%,
+      #4fa8ff 38%,
+      #1668ff 62%,
+      #0b3fa8 88%,
+      #2f7dff 100%
+    );
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
-    /* No glow and no displacement filter: Road Rage's outlines are already torn,
-       and a gold bloom softened the strokes it should be showing off. The one
-       shadow left is tight and dark — it separates the letters from the arena
-       floor behind them without blurring the edges. */
+    /* A tight dark shadow to seat it on the plate, plus a low blue bloom so it
+       reads as emitting light rather than sitting flat. */
     filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.85))
-      drop-shadow(0 0 1px rgba(0, 0, 0, 0.6));
-    /* Road Rage draws its own rightward lean (italicAngle is 0, the strokes do
-       the work), so this only adds the crest's slight extra pitch. */
-    transform: perspective(700px) rotateX(5deg) skewX(-2deg);
-    transform-origin: 50% 100%;
+      drop-shadow(0 0 14px rgba(22, 104, 255, 0.35));
   }
 
   /* The warp and the displacement filter are decorative; drop them where
      motion/effects are unwelcome or unsupported. */
 
-  /* Section-scale wash: gold spill from the right, steel glint from the left,
-     exactly as the crest is lit. */
+  /* Section-scale wash: blue spill from the right, a cooler glint from the
+     left, exactly as the mark is lit. */
+
+  /* The wash below bleeds 10% past each side so it has no hard vertical edge.
+     On a phone that bleed was also 39px of horizontal document scroll — on
+     every page that uses it. Clipped sideways only: the box already spans the
+     viewport, so the "cut" lands exactly where the screen ends and nothing
+     visible changes, while the upward spill (inset -40%) is the whole effect
+     and must stay. `clip` rather than `hidden` so the y axis is not forced to
+     auto. */
+  .aurora {
+    overflow-x: clip;
+    overflow-y: visible;
+  }
+
   .aurora::before {
     content: "";
     position: absolute;
     inset: -40% -10% auto -10%;
     height: 620px;
     background:
-      radial-gradient(36% 52% at 76% 26%, rgba(240, 178, 19, 0.26) 0%, transparent 70%),
+      radial-gradient(36% 52% at 76% 26%, rgba(22, 104, 255, 0.26) 0%, transparent 70%),
       radial-gradient(
         32% 46% at 20% 30%,
-        rgba(176, 190, 205, 0.13) 0%,
+        rgba(79, 168, 255, 0.13) 0%,
         transparent 72%
       ),
-      radial-gradient(30% 40% at 52% 4%, rgba(217, 155, 20, 0.18) 0%, transparent 70%);
+      radial-gradient(30% 40% at 52% 4%, rgba(11, 63, 168, 0.18) 0%, transparent 70%);
     filter: blur(24px);
     pointer-events: none;
     z-index: 0;
@@ -237,89 +215,50 @@
     @apply h-px w-full bg-gradient-to-r from-transparent via-white/15 to-transparent;
   }
 
-  /* Gold hairline for section seams that should read as a struck edge. */
+  /* Blue hairline for section seams that should read as a struck edge. */
   .hairline-gold {
     @apply h-px w-full bg-gradient-to-r from-transparent via-primary/45 to-transparent;
   }
 
   /* ------------------------------------------------------------------
-     Hero plate motion. Three slow, independent cycles — a drifting camera,
-     a breathing light shaft, and the canvas dust — so the still reads as a
-     locked-off video take rather than a static image. Periods are deliberately
-     coprime (46s / 11s) so the loop never visibly repeats.
+     Cutting-room motion. The hero is drawn rather than photographed, so the
+     life in it comes from the things an NLE actually does: a playhead
+     sweeping the timeline, meters riding audio, a slow scanline crawl.
+     Periods are coprime so nothing ever beats against anything else.
      The global prefers-reduced-motion rule collapses all of them.
      ------------------------------------------------------------------ */
-  .ken-burns {
-    animation: ken-burns 46s ease-in-out infinite alternate;
-    will-change: transform;
-  }
 
-  /* The toolchain drifting behind the arena.
-     The mask is the whole point: it hollows out the middle of the hero so the
-     crest, headline and countdown sit over clean plate, and fades both edges so
-     the rows arrive from nowhere rather than sliding in at a hard border.
-     Two rows travelling opposite ways read as parallax; one row reads as a
-     ticker, which this is not. Periods are coprime with the backdrop's 46s and
-     11s so nothing ever beats against it. */
-  .tool-marks {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    padding-block: 14vh;
-    opacity: 0.5;
-    -webkit-mask-image:
-      radial-gradient(58% 46% at 50% 46%, transparent 40%, black 100%),
-      linear-gradient(90deg, transparent, black 14%, black 86%, transparent);
-    mask-image:
-      radial-gradient(58% 46% at 50% 46%, transparent 40%, black 100%),
-      linear-gradient(90deg, transparent, black 14%, black 86%, transparent);
-    -webkit-mask-composite: source-in;
-    mask-composite: intersect;
-  }
-
-  .tool-marks-track {
-    display: flex;
-    width: max-content;
-    gap: 1.75rem;
-    will-change: transform;
-  }
-
-  /* -50% exactly, because the row renders its marks twice. */
-  .tool-marks-left {
-    animation: tool-marks-left 71s linear infinite;
-  }
-
-  .tool-marks-right {
-    animation: tool-marks-right 89s linear infinite;
-  }
-
-  /* The two editors squaring up. They enter from the side they stand on, once,
-     on load — the hero is above the fold so there is nothing to scroll-trigger.
-     `both` fill matters: under prefers-reduced-motion the global rule collapses
-     the duration, and the fill is what leaves them at their final position
-     instead of stuck at the offset start frame. */
-  .editor-in-left {
-    animation: editor-in-left 1.25s cubic-bezier(0.22, 1, 0.36, 1) 0.3s both;
-  }
-
-  .editor-in-right {
-    animation: editor-in-right 1.25s cubic-bezier(0.22, 1, 0.36, 1) 0.42s both;
-  }
-
-  .beam-breathe {
-    /* An additive gold cone sitting on the artwork's own shaft, screened so it
-       only ever brightens. */
-    background: linear-gradient(
-      205deg,
-      rgba(255, 214, 110, 0.5) 0%,
-      rgba(240, 178, 19, 0.22) 26%,
-      transparent 58%
+  /* Faint horizontal rules over a panel, the way a scope or a program monitor
+     reads on a calibrated display. */
+  .scanlines {
+    background-image: repeating-linear-gradient(
+      to bottom,
+      rgb(255 255 255 / 0.035) 0px,
+      rgb(255 255 255 / 0.035) 1px,
+      transparent 1px,
+      transparent 3px
     );
-    mix-blend-mode: screen;
-    animation: beam-breathe 11s ease-in-out infinite;
-    will-change: opacity;
+  }
+
+  /* The playhead crossing the timeline, once every 9s. */
+  .playhead {
+    animation: playhead 9s linear infinite;
+    will-change: transform;
+  }
+
+  /* Audio meters. Each bar takes its own delay from an inline custom property
+     so the row reads as programme material rather than a synchronised wave. */
+  .vu-bar {
+    transform-origin: 50% 100%;
+    animation: vu 1.7s ease-in-out infinite alternate;
+    animation-delay: var(--vu-delay, 0s);
+    will-change: transform;
+  }
+
+  /* A clip settling onto the timeline as the page loads. */
+  .clip-in {
+    animation: clip-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: var(--clip-delay, 0s);
   }
 
   /* The perforated film band across the top of the crest, as a divider. */
@@ -329,7 +268,7 @@
     background-image: repeating-linear-gradient(
       to right,
       transparent 0 8px,
-      rgb(240 178 19 / 0.5) 8px 14px,
+      rgb(22 104 255 / 0.5) 8px 14px,
       transparent 14px 22px
     );
     background-position: center;
@@ -353,69 +292,34 @@
     @apply text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground;
   }
 
-  /* Drops the crest artwork's black plate out against the page so the metal
-     floats with its own glow. The art is lit on black, so `screen` is exact. */
-  .crest-blend {
-    mix-blend-mode: screen;
-  }
 }
 
-@keyframes tool-marks-left {
+@keyframes playhead {
   from {
     transform: translate3d(0, 0, 0);
   }
   to {
-    transform: translate3d(-50%, 0, 0);
+    transform: translate3d(calc(100cqw - 2px), 0, 0);
   }
 }
 
-@keyframes tool-marks-right {
+@keyframes vu {
   from {
-    transform: translate3d(-50%, 0, 0);
+    transform: scaleY(0.18);
   }
   to {
-    transform: translate3d(0, 0, 0);
+    transform: scaleY(1);
   }
 }
 
-@keyframes ken-burns {
-  from {
-    transform: scale(1.045) translate3d(0.6%, 0.5%, 0);
-  }
-  to {
-    transform: scale(1.13) translate3d(-1.1%, -1.3%, 0);
-  }
-}
-
-@keyframes editor-in-left {
+@keyframes clip-in {
   from {
     opacity: 0;
-    transform: translate3d(-24%, 0, 0);
+    transform: translate3d(0, 8px, 0) scaleX(0.94);
   }
   to {
     opacity: 1;
-    transform: translate3d(0, 0, 0);
-  }
-}
-
-@keyframes editor-in-right {
-  from {
-    opacity: 0;
-    transform: translate3d(24%, 0, 0);
-  }
-  to {
-    opacity: 1;
-    transform: translate3d(0, 0, 0);
-  }
-}
-
-@keyframes beam-breathe {
-  0%,
-  100% {
-    opacity: 0.42;
-  }
-  50% {
-    opacity: 0.92;
+    transform: translate3d(0, 0, 0) scaleX(1);
   }
 }
 

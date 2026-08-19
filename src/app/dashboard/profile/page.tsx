@@ -113,7 +113,7 @@ export default async function ProfilePage() {
                         href={link.href}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 text-sm font-medium text-amber-300 underline-offset-4 hover:underline"
+                        className="inline-flex items-center gap-1.5 text-sm font-medium text-sky-300 underline-offset-4 hover:underline"
                       >
                         {link.label}
                         <ExternalLink className="size-3.5" />

@@ -10,11 +10,12 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const LINKS = [
+  { href: "#hiring", label: "The Job" },
   { href: "#about", label: "About" },
   { href: "#timeline", label: "Timeline" },
   { href: "#prizes", label: "Prizes" },
+  { href: "#cause", label: "Cause" },
   { href: "#faq", label: "FAQ" },
-  { href: "/leaderboard", label: "Leaderboard" },
 ];
 
 export function Navbar({
@@ -86,7 +87,7 @@ export function Navbar({
               </Button>
               <Button asChild size="sm" disabled={!registrationOpen}>
                 <Link href={registrationOpen ? "/register" : "#about"}>
-                  {registrationOpen ? "Register Now" : closedLabel}
+                  {registrationOpen ? "Register Free" : closedLabel}
                 </Link>
               </Button>
             </>
@@ -132,7 +133,7 @@ export function Navbar({
                   </Button>
                   {registrationOpen ? (
                     <Button asChild onClick={() => setOpen(false)}>
-                      <Link href="/register">Register Now</Link>
+                      <Link href="/register">Register Free</Link>
                     </Button>
                   ) : null}
                 </>

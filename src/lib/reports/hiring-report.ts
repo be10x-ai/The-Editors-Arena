@@ -30,7 +30,8 @@ export type HiringReportRow = {
   phone: string;
   city: string;
   experienceYears: number;
-  jobRole: string;
+  /** Historical: no longer collected at registration. */
+  jobRole: string | null;
   softwareSkills: string[];
   portfolioUrl: string;
   linkedinUrl: string | null;

@@ -99,11 +99,11 @@ export default async function AdminRatingsPage() {
       </div>
 
       {widest.length > 0 ? (
-        <Card className="border-amber-500/25 bg-amber-500/[0.06] p-5">
-          <p className="text-sm font-semibold text-amber-200">
+        <Card className="border-sky-500/25 bg-sky-500/[0.06] p-5">
+          <p className="text-sm font-semibold text-sky-200">
             Worth a calibration conversation
           </p>
-          <ul className="mt-2 space-y-1 text-sm text-amber-100/80">
+          <ul className="mt-2 space-y-1 text-sm text-sky-100/80">
             {widest.map((row) => (
               <li key={row.submissionId}>
                 <span className="font-mono text-xs">{row.contestantId}</span> — judges
@@ -154,7 +154,7 @@ export default async function AdminRatingsPage() {
               {ratings.map((rating) => (
                 <TableRow key={rating.id}>
                   <TableCell className="sticky left-0 z-10 bg-card">
-                    <p className="font-mono text-xs tracking-wider text-amber-300">
+                    <p className="font-mono text-xs tracking-wider text-sky-300">
                       {rating.submission.contestant.contestantId}
                     </p>
                     <p className="mt-0.5 max-w-[150px] truncate text-sm">

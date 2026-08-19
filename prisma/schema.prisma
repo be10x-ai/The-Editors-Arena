@@ -236,15 +236,22 @@ model Contestant {
 
   fullName String
   email    String
+  /// Ten digits, no country code — normalised on the way in by the
+  /// registration schema, because this number gets dialled and WhatsApped.
   phone    String
   city     String
+  /// Full postal address. Nullable because entrants who registered before it
+  /// was collected have none; the form requires it for everyone since.
+  address  String?
 
   /// Object path inside the avatars bucket, not a full URL — the public URL is
   /// derived at render time, so changing bucket or CDN does not rewrite rows.
   photoPath String?
 
   experienceYears Int
-  jobRole         String
+  /// No longer collected at registration. Kept nullable so historical rows
+  /// keep the answer they gave.
+  jobRole         String?
   softwareSkills  String[]
   portfolioUrl    String
   linkedinUrl     String?

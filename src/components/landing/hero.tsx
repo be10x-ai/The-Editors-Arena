@@ -1,217 +1,258 @@
-import { ArrowRight, Film, Sparkles, Trophy, Users } from "lucide-react";
+import { ArrowRight, Briefcase, TicketPercent, Trophy } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
 import { CountdownTimer } from "@/components/landing/countdown-timer";
-import { DustMotes } from "@/components/landing/dust-motes";
 import { Reveal } from "@/components/landing/reveal";
-import { ToolMarks } from "@/components/landing/tool-marks";
-import { LogoMark } from "@/components/shared/logo";
+import { AiToolStrip, ToolStrip } from "@/components/landing/tool-logos";
 import { Button } from "@/components/ui/button";
-import { BRAND } from "@/lib/constants";
-import type { Gates } from "@/lib/hackathon";
-import { formatIST, formatISTDate } from "@/lib/utils";
+import { BRAND, CAMPAIGN } from "@/lib/constants";
+import type { Gates, PublicCountdown } from "@/lib/hackathon";
+import { formatIST, formatISTDate, formatInr } from "@/lib/utils";
 
+/**
+ * Two columns from `lg` up: the offer on the left, the work on the right.
+ *
+ * The left column carries exactly four things, in the order a visitor decides
+ * on them — the prize, that it comes with a job, that it costs nothing today,
+ * and how long that lasts. The right column is what the day actually looks
+ * like, so the page shows the craft rather than describing it.
+ *
+ * Below `lg` the two stack and the column centres, because a half-width layout
+ * at 5rem type has nowhere to go on a phone.
+ */
 export function Hero({
   gates,
   countdown,
   startsAt,
   registrationsCount,
   prizeHeadline,
+  prizePoolLabel,
 }: {
   gates: Gates;
-  countdown: { target: Date; label: string; reachedLabel: string };
+  countdown: PublicCountdown;
   startsAt: Date;
   registrationsCount: number;
   prizeHeadline: string;
+  /** Podium total, e.g. "₹1.8 Lakh". Empty when the rewards aren't numeric. */
+  prizePoolLabel: string;
 }) {
+  const donated = registrationsCount * CAMPAIGN.donationPerRegistrationInr;
+
+  const rail = [
+    {
+      key: "prize",
+      icon: Trophy,
+      tone: "text-sky-300",
+      body: (
+        <>
+          <span className="font-semibold text-foreground">
+            {prizePoolLabel || prizeHeadline}
+          </span>{" "}
+          prize pool
+        </>
+      ),
+    },
+    {
+      key: "job",
+      icon: Briefcase,
+      tone: "text-blue-300",
+      body: (
+        <>
+          <span className="font-semibold text-foreground">Full-time role</span> after a
+          paid trial
+        </>
+      ),
+    },
+    {
+      key: "free",
+      icon: TicketPercent,
+      tone: "text-amber-300",
+      body: (
+        <>
+          <span className="text-muted-foreground/70 line-through decoration-rose-400/70 decoration-2">
+            {formatInr(CAMPAIGN.entryFeeInr)}
+          </span>{" "}
+          <span className="font-semibold text-amber-300">FREE</span> today
+        </>
+      ),
+    },
+  ];
+
   return (
-    <section className="relative isolate overflow-hidden pb-12 pt-24 sm:pb-16 sm:pt-28">
-      {/* Arena backdrop. Anchored to the top at its own aspect rather than
-          stretched over the whole section: the hero is far taller than the
-          artwork, and object-cover across that height would crop the wreckage
-          framing out entirely. It fades to page black before the countdown. */}
-      <div
-        aria-hidden
-        /* `isolate` keeps the beam's screen blend inside this box — without it
-           the blend reaches the page backdrop and washes the hero content. */
-        className="absolute inset-x-0 top-0 isolate -z-10 h-[clamp(34rem,88vh,62rem)] overflow-hidden"
-      >
-        {/* Wrapper carries the drift so the scrims below stay put — animating
-            the image and its overlays together would slide the vignette off. */}
-        <div className="ken-burns absolute inset-0">
-          <Image
-            src="/hero-bg.jpg"
-            alt=""
-            fill
-            priority
-            sizes="100vw"
-            className="object-cover object-[50%_42%]"
-          />
-        </div>
-
-        <div aria-hidden className="beam-breathe absolute inset-0" />
-
-        <DustMotes className="absolute inset-0 size-full" />
-
-        {/* The toolchain the entrants actually work in. Placed here, inside the
-            backdrop stack, so the vignette and floor fade below settle over it
-            and it sits in the scene rather than on top of it. Its own mask
-            keeps the middle clear for the crest and the headline. */}
-        <ToolMarks />
-
-        {/* The two editors, facing each other across the arena. Deliberately
-            placed above the plate but *below* the scrims that follow, so the
-            vignette and the floor fade land on them too — outside that stack
-            they read as stickers rather than as figures standing in the scene.
-            Hidden below md, where they would crowd the wordmark. */}
-        {/* Inset from the edge rather than flush. Each mace head sits on the
-            outer side of its figure, so anything at or past 0 clipped the
-            play-triangle and the reel — the whole point of the props. No
-            `priority`: they are hidden below md, and a display:none image never
-            satisfies the lazy-load observer, so phones skip both files
-            entirely. On desktop they are in the viewport and fetch at once. */}
-        <Image
-          src="/editor-left.png"
-          alt=""
-          width={540}
-          height={1100}
-          className="editor-in-left absolute bottom-0 left-[5%] hidden h-[72%] w-auto max-w-[30vw] object-contain object-bottom brightness-[1.42] contrast-[1.07] drop-shadow-[0_0_28px_rgba(240,178,19,0.18)] saturate-[1.12] md:block lg:left-[10%] lg:h-[80%]"
-        />
-        <Image
-          src="/editor-right.png"
-          alt=""
-          width={568}
-          height={1100}
-          className="editor-in-right absolute bottom-0 right-[5%] hidden h-[72%] w-auto max-w-[30vw] object-contain object-bottom brightness-[1.42] contrast-[1.07] drop-shadow-[0_0_28px_rgba(240,178,19,0.18)] saturate-[1.12] md:block lg:right-[10%] lg:h-[80%]"
-        />
-
-        {/* Pull the middle down so the wordmark keeps its contrast over the
-            floor detail, without flattening the gold shaft at the right. */}
-        <div className="absolute inset-0 bg-[radial-gradient(68%_60%_at_50%_44%,rgba(10,10,9,0.84),rgba(10,10,9,0.42)_58%,transparent_100%)]" />
-        <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-background/80 to-transparent" />
-        <div className="absolute inset-x-0 bottom-0 h-56 bg-gradient-to-t from-background via-background/70 to-transparent" />
+    <section className="relative isolate overflow-hidden pb-14 pt-28 sm:pb-20 sm:pt-32">
+      {/* Drawn backdrop: navy plate, a blue wash rising behind the prize, and a
+          technical grid. No image requests at all. */}
+      <div aria-hidden className="absolute inset-0 -z-10">
+        <div className="absolute inset-0 bg-[radial-gradient(62%_58%_at_28%_8%,rgba(22,104,255,0.28),transparent_70%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(48%_44%_at_82%_62%,rgba(79,168,255,0.16),transparent_74%)]" />
+        <div className="grid-backdrop absolute inset-0 opacity-70" />
+        <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-background to-transparent" />
       </div>
 
-      <div className="container relative z-10 flex flex-col items-center text-center">
-        {/* The crest, plate dropped out so the metal floats on the page. */}
-        <Reveal delay={0.04}>
-          <LogoMark
-            variant="bare"
-            size={340}
-            priority
-            className="h-auto w-[15rem] motion-safe:animate-float sm:w-[19rem] lg:w-[21rem]"
-          />
-        </Reveal>
+      <div className="container">
+        <div className="grid items-center gap-8 lg:grid-cols-[1fr_1.06fr] lg:gap-10 xl:gap-14">
+          {/* ------------------------- The offer ------------------------- */}
+          <div className="text-center lg:text-left">
+            <Reveal delay={0.04}>
+              <p className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 font-display text-sm font-bold uppercase tracking-[0.16em] text-foreground sm:text-base sm:tracking-[0.2em] lg:justify-start">
+                <span
+                  aria-hidden
+                  className="hidden h-px w-8 bg-gradient-to-r from-transparent to-primary sm:block sm:w-12 lg:from-primary lg:to-primary"
+                />
+                {BRAND.tagline}
+              </p>
+            </Reveal>
 
-        {/* The official tagline, set as a struck rule under the crest — it says
-            what this is, which the headline below deliberately does not. */}
-        <Reveal delay={0.08} className="mt-4 w-full">
-          <p className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-foreground/80 sm:text-xs sm:tracking-[0.26em]">
-            <span
-              aria-hidden
-              className="hidden h-px w-8 bg-gradient-to-r from-transparent to-primary/70 sm:block sm:w-14"
-            />
-            {BRAND.tagline}
-            <span
-              aria-hidden
-              className="hidden h-px w-8 bg-gradient-to-l from-transparent to-primary/70 sm:block sm:w-14"
-            />
-          </p>
-        </Reveal>
-
-        {/* Both crest treatments, carrying the proposition rather than
-            repeating the wordmark already stamped on the shield. */}
-        <Reveal delay={0.12}>
-          <h1 className="mt-2">
-            <span className="sr-only">
-              {BRAND.name} — {BRAND.themeLine}
-            </span>
-            <span
-              aria-hidden
-              className="type-chrome block text-[1.09rem] leading-[1.2] sm:text-[1.68rem] lg:text-[2.1rem]"
-            >
-              REAL FOOTAGE. REAL DEADLINES.
-            </span>
-            <span
-              aria-hidden
-              className="type-arena mt-3 block pb-2 text-[2.4rem] leading-[1] sm:mt-4 sm:text-6xl lg:text-[5rem]"
-            >
-              Real Editing Talent
-            </span>
-          </h1>
-        </Reveal>
-
-        {/* Countdown sits directly under the wordmark so the deadline reads as
-            part of the headline, not as a footnote below the buttons. */}
-        <Reveal delay={0.15} className="mt-8 w-full">
-          <CountdownTimer
-            target={countdown.target}
-            label={countdown.label}
-            reachedLabel={countdown.reachedLabel}
-          />
-        </Reveal>
-
-        <Reveal delay={0.2}>
-          <p className="mx-auto mt-9 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
-            One day, real client footage, a published rubric, and a named jury — then a
-            hiring track for the editors who prove it.
-          </p>
-        </Reveal>
-
-        <Reveal delay={0.25}>
-          <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-center">
-            {gates.registrationOpen ? (
-              <Button asChild size="lg">
-                <Link href="/register">
-                  Register Now
-                  <ArrowRight />
-                </Link>
-              </Button>
-            ) : (
-              <Button asChild size="lg" variant="secondary">
-                <Link href="/login">Sign in to your dashboard</Link>
-              </Button>
-            )}
-            <Button asChild size="lg" variant="secondary">
-              <Link href="#about">View Details</Link>
-            </Button>
-          </div>
-          {!gates.registrationOpen && !gates.hasStarted ? (
-            <p className="mt-3 text-sm text-orange-300/90">
-              {gates.registrationNotYetOpen
-                ? `Registration opens ${formatIST(gates.registrationOpensAt)} IST.`
-                : "Registration is closed for this edition."}
-            </p>
-          ) : null}
-        </Reveal>
-
-        <Reveal delay={0.3} className="w-full">
-          <div aria-hidden className="filmstrip mt-14" />
-          <dl className="mt-8 grid grid-cols-2 gap-4 text-left sm:grid-cols-4">
-            {[
-              {
-                icon: Users,
-                label: "Editors registered",
-                value: `${registrationsCount}`,
-              },
-              { icon: Film, label: "Event day", value: formatISTDate(startsAt) },
-              { icon: Trophy, label: "Top prize", value: prizeHeadline },
-              { icon: Sparkles, label: "Format", value: "Online · India-wide" },
-            ].map((stat) => (
-              <div key={stat.label} className="flex items-start gap-3">
-                <span className="mt-0.5 grid size-9 shrink-0 place-items-center rounded-lg bg-primary/[0.12] text-primary ring-1 ring-inset ring-primary/20">
-                  <stat.icon className="size-4" />
+            <Reveal delay={0.08}>
+              <h1 className="mt-5">
+                <span className="sr-only">
+                  Video editors: win {prizeHeadline} and a full-time video editing job —{" "}
+                  {BRAND.name}
                 </span>
-                <div className="min-w-0">
-                  <dd className="font-display text-base font-semibold leading-tight">
-                    {stat.value}
-                  </dd>
-                  <dt className="mt-0.5 text-xs text-muted-foreground">{stat.label}</dt>
-                </div>
-              </div>
+                <span
+                  aria-hidden
+                  className="type-chrome block text-[1.5rem] font-bold uppercase leading-none tracking-[0.3em] text-sky-200 sm:text-[2rem] lg:text-[2.2rem]"
+                >
+                  Win
+                </span>
+                <span
+                  aria-hidden
+                  className="type-arena mt-1 block pb-2 text-[3.1rem] leading-[0.98] sm:text-[5rem] lg:text-[4.6rem] xl:text-[5.6rem]"
+                >
+                  {prizeHeadline}
+                </span>
+                <span
+                  aria-hidden
+                  className="type-chrome mt-1 block text-[1.35rem] leading-[1.15] sm:text-[2rem] lg:text-[1.9rem] xl:text-[2.25rem]"
+                >
+                  AND A FULL-TIME VIDEO EDITING JOB
+                </span>
+              </h1>
+            </Reveal>
+
+            <Reveal delay={0.12}>
+              <p className="mx-auto mt-6 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base lg:mx-0">
+                <span className="font-semibold text-foreground">
+                  For video editors across India.
+                </span>{" "}
+                One day — {formatISTDate(startsAt)}, online. You get real client footage
+                and a brief, six hours to cut it, a rubric published before you start,
+                and a named jury who actually watches your edit.
+              </p>
+            </Reveal>
+
+          </div>
+
+          {/* ------------------------- The work -------------------------- */}
+          <Reveal delay={0.18} y={32}>
+            <div className="relative">
+              {/* A soft pool of light under the artwork so it sits on the page
+                  rather than floating as a cut-out. */}
+              <div
+                aria-hidden
+                className="absolute inset-0 -z-10 bg-[radial-gradient(58%_54%_at_52%_52%,rgba(22,104,255,0.28),transparent_72%)]"
+              />
+              <Image
+                src="/hero-editor.png"
+                alt="A video editor at work — timeline, colour wheels, audio waveform and film footage"
+                width={1500}
+                height={836}
+                priority
+                sizes="(max-width: 1024px) 100vw, 46vw"
+                className="mx-auto h-auto w-full max-w-2xl lg:max-w-none"
+              />
+            </div>
+          </Reveal>
+        </div>
+
+        {/* The three facts, spread across the full page width so they read as
+            the terms of the offer rather than as a caption to the headline. */}
+        <Reveal delay={0.22} className="mt-10 lg:mt-6">
+          <ul className="grid gap-3 sm:grid-cols-3">
+            {rail.map((item) => (
+              <li
+                key={item.key}
+                className="glass flex items-center justify-center gap-3.5 rounded-2xl px-5 py-6 text-lg sm:text-xl lg:justify-start lg:px-7 lg:py-7"
+              >
+                <item.icon className={`size-8 shrink-0 ${item.tone}`} />
+                <span className="text-muted-foreground">{item.body}</span>
+              </li>
             ))}
-          </dl>
+          </ul>
+        </Reveal>
+
+        {/* The deadline and the two buttons, given the full width of the page.
+            Boxed into the left column they left a dead quarter under the
+            artwork; across the page they close the fold instead. */}
+        <Reveal delay={0.26} className="mt-10 lg:mt-4">
+          <div className="glass rounded-3xl p-5 sm:p-7">
+            <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:gap-10">
+              <div className="lg:min-w-0 lg:flex-1">
+                <CountdownTimer
+                  fluid
+                  // The deadline is the whole reason the timer is here, so the
+                  // line naming it is set as a heading rather than an eyebrow.
+                  labelClassName="mb-4 font-display text-lg font-bold tracking-[0.14em] text-sky-200 sm:text-xl sm:tracking-[0.16em]"
+                  target={countdown.target}
+                  label={countdown.label}
+                  reachedLabel={countdown.reachedLabel}
+                  rollDailyUntil={countdown.rollDailyUntil}
+                />
+              </div>
+
+              <div className="lg:w-px lg:self-stretch lg:bg-white/10" aria-hidden />
+
+              <div className="lg:w-[19rem] lg:shrink-0 xl:w-[24rem]">
+                <div className="flex flex-col gap-3 sm:flex-row lg:flex-col xl:flex-row">
+                  {gates.registrationOpen ? (
+                    <Button asChild size="lg" className="w-full">
+                      <Link href="/register">
+                        Register Free
+                        <ArrowRight />
+                      </Link>
+                    </Button>
+                  ) : (
+                    <Button asChild size="lg" variant="secondary" className="w-full">
+                      <Link href="/login">Sign in to your dashboard</Link>
+                    </Button>
+                  )}
+                  <Button asChild size="lg" variant="secondary" className="w-full">
+                    <Link href="#hiring">See the hiring track</Link>
+                  </Button>
+                </div>
+
+                {gates.registrationOpen ? (
+                  <p className="mt-3 text-center text-xs text-muted-foreground lg:text-left">
+                    Two minutes and one portfolio link · {registrationsCount} registered ·{" "}
+                    {formatInr(donated)} donated
+                  </p>
+                ) : null}
+                {!gates.registrationOpen && !gates.hasStarted ? (
+                  <p className="mt-3 text-center text-sm text-orange-300/90 lg:text-left">
+                    {gates.registrationNotYetOpen
+                      ? `Registration opens ${formatIST(gates.registrationOpensAt)} IST.`
+                      : "Registration is closed for this edition."}
+                  </p>
+                ) : null}
+              </div>
+            </div>
+          </div>
+        </Reveal>
+
+        {/* The toolchain, stated as permission rather than requirement — first
+            the NLEs, then the generative tools the rulebook whitelists. */}
+        <Reveal delay={0.3} className="mt-16">
+          <div aria-hidden className="filmstrip" />
+          <p className="mt-8 text-center text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+            Cut it in whatever you already own
+          </p>
+          <ToolStrip className="mt-5" />
+
+          <p className="mt-10 text-center text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+            AI tools on the whitelist
+          </p>
+          <AiToolStrip className="mt-5" />
         </Reveal>
       </div>
     </section>

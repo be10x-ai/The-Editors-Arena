@@ -17,6 +17,7 @@
     "db:push": "prisma db push",
     "db:studio": "prisma studio",
     "db:seed": "prisma db seed",
+    "content:sync": "tsx --env-file=.env --env-file-if-exists=.env.local scripts/sync-campaign-content.ts",
     "email:test": "tsx --env-file=.env --env-file-if-exists=.env.local scripts/test-email.ts",
     "storage:setup": "tsx --env-file=.env --env-file-if-exists=.env.local scripts/ensure-avatar-bucket.ts",
     "db:reset": "prisma migrate reset --force",

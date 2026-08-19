@@ -119,7 +119,7 @@ export default async function AdminSubmissionsPage() {
               {submissions.map((submission) => (
                 <TableRow key={submission.id}>
                   <TableCell>
-                    <p className="font-mono text-xs tracking-wider text-amber-300">
+                    <p className="font-mono text-xs tracking-wider text-sky-300">
                       {submission.contestant.contestantId}
                     </p>
                     <p className="mt-0.5 font-medium">

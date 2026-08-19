@@ -36,7 +36,7 @@ export function LeaderboardTable({
                 className={cn(
                   "relative overflow-hidden p-5",
                   isWinner
-                    ? "border-amber-400/30 bg-gradient-to-br from-amber-500/[0.1] via-white/[0.02] to-transparent lg:col-span-4 lg:flex lg:items-center lg:justify-between lg:gap-8 lg:p-7"
+                    ? "border-sky-400/30 bg-gradient-to-br from-sky-500/[0.1] via-white/[0.02] to-transparent lg:col-span-4 lg:flex lg:items-center lg:justify-between lg:gap-8 lg:p-7"
                     : "glass-hover",
                 )}
               >
@@ -45,14 +45,14 @@ export function LeaderboardTable({
                     className={cn(
                       "grid size-12 shrink-0 place-items-center rounded-xl",
                       isWinner
-                        ? "bg-gradient-to-br from-amber-400 to-yellow-600 text-black"
-                        : "bg-white/[0.06] text-amber-200",
+                        ? "bg-gradient-to-br from-sky-400 to-blue-600 text-black"
+                        : "bg-white/[0.06] text-sky-200",
                     )}
                   >
                     <Icon className="size-6" />
                   </span>
                   <div className="min-w-0">
-                    <p className={cn("label-eyebrow", isWinner && "text-amber-300/80")}>
+                    <p className={cn("label-eyebrow", isWinner && "text-sky-300/80")}>
                       {isWinner ? "Champion" : `Rank ${row.rank}`}
                     </p>
                     <p
@@ -74,7 +74,7 @@ export function LeaderboardTable({
                   <p
                     className={cn(
                       "font-display font-bold tabular-nums tracking-tight",
-                      isWinner ? "text-4xl text-amber-200" : "text-2xl",
+                      isWinner ? "text-4xl text-sky-200" : "text-2xl",
                     )}
                   >
                     {formatScore(row.averageScore)}
@@ -109,7 +109,7 @@ export function LeaderboardTable({
               return (
                 <TableRow
                   key={row.contestantRowId}
-                  className={cn(isYou && "bg-amber-500/10 hover:bg-amber-500/15")}
+                  className={cn(isYou && "bg-sky-500/10 hover:bg-sky-500/15")}
                 >
                   <TableCell className="font-display font-bold tabular-nums">
                     {row.rank === 1 ? "🏆" : `#${row.rank}`}
@@ -120,7 +120,7 @@ export function LeaderboardTable({
                   <TableCell className="font-medium">
                     {row.name}
                     {isYou ? (
-                      <span className="ml-2 rounded-full bg-amber-500/20 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-amber-200">
+                      <span className="ml-2 rounded-full bg-sky-500/20 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-sky-200">
                         You
                       </span>
                     ) : null}

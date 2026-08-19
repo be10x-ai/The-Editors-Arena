@@ -3,7 +3,8 @@ import Link from "next/link";
 
 import { Reveal } from "@/components/landing/reveal";
 import { Button } from "@/components/ui/button";
-import { formatIST } from "@/lib/utils";
+import { CAMPAIGN } from "@/lib/constants";
+import { formatIST, formatInr } from "@/lib/utils";
 
 export function CtaSection({
   registrationOpen,
@@ -19,7 +20,7 @@ export function CtaSection({
           <div className="glass relative overflow-hidden rounded-3xl px-6 py-12 text-center sm:px-12 sm:py-16">
             <div
               aria-hidden
-              className="absolute inset-0 -z-10 bg-[radial-gradient(60%_80%_at_50%_0%,rgba(240,178,19,0.26),transparent_70%)]"
+              className="absolute inset-0 -z-10 bg-[radial-gradient(60%_80%_at_50%_0%,rgba(22,104,255,0.26),transparent_70%)]"
             />
             <h2>
               <span className="type-chrome block text-2xl leading-tight sm:text-3xl">
@@ -29,21 +30,30 @@ export function CtaSection({
                 What You&apos;ve Got
               </span>
             </h2>
-            <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-muted-foreground">
-              {registrationOpen
-                ? `Registration closes ${formatIST(registrationClosesAt)} IST. It takes two minutes and one portfolio link.`
-                : "Registration for this edition has closed. Sign in to your dashboard for the latest."}
+            <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-muted-foreground sm:text-base">
+              {registrationOpen ? (
+                <>
+                  Two minutes, one portfolio link, and{" "}
+                  <span className="font-semibold text-amber-300">no entry fee</span> —
+                  worth {formatInr(CAMPAIGN.entryFeeInr)}, free for this edition.
+                  Registration closes {formatIST(registrationClosesAt)} IST, and your
+                  entry sends {formatInr(CAMPAIGN.donationPerRegistrationInr)} to{" "}
+                  {CAMPAIGN.cause.longName}.
+                </>
+              ) : (
+                "Registration for this edition has closed. Sign in to your dashboard for the latest."
+              )}
             </p>
             <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
               {registrationOpen ? (
-                <Button asChild size="lg">
+                <Button asChild size="lg" className="w-full sm:w-auto">
                   <Link href="/register">
-                    Register Now
+                    Register Free
                     <ArrowRight />
                   </Link>
                 </Button>
               ) : null}
-              <Button asChild size="lg" variant="secondary">
+              <Button asChild size="lg" variant="secondary" className="w-full sm:w-auto">
                 <Link href="/leaderboard">View the leaderboard</Link>
               </Button>
             </div>

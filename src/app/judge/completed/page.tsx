@@ -85,7 +85,7 @@ export default async function CompletedReviewsPage() {
               {ratings.map((rating) => (
                 <TableRow key={rating.id}>
                   <TableCell>
-                    <p className="font-mono text-xs tracking-wider text-amber-300">
+                    <p className="font-mono text-xs tracking-wider text-sky-300">
                       {rating.submission.contestant.contestantId}
                     </p>
                     <p className="mt-0.5 font-medium">

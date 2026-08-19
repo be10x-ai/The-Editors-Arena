@@ -83,7 +83,7 @@ export default async function ReviewPage({
 
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="font-mono text-xs font-semibold tracking-wider text-amber-300">
+          <p className="font-mono text-xs font-semibold tracking-wider text-sky-300">
             {submission.contestant.contestantId}
           </p>
           <h1 className="heading-hero mt-1.5 text-2xl sm:text-3xl">

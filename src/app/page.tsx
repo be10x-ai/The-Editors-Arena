@@ -1,12 +1,15 @@
 import type { Faq, Hackathon, Prize, TimelineEvent } from "@prisma/client";
 
 import { AboutSection } from "@/components/landing/about-section";
+import { CauseSection } from "@/components/landing/cause-section";
 import { CtaSection } from "@/components/landing/cta-section";
 import { FaqSection } from "@/components/landing/faq-section";
-import { Footer } from "@/components/landing/footer";
+import { HiringSection } from "@/components/landing/hiring-section";
 import { Hero } from "@/components/landing/hero";
+import { LegalStrip } from "@/components/landing/legal-strip";
 import { Navbar } from "@/components/landing/navbar";
 import { PrizeSection } from "@/components/landing/prize-section";
+import { StickyCta } from "@/components/landing/sticky-cta";
 import { TimelineSection } from "@/components/landing/timeline-section";
 import {
   DEFAULT_FAQS,
@@ -14,8 +17,9 @@ import {
   DEFAULT_PRIZES,
   DEFAULT_TIMELINE,
 } from "@/lib/defaults";
-import { computeGates, countdownTarget } from "@/lib/hackathon";
-import { formatISTDate } from "@/lib/utils";
+import { PODIUM_SIZE } from "@/lib/constants";
+import { computeGates, publicCountdown } from "@/lib/hackathon";
+import { formatISTDate, formatInrCompact, parseInrAmount } from "@/lib/utils";
 import { prisma } from "@/lib/prisma";
 import { getSessionUser, homeFor } from "@/lib/rbac";
 
@@ -134,8 +138,17 @@ export default async function LandingPage() {
   const { hackathon } = data;
 
   const gates = computeGates(hackathon);
-  const countdown = countdownTarget(hackathon);
+  const countdown = publicCountdown(hackathon);
   const topPrize = data.prizes.find((prize) => prize.position === 1);
+
+  // Headline pool, derived from the prize rows so admin edits carry through to
+  // the hero instead of leaving it advertising a stale number.
+  const pool = data.prizes
+    .filter((prize) => prize.position <= PODIUM_SIZE)
+    .reduce((total, prize) => {
+      const amount = parseInrAmount(prize.reward);
+      return amount === null ? total : total + amount * Math.max(prize.quantity, 1);
+    }, 0);
 
   return (
     <>
@@ -156,11 +169,14 @@ export default async function LandingPage() {
           countdown={countdown}
           startsAt={hackathon.startsAt}
           registrationsCount={data.registrationsCount}
-          prizeHeadline={topPrize?.reward ?? "iPhone"}
+          prizeHeadline={topPrize?.reward ?? "₹1,00,000"}
+          prizePoolLabel={pool > 0 ? formatInrCompact(pool) : ""}
         />
+        <HiringSection />
         <AboutSection />
         <TimelineSection events={data.timeline} />
         <PrizeSection prizes={data.prizes} />
+        <CauseSection registrationsCount={data.registrationsCount} />
         <FaqSection faqs={data.faqs} />
         <CtaSection
           registrationOpen={gates.registrationOpen}
@@ -168,7 +184,10 @@ export default async function LandingPage() {
         />
       </main>
 
-      <Footer />
+      <LegalStrip />
+      {/* Clears the phone-only sticky bar so it never sits on the legal line. */}
+      <div aria-hidden className="h-20 sm:hidden" />
+      <StickyCta registrationOpen={gates.registrationOpen} />
     </>
   );
 }

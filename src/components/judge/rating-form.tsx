@@ -150,7 +150,7 @@ export function RatingForm({
                     {Math.round(criterion.weight * 100)}%
                   </span>
                 </Label>
-                <output className="font-display text-lg font-bold tabular-nums text-amber-200">
+                <output className="font-display text-lg font-bold tabular-nums text-sky-200">
                   {draft[criterion.key].toFixed(1)}
                 </output>
               </div>
@@ -174,7 +174,7 @@ export function RatingForm({
       </Card>
 
       <Card
-        className={drift > 1.5 ? "border-amber-500/30 bg-amber-500/[0.06]" : undefined}
+        className={drift > 1.5 ? "border-sky-500/30 bg-sky-500/[0.06]" : undefined}
       >
         <CardHeader>
           <CardTitle>Overall score</CardTitle>

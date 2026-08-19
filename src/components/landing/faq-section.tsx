@@ -28,7 +28,7 @@ export function FaqSection({ faqs }: { faqs: Faq[] }) {
             <Reveal delay={0.1} className="mt-6">
               <Link
                 href={`mailto:${BRAND.supportEmail}`}
-                className="text-sm font-semibold text-amber-300 underline-offset-4 hover:underline"
+                className="text-sm font-semibold text-sky-300 underline-offset-4 hover:underline"
               >
                 {BRAND.supportEmail}
               </Link>

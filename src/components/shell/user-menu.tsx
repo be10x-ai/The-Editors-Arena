@@ -22,7 +22,7 @@ export function UserMenu({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className="flex items-center gap-2.5 rounded-xl border border-white/10 bg-white/[0.04] py-1.5 pl-1.5 pr-3 transition hover:border-white/20 hover:bg-white/[0.07] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40">
-        <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-gold-strike text-xs font-bold text-[#241a02]">
+        <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-blue-strike text-xs font-bold text-white">
           {initials(user.name) || <User className="size-4" />}
         </span>
         <span className="hidden text-left sm:block">
@@ -41,7 +41,7 @@ export function UserMenu({
           <p className="truncate text-sm font-medium">{user.name}</p>
           <p className="truncate text-xs text-muted-foreground">{user.email}</p>
           {user.contestantId ? (
-            <p className="mt-1 font-mono text-xs tracking-wider text-amber-300">
+            <p className="mt-1 font-mono text-xs tracking-wider text-sky-300">
               {user.contestantId}
             </p>
           ) : null}

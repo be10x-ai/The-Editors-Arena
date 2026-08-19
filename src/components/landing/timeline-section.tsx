@@ -42,7 +42,7 @@ export function TimelineSection({ events }: { events: TimelineEvent[] }) {
                       done
                         ? "border-slate-400/40 bg-slate-400/15 text-slate-200"
                         : isNext
-                          ? "border-amber-400/55 bg-amber-500/20 text-amber-200 shadow-[0_0_18px_-6px_rgba(240,178,19,0.7)]"
+                          ? "border-sky-400/55 bg-sky-500/20 text-sky-200 shadow-[0_0_18px_-6px_rgba(22,104,255,0.7)]"
                           : "border-white/12 bg-white/[0.03] text-muted-foreground"
                     }`}
                   >
@@ -56,7 +56,7 @@ export function TimelineSection({ events }: { events: TimelineEvent[] }) {
                   <div
                     className={`min-w-0 flex-1 rounded-2xl border p-5 transition ${
                       isNext
-                        ? "border-amber-500/25 bg-amber-500/[0.05]"
+                        ? "border-sky-500/25 bg-sky-500/[0.05]"
                         : "border-white/[0.07] bg-white/[0.02]"
                     }`}
                   >
@@ -74,7 +74,7 @@ export function TimelineSection({ events }: { events: TimelineEvent[] }) {
                       </p>
                     ) : null}
                     {isNext ? (
-                      <p className="mt-3 text-xs font-semibold uppercase tracking-wider text-amber-300">
+                      <p className="mt-3 text-xs font-semibold uppercase tracking-wider text-sky-300">
                         Up next
                       </p>
                     ) : null}

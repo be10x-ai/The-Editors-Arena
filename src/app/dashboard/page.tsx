@@ -93,7 +93,7 @@ export default async function ContestantDashboard() {
             <ContestantStatusBadge status={contestant.status} />
             {submission ? <SubmissionStatusBadge status={submission.status} /> : null}
             {contestant.rank && hackathon.resultsPublished ? (
-              <span className="rounded-full border border-amber-400/30 bg-amber-500/15 px-2.5 py-0.5 text-xs font-semibold text-amber-200">
+              <span className="rounded-full border border-sky-400/30 bg-sky-500/15 px-2.5 py-0.5 text-xs font-semibold text-sky-200">
                 Rank #{contestant.rank}
               </span>
             ) : null}
@@ -288,7 +288,7 @@ export default async function ContestantDashboard() {
                   <li key={event.id} className="flex gap-3">
                     <span
                       className={`mt-1 size-2 shrink-0 rounded-full ${
-                        done ? "bg-amber-400" : "bg-white/20"
+                        done ? "bg-sky-400" : "bg-white/20"
                       }`}
                     />
                     <div className="min-w-0">
@@ -323,7 +323,7 @@ export default async function ContestantDashboard() {
               "Upload early. A file still transferring at the deadline counts as late.",
             ].map((step, index) => (
               <li key={index} className="flex gap-3">
-                <span className="grid size-6 shrink-0 place-items-center rounded-lg bg-amber-500/15 text-xs font-bold text-amber-200">
+                <span className="grid size-6 shrink-0 place-items-center rounded-lg bg-sky-500/15 text-xs font-bold text-sky-200">
                   {index + 1}
                 </span>
                 <span>{step}</span>

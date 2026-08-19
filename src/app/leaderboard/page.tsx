@@ -4,7 +4,7 @@ import Link from "next/link";
 
 import { LogoLockup } from "@/components/shared/logo";
 import { SignOutButton } from "@/components/shared/sign-out-button";
-import { Footer } from "@/components/landing/footer";
+import { LegalStrip } from "@/components/landing/legal-strip";
 import { LeaderboardTable } from "@/components/leaderboard/leaderboard-table";
 import { EventStatusBadge } from "@/components/shared/status-badges";
 import { Button } from "@/components/ui/button";
@@ -126,7 +126,7 @@ export default async function LeaderboardPage() {
           ) : (
             <>
               {!gates?.resultsVisible && isStaff ? (
-                <p className="mb-5 rounded-xl border border-amber-500/25 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
+                <p className="mb-5 rounded-xl border border-sky-500/25 bg-sky-500/10 px-4 py-3 text-sm text-sky-100">
                   Staff preview — these results are not public yet.
                 </p>
               ) : null}
@@ -139,7 +139,7 @@ export default async function LeaderboardPage() {
         </div>
       </main>
 
-      <Footer />
+      <LegalStrip />
     </div>
   );
 }
