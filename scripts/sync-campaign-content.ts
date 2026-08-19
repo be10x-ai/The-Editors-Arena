@@ -17,6 +17,12 @@ import { DEFAULT_FAQS, DEFAULT_PRIZES } from "../src/lib/defaults";
 
 const prisma = new PrismaClient();
 const dryRun = process.argv.includes("--dry");
+/**
+ * Deleting a prize row is the one irreversible thing this script can do, and
+ * "no longer in defaults" is a weak reason to lose data an admin may still be
+ * using. Off unless asked for explicitly.
+ */
+const prune = process.argv.includes("--prune");
 
 async function main() {
   const hackathon = await prisma.hackathon.findFirst({
@@ -49,7 +55,13 @@ async function main() {
   const keptPositions = new Set(DEFAULT_PRIZES.map((prize) => prize.position));
   const stale = existingPrizes.filter((row) => !keptPositions.has(row.position));
   for (const row of stale) {
-    console.log(`· prize delete: position ${row.position} (${row.reward}) — no longer in defaults`);
+    if (!prune) {
+      console.log(
+        `· prize kept: position ${row.position} (${row.reward}) — not in defaults, but the landing page already shows the podium only. Pass --prune to delete it.`,
+      );
+      continue;
+    }
+    console.log(`· prize delete: position ${row.position} (${row.reward}) — --prune`);
     if (!dryRun) await prisma.prize.delete({ where: { id: row.id } });
   }
 
