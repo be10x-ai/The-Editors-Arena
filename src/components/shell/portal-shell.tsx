@@ -16,7 +16,13 @@ export function PortalShell({
   children,
 }: {
   items: PortalNavItem[];
-  user: { name: string; email: string; role: string; contestantId?: string | null };
+  user: {
+    name: string;
+    email: string;
+    role: string;
+    contestantId?: string | null;
+    avatarUrl?: string | null;
+  };
   eventStatus?: EventStatus;
   areaLabel: string;
   children: React.ReactNode;

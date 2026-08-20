@@ -30,9 +30,10 @@ export default async function SubmitPage() {
 
   const gates = computeGates(hackathon);
   const submission = contestant.submission;
-  // REJECTED is deliberately not locked — an admin rejecting a link is how a
-  // contestant gets a second attempt.
-  const isLocked = submission?.status === "SUBMITTED" || submission?.status === "LATE";
+  const hasLink = submission?.status === "SUBMITTED" || submission?.status === "LATE";
+  // The link stays the entrant's to change for as long as the window is open;
+  // it is the deadline that closes it, not the act of submitting.
+  const canEdit = gates.uploadsOpen;
   // Shown verbatim so entrants copy it rather than inventing a format — the
   // title is how the jury ties an unlisted video back to a contestant.
   const requiredTitle = `${contestant.contestantId} - ${contestant.fullName}`;
@@ -45,8 +46,11 @@ export default async function SubmitPage() {
         <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">
           Upload your finished edit to YouTube in 1080p, title it{" "}
           <strong className="text-foreground">{requiredTitle}</strong>, then paste the
-          link here. You get one submission — once it is in, the link is locked and only
-          the organisers can change it.
+          link here. You can replace the link as often as you need until{" "}
+          <strong className="text-foreground">
+            {formatIST(hackathon.submissionDeadline)} IST
+          </strong>{" "}
+          — whatever is in at that moment is what the jury watches.
         </p>
       </div>
 
@@ -54,12 +58,12 @@ export default async function SubmitPage() {
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between gap-3">
-              <CardTitle>{isLocked ? "Your submission" : "Paste your link"}</CardTitle>
+              <CardTitle>{hasLink ? "Your submission" : "Paste your link"}</CardTitle>
               {submission ? <SubmissionStatusBadge status={submission.status} /> : null}
             </div>
           </CardHeader>
           <CardContent className="space-y-5">
-            {isLocked && submission ? (
+            {hasLink && submission ? (
               <>
                 <Alert variant="success">
                   <CheckCircle2 />
@@ -67,12 +71,15 @@ export default async function SubmitPage() {
                     <AlertTitle>
                       {submission.status === "LATE"
                         ? "Received — flagged late"
-                        : "Received and locked"}
+                        : canEdit
+                          ? "Received"
+                          : "Received and locked"}
                     </AlertTitle>
                     <AlertDescription>
-                      Submitted {formatIST(submission.uploadedAt)} IST. The jury watches
-                      this link. If it is wrong, contact the organisers — you cannot
-                      change it yourself.
+                      Submitted {formatIST(submission.uploadedAt)} IST.{" "}
+                      {canEdit
+                        ? `You can replace it below until ${formatIST(hackathon.submissionDeadline)} IST — the last link saved is the one the jury watches.`
+                        : "The window is closed. The jury watches this link — contact the organisers if it is wrong."}
                     </AlertDescription>
                   </div>
                 </Alert>
@@ -93,6 +100,19 @@ export default async function SubmitPage() {
                         Open on YouTube
                       </a>
                     </Button>
+                  </div>
+                ) : null}
+
+                {canEdit ? (
+                  <div className="space-y-4 border-t border-white/[0.07] pt-5">
+                    <div>
+                      <p className="label-eyebrow">Changed your mind?</p>
+                      <p className="mt-1.5 text-sm text-muted-foreground">
+                        Paste a different link and save. It replaces the one above
+                        immediately — there is no need to ask the organisers.
+                      </p>
+                    </div>
+                    <YoutubeSubmitForm currentUrl={submission.youtubeUrl} replacing />
                   </div>
                 ) : null}
               </>
@@ -148,7 +168,7 @@ export default async function SubmitPage() {
                       ? "Accepted but flagged"
                       : "Not accepted",
                   ],
-                  ["Changes after submit", "Not possible"],
+                  ["Changes after submit", "Until the deadline"],
                 ].map(([label, value]) => (
                   <div key={label} className="flex justify-between gap-4">
                     <dt className="text-muted-foreground">{label}</dt>
@@ -197,7 +217,10 @@ export default async function SubmitPage() {
                   • Open the link in a private window to confirm it plays for someone
                   who is not signed in as you.
                 </li>
-                <li>• You get one submission. Paste carefully.</li>
+                <li>
+                  • You can replace the link until the deadline — but the clock does
+                  not stop for a re-upload, so paste carefully the first time.
+                </li>
               </ul>
             </CardContent>
           </Card>

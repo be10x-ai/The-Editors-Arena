@@ -140,6 +140,21 @@ export const SOFTWARE_OPTIONS = [
 ] as const;
 
 
+/**
+ * Experience buckets, as offered at registration. Shared with the profile
+ * editor so a saved value always has a label to render back.
+ */
+export const EXPERIENCE_OPTIONS = [
+  { value: "0", label: "Less than a year" },
+  { value: "1", label: "1 year" },
+  { value: "2", label: "2 years" },
+  { value: "3", label: "3 years" },
+  { value: "4", label: "4 years" },
+  { value: "5", label: "5 years" },
+  { value: "7", label: "6–8 years" },
+  { value: "10", label: "9+ years" },
+] as const;
+
 export const HEARD_FROM_OPTIONS = [
   "Instagram",
   "LinkedIn",

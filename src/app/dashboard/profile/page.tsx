@@ -2,11 +2,11 @@ import { ExternalLink } from "lucide-react";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
+import { ContestantDetailsForm } from "@/components/forms/contestant-details-form";
 import { PhotoUploadForm } from "@/components/forms/photo-upload-form";
 import { SetPasswordForm } from "@/components/forms/set-password-form";
 import { CopyField } from "@/components/shared/copy-field";
 import { ContestantStatusBadge } from "@/components/shared/status-badges";
-import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardContent,
@@ -31,109 +31,111 @@ export default async function ProfilePage() {
   });
   if (!contestant) redirect("/dashboard");
 
-  const links = [{ label: "Portfolio", href: contestant.portfolioUrl }].filter(
-    (link): link is { label: string; href: string } => Boolean(link.href),
-  );
-
   return (
-    <div className="space-y-7">
+    <div className="space-y-6">
       <div>
         <p className="label-eyebrow">Profile</p>
         <h1 className="heading-hero mt-2 text-2xl sm:text-3xl">Your details</h1>
-        <p className="mt-3 text-sm text-muted-foreground">
-          Need something changed? Email the organisers — registration details are locked
-          after entry so the judging record stays clean.
+        <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">
+          Keep these current — the organisers use them to reach you about the task, the
+          result and anything you win. Your email and contestant ID are fixed; email the
+          organisers if either is wrong.
         </p>
       </div>
 
-      <div className="grid gap-5 lg:grid-cols-2">
+      {/* The identity strip. Photo, ID and status are the three things looked up
+          rather than read, so they sit across the top instead of competing with
+          the form for the same column. */}
+      <Card>
+        <CardContent className="flex flex-col gap-6 p-5 sm:p-6 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
+            <PhotoUploadForm currentUrl={avatarPublicUrl(contestant.photoPath)} />
+            <div className="min-w-0">
+              <h2 className="font-display text-xl font-semibold">
+                {contestant.fullName}
+              </h2>
+              <p className="mt-1 truncate text-sm text-muted-foreground">
+                {contestant.email}
+              </p>
+              <div className="mt-3 flex flex-wrap items-center gap-2.5">
+                <ContestantStatusBadge status={contestant.status} />
+                <span className="text-xs text-muted-foreground">
+                  Registered {formatIST(contestant.registeredAt)} IST
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="lg:w-72 lg:shrink-0">
+            <p className="label-eyebrow mb-2">Contestant ID</p>
+            <CopyField value={contestant.contestantId} label="Contestant ID" />
+            <p className="mt-2 text-xs text-muted-foreground">
+              Your video title must start with this.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="grid items-start gap-5 lg:grid-cols-[1.55fr_1fr]">
         <Card>
           <CardHeader>
             <CardTitle>Registration</CardTitle>
             <CardDescription>
-              Registered {formatIST(contestant.registeredAt)} IST
+              Everything you entered when you signed up. Edit any of it yourself.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-5">
-            <div>
-              <p className="label-eyebrow mb-2">Contestant ID</p>
-              <CopyField value={contestant.contestantId} label="Contestant ID" />
-            </div>
-
-            <dl className="space-y-3 text-sm">
-              {[
-                ["Full name", contestant.fullName],
-                ["Email", contestant.email],
-                ["Phone", contestant.phone],
-                ["City", contestant.city],
-                [
-                  "Experience",
-                  `${contestant.experienceYears} year${contestant.experienceYears === 1 ? "" : "s"}`,
-                ],
-                ["Current role", contestant.jobRole],
-              ].map(([label, value]) => (
-                <div key={label} className="flex justify-between gap-4">
-                  <dt className="text-muted-foreground">{label}</dt>
-                  <dd className="text-right font-medium">{value}</dd>
-                </div>
-              ))}
-              <div className="flex items-center justify-between gap-4">
-                <dt className="text-muted-foreground">Status</dt>
-                <dd>
-                  <ContestantStatusBadge status={contestant.status} />
-                </dd>
-              </div>
-            </dl>
+          <CardContent>
+            <ContestantDetailsForm
+              details={{
+                fullName: contestant.fullName,
+                email: contestant.email,
+                phone: contestant.phone,
+                city: contestant.city,
+                address: contestant.address,
+                experienceYears: contestant.experienceYears,
+                softwareSkills: contestant.softwareSkills,
+                portfolioUrl: contestant.portfolioUrl,
+                heardFrom: contestant.heardFrom,
+              }}
+            />
           </CardContent>
         </Card>
 
         <div className="space-y-5">
           <Card>
             <CardHeader>
-              <CardTitle>Software &amp; links</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-5">
-              <div>
-                <p className="label-eyebrow mb-2">Software skills</p>
-                <div className="flex flex-wrap gap-2">
-                  {contestant.softwareSkills.map((skill) => (
-                    <Badge key={skill} variant="secondary">
-                      {skill}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <p className="label-eyebrow mb-2">Links</p>
-                <ul className="space-y-2">
-                  {links.map((link) => (
-                    <li key={link.label}>
-                      <a
-                        href={link.href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 text-sm font-medium text-sky-300 underline-offset-4 hover:underline"
-                      >
-                        {link.label}
-                        <ExternalLink className="size-3.5" />
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Profile photo</CardTitle>
+              <CardTitle>Your portfolio</CardTitle>
               <CardDescription>
-                Optional. Shown to the organisers alongside your entry.
+                What the screening panel opens first.
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <PhotoUploadForm currentUrl={avatarPublicUrl(contestant.photoPath)} />
+            <CardContent className="space-y-4">
+              <a
+                href={contestant.portfolioUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 break-all rounded-xl border border-white/10 bg-white/[0.03] p-3 text-sm font-medium text-sky-300 transition hover:border-sky-400/40 hover:bg-sky-500/[0.07]"
+              >
+                <ExternalLink className="size-4 shrink-0" />
+                {contestant.portfolioUrl.replace(/^https?:\/\//, "")}
+              </a>
+              <div>
+                <p className="label-eyebrow mb-2">Software you work in</p>
+                <div className="flex flex-wrap gap-2">
+                  {contestant.softwareSkills.length > 0 ? (
+                    contestant.softwareSkills.map((skill) => (
+                      <span
+                        key={skill}
+                        className="rounded-full border border-sky-400/25 bg-sky-500/10 px-3 py-1 text-xs font-medium text-sky-100"
+                      >
+                        {skill}
+                      </span>
+                    ))
+                  ) : (
+                    <p className="text-sm text-muted-foreground">None listed yet.</p>
+                  )}
+                </div>
+              </div>
             </CardContent>
           </Card>
 
@@ -141,7 +143,7 @@ export default async function ProfilePage() {
             <CardHeader>
               <CardTitle>Change password</CardTitle>
               <CardDescription>
-                You sign in with this email and password.
+                You sign in with {contestant.email} and this password.
               </CardDescription>
             </CardHeader>
             <CardContent>

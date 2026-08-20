@@ -4,6 +4,7 @@ import { PortalShell } from "@/components/shell/portal-shell";
 import type { PortalNavItem } from "@/components/shell/portal-nav";
 import { getActiveHackathon } from "@/lib/hackathon";
 import { requireRole } from "@/lib/rbac";
+import { avatarPublicUrl } from "@/lib/storage";
 
 export const metadata: Metadata = { title: "Dashboard" };
 
@@ -31,6 +32,7 @@ export default async function DashboardLayout({
         email: user.email,
         role: user.role,
         contestantId: user.contestantId,
+        avatarUrl: avatarPublicUrl(user.photoPath),
       }}
     >
       {children}

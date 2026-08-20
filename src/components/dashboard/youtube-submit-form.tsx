@@ -15,19 +15,30 @@ import { submitYoutubeLink } from "@/server/actions/submission";
 import { idleState } from "@/server/actions/types";
 
 /**
- * Submits the entrant's YouTube link. One shot — the server refuses to change a
- * link once a submission exists, so the form leans hard on confirming before
- * sending rather than offering an edit afterwards.
+ * Submits the entrant's YouTube link, and replaces it on every later submit.
+ *
+ * `replacing` only changes the wording: the same action backs both, and the
+ * window — not the first submit — is what closes the form. The link is echoed
+ * back into the field so a one-character fix is a one-character edit rather
+ * than a re-paste.
  */
-export function YoutubeSubmitForm() {
+export function YoutubeSubmitForm({
+  currentUrl,
+  replacing = false,
+}: {
+  currentUrl?: string | null;
+  replacing?: boolean;
+} = {}) {
   const [state, action] = useActionState(submitYoutubeLink, idleState as never);
-  const [url, setUrl] = React.useState("");
+  const [url, setUrl] = React.useState(currentUrl ?? "");
 
   const fieldErrors = state.fieldErrors ?? {};
   const echoed =
-    typeof state.values?.youtubeUrl === "string" ? state.values.youtubeUrl : "";
+    typeof state.values?.youtubeUrl === "string" && state.values.youtubeUrl
+      ? state.values.youtubeUrl
+      : (currentUrl ?? "");
 
-  // Live feedback, so a bad paste is caught before the one submit is spent.
+  // Live feedback, so a bad paste is caught before it is sent at all.
   const videoId = parseYoutubeId(url || echoed);
   const looksValid = Boolean(videoId);
 
@@ -42,14 +53,16 @@ export function YoutubeSubmitForm() {
         <Alert variant="destructive">
           <AlertTriangle />
           <div>
-            <AlertTitle>Not submitted</AlertTitle>
+            <AlertTitle>{replacing ? "Not updated" : "Not submitted"}</AlertTitle>
             <AlertDescription>{state.message}</AlertDescription>
           </div>
         </Alert>
       ) : null}
 
       <div className="space-y-2">
-        <Label htmlFor="youtubeUrl">YouTube link *</Label>
+        <Label htmlFor="youtubeUrl">
+          {replacing ? "New YouTube link *" : "YouTube link *"}
+        </Label>
         <Input
           id="youtubeUrl"
           name="youtubeUrl"
@@ -88,8 +101,8 @@ export function YoutubeSubmitForm() {
       <div className="flex items-start gap-3 rounded-xl border border-orange-500/30 bg-orange-500/[0.07] p-4">
         <Checkbox id="confirmFinal" name="confirmFinal" required className="mt-0.5" />
         <Label htmlFor="confirmFinal" className="text-sm font-normal leading-relaxed">
-          This is my final edit. I understand the link is locked once I submit and I
-          cannot change it myself.
+          This is the edit I want judged. I can change this link until the submission
+          deadline — after that, whatever is here is what the jury watches.
         </Label>
       </div>
       {fieldErrors.confirmFinal?.length ? (
@@ -98,8 +111,12 @@ export function YoutubeSubmitForm() {
         </p>
       ) : null}
 
-      <SubmitButton size="lg" className="w-full sm:w-auto" pendingLabel="Submitting…">
-        Submit my link
+      <SubmitButton
+        size="lg"
+        className="w-full sm:w-auto"
+        pendingLabel={replacing ? "Updating…" : "Submitting…"}
+      >
+        {replacing ? "Update my link" : "Submit my link"}
         <ArrowRight />
       </SubmitButton>
     </form>

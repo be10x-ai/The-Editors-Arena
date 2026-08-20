@@ -4,9 +4,11 @@ import {
   CheckCircle2,
   Clock,
   ExternalLink,
+  Pencil,
   Upload,
   Youtube,
 } from "lucide-react";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { AssetCard } from "@/components/dashboard/asset-card";
@@ -214,7 +216,9 @@ export default async function ContestantDashboard() {
                     <CheckCircle2 className="size-4" />
                     {submission.status === "LATE"
                       ? "Received — flagged late"
-                      : "Received and locked"}
+                      : gates.uploadsOpen
+                        ? "Received"
+                        : "Received and locked"}
                   </p>
                   {submission.youtubeUrl ? (
                     <p className="mt-1.5 break-all font-mono text-xs text-emerald-100/80">
@@ -222,8 +226,10 @@ export default async function ContestantDashboard() {
                     </p>
                   ) : null}
                   <p className="mt-1 text-xs text-emerald-100/70">
-                    Submitted {formatIST(submission.uploadedAt)} IST · the link cannot
-                    be changed
+                    Submitted {formatIST(submission.uploadedAt)} IST ·{" "}
+                    {gates.uploadsOpen
+                      ? "you can still change it"
+                      : "the link cannot be changed"}
                   </p>
                 </div>
 
@@ -240,13 +246,23 @@ export default async function ContestantDashboard() {
                       </a>
                     </Button>
                   ) : null}
+                  {/* The wrong link is only fixable while the window is open, so
+                      the way to fix it is on the page the moment it matters. */}
+                  {gates.uploadsOpen ? (
+                    <Button asChild variant="secondary" size="sm">
+                      <Link href="/dashboard/submit">
+                        <Pencil />
+                        Change my link
+                      </Link>
+                    </Button>
+                  ) : null}
                 </div>
               </>
             ) : (
               <>
                 <p className="text-sm leading-relaxed text-muted-foreground">
                   {gates.uploadsOpen
-                    ? "Submissions are open. Upload your edit to YouTube as Public or Unlisted, then paste the link — you get one submission and it cannot be changed afterwards."
+                    ? "Submissions are open. Upload your edit to YouTube as Public or Unlisted, then paste the link — you can replace it any time until the deadline."
                     : gates.deadlinePassed
                       ? "The submission window has closed."
                       : "The link form unlocks when the organisers open submissions on event day."}

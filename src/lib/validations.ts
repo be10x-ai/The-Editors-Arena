@@ -28,14 +28,57 @@ export const istDateTime = z.union([z.string(), z.date()]).transform((value, ctx
   return parsed;
 });
 
+/**
+ * The entrant-owned half of a registration, shared with the profile editor.
+ *
+ * Split out so the two forms cannot drift: a rule tightened at registration
+ * (the dotted-domain email, the ten-digit phone) has to hold when the same
+ * value is edited later, and duplicating the field definitions is how that
+ * stops being true.
+ */
+const contestantFields = {
+  fullName: z
+    .string()
+    .trim()
+    .min(3, "Please enter your full name")
+    .max(120)
+    .regex(/^[\p{L}\p{M}.'\- ]+$/u, "Letters, spaces, hyphens and apostrophes only"),
+  phone: z
+    .string()
+    .trim()
+    // Accepted as typed (spaces, dashes, +91, leading 0) and stored as ten
+    // digits, because this number is dialled and WhatsApped by a human.
+    .transform((value) => value.replace(/[\s\-()]/g, ""))
+    .refine((value) => /^(?:\+?91|0)?[6-9]\d{9}$/.test(value), {
+      message: "Enter a 10-digit Indian mobile number",
+    })
+    .transform((value) => value.replace(/^(?:\+?91|0)/, "")),
+  city: z.string().trim().min(2, "Enter your city").max(80),
+  address: z
+    .string()
+    .trim()
+    .min(10, "Enter your full postal address")
+    .max(300, "Keep it under 300 characters"),
+  experienceYears: z.coerce
+    .number({ invalid_type_error: "Select your experience" })
+    .int("Whole years only")
+    .min(0)
+    .max(50),
+  softwareSkills: z
+    .array(z.string().trim().min(1).max(60))
+    .min(1, "Pick at least one tool you work in")
+    .max(15),
+  portfolioUrl: url,
+} as const;
+
+/** What a signed-in contestant may change about their own entry. */
+export const contestantProfileSchema = z.object(contestantFields);
+
+export type ContestantProfileInput = z.infer<typeof contestantProfileSchema>;
+
 export const registrationSchema = z
   .object({
-    fullName: z
-      .string()
-      .trim()
-      .min(3, "Please enter your full name")
-      .max(120)
-      .regex(/^[\p{L}\p{M}.'\- ]+$/u, "Letters, spaces, hyphens and apostrophes only"),
+    ...contestantFields,
     email: z
       .string()
       .trim()
@@ -48,32 +91,6 @@ export const registrationSchema = z
       .refine((value) => /^[^@\s]+@[^@\s.]+(\.[^@\s.]+)+$/.test(value), {
         message: "Enter a valid email, including the domain",
       }),
-    phone: z
-      .string()
-      .trim()
-      // Accepted as typed (spaces, dashes, +91, leading 0) and stored as ten
-      // digits, because this number is dialled and WhatsApped by a human.
-      .transform((value) => value.replace(/[\s\-()]/g, ""))
-      .refine((value) => /^(?:\+?91|0)?[6-9]\d{9}$/.test(value), {
-        message: "Enter a 10-digit Indian mobile number",
-      })
-      .transform((value) => value.replace(/^(?:\+?91|0)/, "")),
-    city: z.string().trim().min(2, "Enter your city").max(80),
-    address: z
-      .string()
-      .trim()
-      .min(10, "Enter your full postal address")
-      .max(300, "Keep it under 300 characters"),
-    experienceYears: z.coerce
-      .number({ invalid_type_error: "Select your experience" })
-      .int("Whole years only")
-      .min(0)
-      .max(50),
-    softwareSkills: z
-      .array(z.string().trim().min(1).max(60))
-      .min(1, "Pick at least one tool you work in")
-      .max(15),
-    portfolioUrl: url,
     heardFrom: z.string().trim().max(80).optional(),
     password: z.string().min(8, "Use at least 8 characters").max(200),
     confirmPassword: z.string().min(8, "Use at least 8 characters").max(200),
@@ -114,9 +131,16 @@ export const youtubeSubmissionSchema = z.object({
     .refine((v) => parseYoutubeId(v) !== null, {
       message: "That is not a YouTube video link. Use the full watch or youtu.be URL.",
     }),
-  /** Typed confirmation, because the link cannot be changed afterwards. */
+  /**
+   * Deliberate confirmation. The link can be changed until the deadline, so
+   * this is no longer a point of no return — but it is still the moment the
+   * jury's copy of the entry changes, and it should be an act rather than a
+   * stray click.
+   */
   confirmFinal: z.literal(true, {
-    errorMap: () => ({ message: "Tick the box to confirm this is your final edit" }),
+    errorMap: () => ({
+      message: "Tick the box to confirm this is the edit you want judged",
+    }),
   }),
 });
 

@@ -12,6 +12,8 @@ export type SessionUser = {
   role: Role;
   contestantRowId?: string | null;
   contestantId?: string | null;
+  /** Avatar object path, not a URL — resolved by `avatarPublicUrl` at render. */
+  photoPath?: string | null;
   judgeId?: string | null;
 };
 
@@ -51,7 +53,7 @@ export const getSessionUser = cache(async (): Promise<SessionUser | null> => {
   const user = await prisma.user.findUnique({
     where: { email },
     include: {
-      contestant: { select: { id: true, contestantId: true } },
+      contestant: { select: { id: true, contestantId: true, photoPath: true } },
       judge: { select: { id: true, isActive: true } },
     },
   });
@@ -68,6 +70,7 @@ export const getSessionUser = cache(async (): Promise<SessionUser | null> => {
     role: user.role,
     contestantRowId: user.contestant?.id ?? null,
     contestantId: user.contestant?.contestantId ?? null,
+    photoPath: user.contestant?.photoPath ?? null,
     judgeId: user.judge?.id ?? null,
   };
 });

@@ -12,7 +12,7 @@ import {
   removeAvatar,
   uploadAvatar,
 } from "@/lib/storage";
-import { ownProfileSchema } from "@/lib/validations";
+import { contestantProfileSchema, ownProfileSchema } from "@/lib/validations";
 import {
   errorState,
   successState,
@@ -79,6 +79,85 @@ export async function updateOwnProfile(
   revalidatePath("/admin/profile");
   revalidatePath("/judge/profile");
   return successState("Profile updated.");
+}
+
+/**
+ * Lets a contestant correct their own registration details.
+ *
+ * Everything an entrant is asked for at registration is theirs to fix — a
+ * mistyped phone number or a moved address is otherwise an email to the
+ * organisers and a manual edit. Two fields are deliberately not here: the email
+ * is the login identifier and is unique across users, and the contestant ID is
+ * the judging record's handle. Neither is a self-service change.
+ */
+export async function updateContestantDetails(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const user = await getSessionUser();
+  if (!user || user.role !== "CONTESTANT" || !user.contestantRowId) {
+    return errorState("Sign in as a contestant first.");
+  }
+
+  const parsed = contestantProfileSchema.safeParse({
+    fullName: formData.get("fullName"),
+    phone: formData.get("phone"),
+    city: formData.get("city"),
+    address: formData.get("address"),
+    experienceYears: formData.get("experienceYears"),
+    softwareSkills: formData.getAll("softwareSkills").filter(Boolean),
+    portfolioUrl: formData.get("portfolioUrl"),
+  });
+  if (!parsed.success) {
+    return errorState(
+      "Check the highlighted fields.",
+      parsed.error.flatten().fieldErrors as Record<string, string[]>,
+      {
+        fullName: String(formData.get("fullName") ?? ""),
+        phone: String(formData.get("phone") ?? ""),
+        city: String(formData.get("city") ?? ""),
+        address: String(formData.get("address") ?? ""),
+        experienceYears: String(formData.get("experienceYears") ?? ""),
+        portfolioUrl: String(formData.get("portfolioUrl") ?? ""),
+        softwareSkills: formData.getAll("softwareSkills").map(String),
+      },
+    );
+  }
+
+  const input = parsed.data;
+
+  await prisma.contestant.update({
+    where: { id: user.contestantRowId },
+    data: {
+      fullName: input.fullName,
+      phone: input.phone,
+      city: input.city,
+      address: input.address,
+      experienceYears: input.experienceYears,
+      softwareSkills: input.softwareSkills,
+      portfolioUrl: input.portfolioUrl,
+    },
+  });
+
+  // The user row carries the name the whole app greets them by, so it moves in
+  // step with the entry rather than keeping the spelling they are correcting.
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { name: input.fullName },
+  });
+
+  await recordAudit({
+    actorId: user.id,
+    actorRole: user.role,
+    action: "contestant.details_updated",
+    entity: "Contestant",
+    entityId: user.contestantRowId,
+  });
+
+  revalidatePath("/dashboard/profile");
+  revalidatePath("/dashboard");
+  revalidatePath("/admin/contestants");
+  return successState("Your details are updated.");
 }
 
 /**

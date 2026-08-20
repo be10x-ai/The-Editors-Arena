@@ -22,23 +22,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
+  EXPERIENCE_OPTIONS,
   HEARD_FROM_OPTIONS,
   SOFTWARE_OPTIONS,
 } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import { registerContestant } from "@/server/actions/registration";
 import { idleState } from "@/server/actions/types";
-
-const EXPERIENCE_OPTIONS = [
-  { value: "0", label: "Less than a year" },
-  { value: "1", label: "1 year" },
-  { value: "2", label: "2 years" },
-  { value: "3", label: "3 years" },
-  { value: "4", label: "4 years" },
-  { value: "5", label: "5 years" },
-  { value: "7", label: "6–8 years" },
-  { value: "10", label: "9+ years" },
-];
 
 function FieldError({ errors }: { errors?: string[] }) {
   if (!errors?.length) return null;

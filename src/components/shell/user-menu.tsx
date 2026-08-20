@@ -17,13 +17,33 @@ import { initials } from "@/lib/utils";
 export function UserMenu({
   user,
 }: {
-  user: { name: string; email: string; role: string; contestantId?: string | null };
+  user: {
+    name: string;
+    email: string;
+    role: string;
+    contestantId?: string | null;
+    /** Uploaded avatar, already resolved to a public URL. */
+    avatarUrl?: string | null;
+  };
 }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className="flex items-center gap-2.5 rounded-xl border border-white/10 bg-white/[0.04] py-1.5 pl-1.5 pr-3 transition hover:border-white/20 hover:bg-white/[0.07] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40">
-        <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-blue-strike text-xs font-bold text-white">
-          {initials(user.name) || <User className="size-4" />}
+        <span className="grid size-8 shrink-0 place-items-center overflow-hidden rounded-lg bg-blue-strike text-xs font-bold text-white">
+          {/* Plain <img>: the avatar comes from the storage bucket's public CDN
+              and next/image would need that host whitelisted in config for a
+              32px square it does not need to optimise. */}
+          {user.avatarUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={user.avatarUrl}
+              alt=""
+              className="size-full object-cover"
+              loading="lazy"
+            />
+          ) : (
+            (initials(user.name) || <User className="size-4" />)
+          )}
         </span>
         <span className="hidden text-left sm:block">
           <span className="block max-w-[140px] truncate text-[13px] font-semibold leading-tight">
