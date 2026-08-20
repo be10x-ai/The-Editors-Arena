@@ -1,4 +1,3 @@
-import { ExternalLink } from "lucide-react";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
@@ -101,44 +100,11 @@ export default async function ProfilePage() {
           </CardContent>
         </Card>
 
+        {/* The right column is password-only on purpose: the portfolio link and
+            the software chips live in the form beside it, and a read-only copy
+            of two fields the entrant is already looking at is just the same
+            page twice. */}
         <div className="space-y-5">
-          <Card>
-            <CardHeader>
-              <CardTitle>Your portfolio</CardTitle>
-              <CardDescription>
-                What the screening panel opens first.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <a
-                href={contestant.portfolioUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 break-all rounded-xl border border-white/10 bg-white/[0.03] p-3 text-sm font-medium text-sky-300 transition hover:border-sky-400/40 hover:bg-sky-500/[0.07]"
-              >
-                <ExternalLink className="size-4 shrink-0" />
-                {contestant.portfolioUrl.replace(/^https?:\/\//, "")}
-              </a>
-              <div>
-                <p className="label-eyebrow mb-2">Software you work in</p>
-                <div className="flex flex-wrap gap-2">
-                  {contestant.softwareSkills.length > 0 ? (
-                    contestant.softwareSkills.map((skill) => (
-                      <span
-                        key={skill}
-                        className="rounded-full border border-sky-400/25 bg-sky-500/10 px-3 py-1 text-xs font-medium text-sky-100"
-                      >
-                        {skill}
-                      </span>
-                    ))
-                  ) : (
-                    <p className="text-sm text-muted-foreground">None listed yet.</p>
-                  )}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
           <Card>
             <CardHeader>
               <CardTitle>Change password</CardTitle>
