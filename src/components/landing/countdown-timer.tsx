@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import * as React from "react";
 
 import { cn, endOfISTDay } from "@/lib/utils";
@@ -71,6 +71,7 @@ export function CountdownTimer({
 
   const [remaining, setRemaining] = React.useState<Remaining | null>(null);
   const [mounted, setMounted] = React.useState(false);
+  const reduceMotion = useReducedMotion();
 
   React.useEffect(() => {
     setMounted(true);
@@ -109,11 +110,17 @@ export function CountdownTimer({
     );
   }
 
+  /**
+   * Seconds are flagged `live`: it is the only number on the page that moves,
+   * and lighting it is what makes the panel read as a running clock rather
+   * than four printed boxes. Everything else stays quiet so the lit tile has
+   * something to be brighter than.
+   */
   const units = [
-    { value: remaining?.days ?? 0, label: "Days" },
-    { value: remaining?.hours ?? 0, label: "Hours" },
-    { value: remaining?.minutes ?? 0, label: "Minutes" },
-    { value: remaining?.seconds ?? 0, label: "Seconds" },
+    { value: remaining?.days ?? 0, label: "Days", live: false },
+    { value: remaining?.hours ?? 0, label: "Hours", live: false },
+    { value: remaining?.minutes ?? 0, label: "Minutes", live: false },
+    { value: remaining?.seconds ?? 0, label: "Seconds", live: true },
   ];
 
   return (
@@ -136,25 +143,46 @@ export function CountdownTimer({
             className={cn(
               "glass relative overflow-hidden rounded-xl text-center",
               compact ? "px-2 py-2.5" : "px-2 py-4 sm:px-4 sm:py-5",
+              unit.live && "timer-live",
             )}
           >
             <div
               aria-hidden
-              className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-sky-400/60 to-transparent"
+              className={cn(
+                "absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent to-transparent",
+                unit.live ? "via-sky-300" : "via-sky-400/60",
+              )}
             />
             <p
               className={cn(
-                "font-display font-bold tabular-nums tracking-tight text-foreground",
+                "font-display font-bold tabular-nums tracking-tight",
                 compact ? "text-xl" : "text-2xl sm:text-4xl",
+                unit.live ? "text-glow-sky text-sky-100" : "text-foreground",
               )}
               suppressHydrationWarning
             >
-              {String(unit.value).padStart(2, "0")}
+              {unit.live && !reduceMotion ? (
+                /* Keyed on the value, so each tick remounts the digits and
+                   replays the lift — the movement is the attraction, not a
+                   loop running whether or not the clock is going. */
+                <motion.span
+                  key={unit.value}
+                  className="inline-block"
+                  initial={{ opacity: 0.35, y: -5, scale: 1.06 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
+                >
+                  {String(unit.value).padStart(2, "0")}
+                </motion.span>
+              ) : (
+                String(unit.value).padStart(2, "0")
+              )}
             </p>
             <p
               className={cn(
-                "mt-1 font-medium uppercase tracking-[0.16em] text-muted-foreground",
+                "mt-1 font-medium uppercase tracking-[0.16em]",
                 compact ? "text-[9px]" : "text-[10px] sm:text-[11px]",
+                unit.live ? "text-sky-300/90" : "text-muted-foreground",
               )}
             >
               {unit.label}
