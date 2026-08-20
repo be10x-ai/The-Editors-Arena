@@ -67,13 +67,15 @@ export function Hero({
     {
       key: "free",
       icon: TicketPercent,
-      tone: "text-amber-300",
+      // Green, not amber: this is the good news on the row — the fee is
+      // waived — and amber reads as a caution beside the strike-through.
+      tone: "text-emerald-300",
       body: (
         <>
           <span className="text-muted-foreground/70 line-through decoration-rose-400/70 decoration-2">
             {formatInr(CAMPAIGN.entryFeeInr)}
           </span>{" "}
-          <span className="font-semibold text-amber-300">FREE</span> today
+          <span className="font-semibold text-emerald-300">FREE</span> today
         </>
       ),
     },
