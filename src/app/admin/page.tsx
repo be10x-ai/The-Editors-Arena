@@ -181,64 +181,79 @@ export default async function AdminControlPanel() {
             {EVENT_STATUS_META[hackathon.status].description}
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
-          <ol className="flex flex-wrap gap-2">
-            {ORDER.map((status, index) => (
-              <li key={status}>
-                <span
-                  className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold ${
-                    index < currentIndex
-                      ? "border-sky-500/30 bg-sky-500/10 text-sky-200"
-                      : index === currentIndex
-                        ? EVENT_STATUS_META[status].tone
-                        : "border-white/10 bg-white/[0.02] text-muted-foreground"
-                  }`}
-                >
-                  {index < currentIndex ? <CheckCircle2 className="size-3" /> : null}
-                  {EVENT_STATUS_META[status].label}
-                </span>
-              </li>
-            ))}
-          </ol>
+        {/* Controls left, history right. Stacked, the stage chips and two
+            buttons left the whole right half of a full-width card empty. */}
+        <CardContent className="grid items-start gap-6 lg:grid-cols-[1.35fr_1fr] lg:gap-8">
+          <div className="space-y-6">
+            <ol className="flex flex-wrap gap-2">
+              {ORDER.map((status, index) => (
+                <li key={status}>
+                  <span
+                    className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold ${
+                      index < currentIndex
+                        ? "border-sky-500/30 bg-sky-500/10 text-sky-200"
+                        : index === currentIndex
+                          ? EVENT_STATUS_META[status].tone
+                          : "border-white/10 bg-white/[0.02] text-muted-foreground"
+                    }`}
+                  >
+                    {index < currentIndex ? <CheckCircle2 className="size-3" /> : null}
+                    {EVENT_STATUS_META[status].label}
+                  </span>
+                </li>
+              ))}
+            </ol>
 
-          <div className="flex flex-wrap gap-3">
-            {nextStates.map((status) => {
-              const forward = ORDER.indexOf(status) > currentIndex;
-              return (
-                <ActionButton
-                  key={status}
-                  action={changeEventStatus}
-                  fields={{ status }}
-                  variant={forward ? "default" : "secondary"}
-                  confirm={{
-                    title: `Move to ${EVENT_STATUS_META[status].label}?`,
-                    description: `${EVENT_STATUS_META[status].description} This is visible to every contestant and judge immediately.`,
-                    confirmLabel: `Yes, set ${EVENT_STATUS_META[status].label}`,
-                  }}
-                >
-                  {forward ? "Advance to" : "Roll back to"}{" "}
-                  {EVENT_STATUS_META[status].label}
-                </ActionButton>
-              );
-            })}
+            <div className="flex flex-wrap gap-3">
+              {nextStates.map((status) => {
+                const forward = ORDER.indexOf(status) > currentIndex;
+                return (
+                  <ActionButton
+                    key={status}
+                    action={changeEventStatus}
+                    fields={{ status }}
+                    variant={forward ? "default" : "secondary"}
+                    confirm={{
+                      title: `Move to ${EVENT_STATUS_META[status].label}?`,
+                      description: `${EVENT_STATUS_META[status].description} This is visible to every contestant and judge immediately.`,
+                      confirmLabel: `Yes, set ${EVENT_STATUS_META[status].label}`,
+                    }}
+                  >
+                    {forward ? "Advance to" : "Roll back to"}{" "}
+                    {EVENT_STATUS_META[status].label}
+                  </ActionButton>
+                );
+              })}
+            </div>
+
+            <p className="text-xs leading-relaxed text-muted-foreground">
+              Every move here is live for contestants and judges the moment it is
+              made. Rolling back is allowed but leaves a line in the log.
+            </p>
           </div>
 
-          {statusLog.length > 0 ? (
-            <div>
-              <p className="label-eyebrow mb-2">Recent transitions</p>
-              <ul className="space-y-1.5 text-xs text-muted-foreground">
+          <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-4">
+            <p className="label-eyebrow mb-3">Recent transitions</p>
+            {statusLog.length > 0 ? (
+              <ul className="space-y-2.5 text-xs">
                 {statusLog.map((log) => (
-                  <li key={log.id} className="flex flex-wrap gap-x-2">
-                    <span className="tabular-nums">{formatIST(log.createdAt)}</span>
-                    <span className="text-foreground/80">
+                  <li key={log.id} className="flex flex-col gap-0.5">
+                    <span className="font-medium text-foreground/85">
                       {log.from ?? "—"} → {log.to}
                     </span>
-                    {log.note ? <span>· {log.note}</span> : null}
+                    <span className="tabular-nums text-muted-foreground">
+                      {formatIST(log.createdAt)}
+                      {log.note ? ` · ${log.note}` : ""}
+                    </span>
                   </li>
                 ))}
               </ul>
-            </div>
-          ) : null}
+            ) : (
+              <p className="text-xs text-muted-foreground">
+                No transitions yet — the event has not moved off its opening stage.
+              </p>
+            )}
+          </div>
         </CardContent>
       </Card>
 
