@@ -1,9 +1,10 @@
-import { Clock, ExternalLink, PlayCircle, Upload, Video } from "lucide-react";
+import { Clock, ExternalLink, Upload, Video } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 
 import { ActionButton } from "@/components/admin/action-button";
 import { ReasonDialogButton } from "@/components/admin/reason-dialog-button";
+import { WatchSubmissionDialog } from "@/components/admin/watch-submission-dialog";
 import { StatCard } from "@/components/shared/stat-card";
 import { SubmissionStatusBadge } from "@/components/shared/status-badges";
 import { Button } from "@/components/ui/button";
@@ -119,9 +120,12 @@ export default async function AdminSubmissionsPage() {
               {submissions.map((submission) => (
                 <TableRow key={submission.id}>
                   <TableCell>
-                    <p className="font-mono text-xs tracking-wider text-sky-300">
+                    <Link
+                      href={`/admin/contestants/${submission.contestantId}`}
+                      className="font-mono text-xs tracking-wider text-sky-300 hover:underline"
+                    >
                       {submission.contestant.contestantId}
-                    </p>
+                    </Link>
                     <p className="mt-0.5 font-medium">
                       {submission.contestant.fullName}
                     </p>
@@ -166,12 +170,14 @@ export default async function AdminSubmissionsPage() {
                   <TableCell>
                     <div className="flex flex-wrap items-center justify-end gap-1.5">
                       {submission.youtubeVideoId || submission.previewUrl ? (
-                        <Button asChild size="sm" variant="ghost">
-                          <Link href={`/judge/review/${submission.id}`}>
-                            <PlayCircle />
-                            Watch
-                          </Link>
-                        </Button>
+                        <WatchSubmissionDialog
+                          contestantId={submission.contestant.contestantId}
+                          contestantName={submission.contestant.fullName}
+                          youtubeVideoId={submission.youtubeVideoId}
+                          youtubeUrl={submission.youtubeUrl}
+                          previewUrl={submission.previewUrl}
+                          viewUrl={submission.videoUrl}
+                        />
                       ) : null}
                       {(submission.youtubeUrl ?? submission.videoUrl) ? (
                         <Button asChild size="sm" variant="ghost">

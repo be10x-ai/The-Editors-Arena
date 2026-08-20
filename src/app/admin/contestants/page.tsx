@@ -1,5 +1,6 @@
-import { Download, ExternalLink, Mail, Search, Star, Users } from "lucide-react";
+import { Download, Eye, Mail, Search, Star, UserRound, Users } from "lucide-react";
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 
 import { ActionButton } from "@/components/admin/action-button";
@@ -24,6 +25,7 @@ import {
 import { getActiveHackathon } from "@/lib/hackathon";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/rbac";
+import { avatarPublicUrl } from "@/lib/storage";
 import { formatISTDate, formatScore } from "@/lib/utils";
 import {
   disqualifyContestant,
@@ -58,6 +60,7 @@ export default async function AdminContestantsPage({
               { fullName: { contains: query, mode: "insensitive" } },
               { email: { contains: query, mode: "insensitive" } },
               { city: { contains: query, mode: "insensitive" } },
+              { address: { contains: query, mode: "insensitive" } },
               { phone: { contains: query } },
             ],
           }
@@ -109,7 +112,7 @@ export default async function AdminContestantsPage({
           <Input
             name="q"
             defaultValue={query}
-            placeholder="Search by ID, name, email, city or phone"
+            placeholder="Search by ID, name, email, city, address or phone"
             className="pl-10"
           />
         </div>
@@ -152,22 +155,51 @@ export default async function AdminContestantsPage({
             <TableBody>
               {contestants.map((contestant) => (
                 <TableRow key={contestant.id}>
-                  <TableCell className="font-mono text-xs tracking-wider text-sky-300">
-                    {contestant.contestantId}
+                  <TableCell className="font-mono text-xs tracking-wider">
+                    <Link
+                      href={`/admin/contestants/${contestant.id}`}
+                      className="text-sky-300 hover:underline"
+                    >
+                      {contestant.contestantId}
+                    </Link>
                   </TableCell>
                   <TableCell>
-                    <p className="font-medium">{contestant.fullName}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {contestant.city} · {contestant.jobRole}
-                    </p>
-                    <a
-                      href={contestant.portfolioUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="mt-1 inline-flex items-center gap-1 text-xs text-primary hover:underline"
-                    >
-                      Portfolio <ExternalLink className="size-3" />
-                    </a>
+                    {/* Photo, name and where they are, as one block — the row is
+                        how an organiser recognises an entrant, and the picture
+                        they uploaded is the fastest handle on that. */}
+                    <div className="flex items-start gap-3">
+                      <span className="relative grid size-10 shrink-0 place-items-center overflow-hidden rounded-lg border border-white/10 bg-white/[0.03]">
+                        {avatarPublicUrl(contestant.photoPath) ? (
+                          <Image
+                            src={avatarPublicUrl(contestant.photoPath)!}
+                            alt=""
+                            width={80}
+                            height={80}
+                            className="size-full object-cover"
+                          />
+                        ) : (
+                          <UserRound className="size-4 text-muted-foreground" />
+                        )}
+                      </span>
+                      <div className="min-w-0">
+                        <Link
+                          href={`/admin/contestants/${contestant.id}`}
+                          className="font-medium hover:text-sky-300 hover:underline"
+                        >
+                          {contestant.fullName}
+                        </Link>
+                        <p className="text-xs text-muted-foreground">
+                          {[contestant.city, contestant.jobRole]
+                            .filter(Boolean)
+                            .join(" · ")}
+                        </p>
+                        <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground/80">
+                          {contestant.address ?? (
+                            <span className="text-orange-300/80">No address on file</span>
+                          )}
+                        </p>
+                      </div>
+                    </div>
                   </TableCell>
                   <TableCell className="hidden text-xs text-muted-foreground lg:table-cell">
                     <p>{contestant.email}</p>
@@ -204,6 +236,12 @@ export default async function AdminContestantsPage({
                   </TableCell>
                   <TableCell>
                     <div className="flex flex-wrap items-center justify-end gap-1.5">
+                      <Button asChild size="sm" variant="ghost" aria-label="View profile">
+                        <Link href={`/admin/contestants/${contestant.id}`}>
+                          <Eye />
+                        </Link>
+                      </Button>
+
                       <ActionButton
                         action={resendWelcomeEmail}
                         fields={{ contestantRowId: contestant.id }}

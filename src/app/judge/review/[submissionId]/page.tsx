@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
-import { SubmissionPlayer } from "@/components/judge/submission-player";
+import { SubmissionPlayer } from "@/components/shared/submission-player";
 import { RatingForm } from "@/components/judge/rating-form";
 import { SubmissionStatusBadge } from "@/components/shared/status-badges";
 import { Badge } from "@/components/ui/badge";

@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { youtubeEmbedUrl } from "@/lib/youtube";
 
 /**
- * Plays a submission inside the judge portal.
+ * Plays a submission. Shared by the judge review page and the admin console —
+ * same player, different reason for watching.
  *
  * Prefers the YouTube embed. Falls back to the Drive preview iframe so entries
  * submitted before the switch to links are still watchable — those rows keep
