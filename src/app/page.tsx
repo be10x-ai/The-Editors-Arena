@@ -9,6 +9,7 @@ import { Hero } from "@/components/landing/hero";
 import { LegalStrip } from "@/components/landing/legal-strip";
 import { Navbar } from "@/components/landing/navbar";
 import { PrizeSection } from "@/components/landing/prize-section";
+import { ScrollToTopOnReload } from "@/components/landing/scroll-to-top-on-reload";
 import { StickyCta } from "@/components/landing/sticky-cta";
 import { TimelineSection } from "@/components/landing/timeline-section";
 import {
@@ -152,6 +153,7 @@ export default async function LandingPage() {
 
   return (
     <>
+      <ScrollToTopOnReload />
       <Navbar
         isAuthenticated={Boolean(sessionUser)}
         dashboardHref={homeFor(sessionUser?.role ?? null)}

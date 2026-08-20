@@ -14,6 +14,7 @@
 import { PrismaClient } from "@prisma/client";
 
 import { DEFAULT_FAQS, DEFAULT_PRIZES } from "../src/lib/defaults";
+import { realignTimelineDates, scheduleFieldForTitle } from "../src/lib/timeline-sync";
 
 const prisma = new PrismaClient();
 const dryRun = process.argv.includes("--dry");
@@ -90,25 +91,19 @@ async function main() {
   }
 
   // --- Timeline dates -----------------------------------------------------
-  // The hackathon row is the source of truth for every gate; the timeline rows
-  // are display copy that has to agree with it. They drift the moment an admin
-  // moves a date in /admin/settings, which edits the hackathon and leaves these
-  // behind — so the public page ends up advertising a deadline the platform
-  // will not enforce. Only dates are realigned: titles, descriptions, ordering
-  // and which rows exist at all stay the admin's call.
-  const TIMELINE_DATE_SOURCE: { match: RegExp; field: keyof typeof hackathon }[] = [
-    { match: /registration\s*opens/i, field: "registrationOpensAt" },
-    { match: /registration\s*closes/i, field: "registrationClosesAt" },
-    { match: /(hackathon|event)\s*(begins|starts)/i, field: "startsAt" },
-    { match: /task\s*released/i, field: "taskReleaseAt" },
-    { match: /submission\s*deadline/i, field: "submissionDeadline" },
-    { match: /^judging/i, field: "judgingEndsAt" },
-    { match: /(winner|results)\s*announce/i, field: "resultsAt" },
-  ];
-
+  // Realignment now also happens whenever an admin saves /admin/settings; this
+  // stays as the repair path for rows that drifted before that, or that were
+  // edited directly in the database.
   const timeline = await prisma.timelineEvent.findMany({
     where: { hackathonId: hackathon.id },
+    select: { id: true, title: true },
   });
+
+  for (const row of timeline) {
+    if (!scheduleFieldForTitle(row.title)) {
+      console.log(`· timeline skip: "${row.title}" — no matching date on the edition`);
+    }
+  }
 
   const ist = (date: Date) =>
     new Intl.DateTimeFormat("en-IN", {
@@ -117,25 +112,11 @@ async function main() {
       timeStyle: "short",
     }).format(date);
 
-  for (const row of timeline) {
-    const source = TIMELINE_DATE_SOURCE.find((entry) => entry.match.test(row.title));
-    if (!source) {
-      console.log(`· timeline skip: "${row.title}" — no matching date on the edition`);
-      continue;
-    }
-
-    const correct = hackathon[source.field] as Date;
-    if (row.occursAt.getTime() === correct.getTime()) continue;
-
+  const realigned = await realignTimelineDates(prisma, hackathon, { dryRun });
+  for (const change of realigned) {
     console.log(
-      `· timeline update: "${row.title}" ${ist(row.occursAt)} → ${ist(correct)}`,
+      `· timeline update: "${change.title}" ${ist(change.from)} → ${ist(change.to)}`,
     );
-    if (!dryRun) {
-      await prisma.timelineEvent.update({
-        where: { id: row.id },
-        data: { occursAt: correct },
-      });
-    }
   }
 
   console.log("\nDone.");

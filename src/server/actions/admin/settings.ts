@@ -7,6 +7,7 @@ import { processDueReminders, rescheduleAllReminders } from "@/lib/email/reminde
 import { requireActiveHackathon } from "@/lib/hackathon";
 import { prisma } from "@/lib/prisma";
 import { assertAdmin } from "@/lib/rbac";
+import { realignTimelineDates } from "@/lib/timeline-sync";
 import { hackathonSettingsSchema } from "@/lib/validations";
 import {
   errorState,
@@ -86,7 +87,7 @@ export async function saveHackathonSettings(
   const hackathon = await requireActiveHackathon();
   const startChanged = hackathon.startsAt.getTime() !== input.startsAt.getTime();
 
-  await prisma.hackathon.update({
+  const updated = await prisma.hackathon.update({
     where: { id: hackathon.id },
     data: {
       name: input.name,
@@ -104,6 +105,16 @@ export async function saveHackathonSettings(
     },
   });
 
+  /**
+   * The published timeline is display copy for these same dates, so it moves
+   * with them. Without this the landing page and the dashboard kept advertising
+   * the previous schedule until someone remembered to run `content:sync`.
+   */
+  const realigned = await realignTimelineDates(prisma, updated).catch((error) => {
+    console.error("[settings] timeline realign failed", error);
+    return [];
+  });
+
   let rescheduled = 0;
   if (startChanged) {
     rescheduled = await rescheduleAllReminders(hackathon.id).catch((error) => {
@@ -118,19 +129,29 @@ export async function saveHackathonSettings(
     action: "hackathon.settings_saved",
     entity: "Hackathon",
     entityId: hackathon.id,
-    meta: { startChanged, rescheduled },
+    meta: {
+      startChanged,
+      rescheduled,
+      timelineRealigned: realigned.map((change) => change.title),
+    },
   });
 
   revalidatePath("/");
   revalidatePath("/admin");
   revalidatePath("/admin/settings");
+  revalidatePath("/admin/content");
   revalidatePath("/dashboard");
 
-  return successState(
+  const notes = [
     startChanged
-      ? `Settings saved. Reminders re-queued for ${rescheduled} contestant${rescheduled === 1 ? "" : "s"}.`
-      : "Settings saved.",
-  );
+      ? `Reminders re-queued for ${rescheduled} contestant${rescheduled === 1 ? "" : "s"}.`
+      : null,
+    realigned.length > 0
+      ? `${realigned.length} timeline entr${realigned.length === 1 ? "y" : "ies"} moved to match.`
+      : null,
+  ].filter(Boolean);
+
+  return successState(["Settings saved.", ...notes].join(" "));
 }
 
 /** Drains the reminder queue on demand instead of waiting for the cron. */
