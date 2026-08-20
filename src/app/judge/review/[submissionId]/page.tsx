@@ -97,8 +97,14 @@ export default async function ReviewPage({
         </div>
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[1.5fr_1fr]">
-        <div className="space-y-6">
+      <div className="grid items-start gap-6 xl:grid-cols-[1.5fr_1fr]">
+        {/* The video follows the form down. Scoring six criteria plus written
+            feedback is far taller than the player, so a static left column
+            meant judging from memory past the second slider — and left most of
+            a screen empty while doing it. Capped to the viewport so a long
+            contestant card scrolls inside the sticky region rather than
+            hiding its own bottom. */}
+        <div className="space-y-6 xl:sticky xl:top-24 xl:max-h-[calc(100dvh-7rem)] xl:overflow-y-auto xl:pr-1">
           <SubmissionPlayer
             youtubeVideoId={submission.youtubeVideoId}
             youtubeUrl={submission.youtubeUrl}
