@@ -2,7 +2,7 @@
  * Centralised environment access.
  *
  * Nothing here throws at import time — the app must boot (and the landing page
- * must render) even when Google integrations are not configured yet. Callers
+ * must render) even when email and Supabase are not configured yet. Callers
  * that genuinely need a value use `requireEnv`.
  */
 
@@ -82,13 +82,13 @@ export const env = {
   nodeEnv: str("NODE_ENV", "development"),
   isProd: str("NODE_ENV") === "production",
 
-  authSecret: str("AUTH_SECRET"),
   cronSecret: str("CRON_SECRET"),
 
   /**
-   * Supabase, used only for Storage — the database goes through Prisma and auth
-   * is this app's own. The service-role key bypasses row-level security, so it
-   * must never be exposed to the browser.
+   * Supabase does three jobs here: Postgres (reached through Prisma, not this
+   * client), the accounts people sign in with, and Storage for profile photos.
+   * The service-role key bypasses row-level security and can act as any user,
+   * so it must never be exposed to the browser.
    */
   supabase: {
     url: str("NEXT_PUBLIC_SUPABASE_URL"),
@@ -101,8 +101,9 @@ export const env = {
    * Outbound mail over plain SMTP, straight from this app to the relay.
    *
    * These are the same credentials Supabase's Custom SMTP screen takes, but the
-   * two are independent senders on one mailbox, not a chain: Supabase relays
-   * only its own Auth templates, and this app does not use Supabase Auth.
+   * two are independent senders on one mailbox, not a chain: everything in
+   * lib/email leaves from here, while Supabase relays its own Auth templates.
+   * Both need configuring — the sign-in code is one of Supabase's.
    */
   smtp: {
     host: str("SMTP_HOST"),
@@ -124,7 +125,7 @@ export const env = {
     demoData: bool("SEED_DEMO_DATA", false),
   },
 
-  /** When true, Google calls are logged instead of executed. */
+  /** When true, outbound email is logged instead of sent. Email is all it gates. */
   dryRun: bool("INTEGRATIONS_DRY_RUN", false),
 } as const;
 

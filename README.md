@@ -52,10 +52,10 @@ npm install
 
 # 2. Configure
 cp .env.example .env
-#    Minimum to boot: DATABASE_URL, DIRECT_DATABASE_URL, AUTH_SECRET.
+#    Minimum to boot: DATABASE_URL and DIRECT_DATABASE_URL. Add the three
+#    Supabase keys before anyone can sign in.
 #    Leave INTEGRATIONS_DRY_RUN=true until SMTP credentials exist —
 #    emails then log to the console instead of failing.
-openssl rand -base64 32     # paste into AUTH_SECRET
 
 # 3. Database
 npm run db:deploy           # apply migrations (or `npm run db:migrate` in dev)
@@ -282,9 +282,8 @@ src/
     judge/                 queue, review/[id], completed
     admin/                 control panel, contestants, submissions, judges,
                            assignments, ratings, emails, content, reports, settings
+    auth/callback/         Supabase code exchange
     api/
-      auth/[...nextauth]/  Auth.js handler
-      submissions/         upload-session, complete
       cron/reminders/      queue drain (CRON_SECRET)
       reports/hiring/      PDF / XLSX / registrations
       health/              probe

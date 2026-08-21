@@ -335,15 +335,16 @@ belong in the route file itself as Route Segment Config:
 export const maxDuration = 60;
 ```
 
-The block has been removed; `/api/reports/hiring`, `/api/submissions/complete`
-and `/api/cron/reminders` each declare their own `maxDuration`.
+The block has been removed; `/api/reports/hiring` and `/api/cron/reminders`
+each declare their own `maxDuration`.
 
 **Deploy succeeds but every page 500s.**
 The build never needs the database — `src/lib/env.ts` throws at no point during
 import, and all data pages are `force-dynamic`. So a green build with red pages
 means runtime env vars are missing. `DATABASE_URL`, `DIRECT_DATABASE_URL`,
-`AUTH_SECRET`, `AUTH_TRUST_HOST=true` and `NEXT_PUBLIC_APP_URL` are the ones that
-break everything; check `/api/health` first.
+`NEXT_PUBLIC_APP_URL` and the three Supabase keys are the ones that break
+everything; check `/api/health` first. Missing Supabase keys are the quiet case
+— pages render and only sign-in fails.
 
 **Looking for `.htaccess`.**
 There isn't one, and adding one would have no effect. `.htaccess` is read by

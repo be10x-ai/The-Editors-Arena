@@ -1,5 +1,12 @@
 # Claude CLI Build Prompt — The Editor Arena Platform
 
+> **Historical.** This is the brief the platform was built from, kept as a record
+> of the original scope. It has not been updated as the build diverged from it —
+> auth moved from NextAuth to Supabase, and submissions moved from Drive uploads
+> to YouTube links, so `src/lib/auth.ts` and `POST /api/submissions` below no
+> longer exist. For how the thing actually works, read `README.md` and
+> `DEPLOYMENT.md`.
+
 Copy everything below the line into `claude` from inside the `Website/` directory.
 Run it in phases; each phase ends with a verification command that must pass before moving on.
 

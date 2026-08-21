@@ -13,7 +13,7 @@ name: Deploy to Vercel
 #   VERCEL_PROJECT_ID  from .vercel/project.json, or Project Settings -> General
 #
 # `vercel pull` fetches the project's environment variables, so DATABASE_URL,
-# AUTH_SECRET and the rest still have to be set in the Vercel project itself —
+# the Supabase keys and the rest still have to be set in the Vercel project itself —
 # this workflow does not replace that.
 
 # Manual only. Vercel's Git integration handles pushes, so running this on every
