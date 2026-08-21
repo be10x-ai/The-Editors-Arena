@@ -7,11 +7,11 @@ import { formatIST, formatScore } from "@/lib/utils";
 export type EmailContent = { subject: string; html: string; text: string };
 
 const COLORS = {
-  bg: "#0a0a09",
-  card: "#171613",
-  border: "#2c2a25",
-  text: "#eeece6",
-  muted: "#a8a49a",
+  bg: "#060b13",
+  card: "#0e1520",
+  border: "#222e3f",
+  text: "#eef2f6",
+  muted: "#9facbc",
   accent: "#1668ff",
   accent2: "#0b3fa8",
 };
@@ -27,7 +27,7 @@ function escapeHtml(value: string): string {
 function button(href: string, label: string): string {
   return `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:24px 0;">
     <tr><td style="border-radius:10px;background:linear-gradient(90deg,${COLORS.accent},${COLORS.accent2});">
-      <a href="${href}" style="display:inline-block;padding:13px 26px;font:600 15px/1 -apple-system,Segoe UI,Roboto,sans-serif;color:#0b0b12;text-decoration:none;border-radius:10px;">${escapeHtml(label)}</a>
+      <a href="${href}" style="display:inline-block;padding:13px 26px;font:600 15px/1 -apple-system,Segoe UI,Roboto,sans-serif;color:#ffffff;text-decoration:none;border-radius:10px;">${escapeHtml(label)}</a>
     </td></tr>
   </table>`;
 }
@@ -59,7 +59,7 @@ function layout(opts: { heading: string; preheader: string; body: string }): str
 
 function idBadge(contestantId: string): string {
   return `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:20px 0;width:100%;">
-    <tr><td style="padding:16px 18px;background:rgba(22,104,255,.12);border:1px solid rgba(22,104,255,.35);border-radius:12px;">
+    <tr><td style="padding:16px 18px;background:#0d1b33;background:rgba(22,104,255,.12);border:1px solid rgba(22,104,255,.35);border-radius:12px;">
       <p style="margin:0 0 6px;font:600 11px/1 -apple-system,Segoe UI,Roboto,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:${COLORS.muted};">Your Contestant ID</p>
       <p style="margin:0;font:700 24px/1.2 ui-monospace,SFMono-Regular,Menlo,monospace;color:${COLORS.text};letter-spacing:.06em;">${escapeHtml(contestantId)}</p>
     </td></tr></table>`;
@@ -377,7 +377,7 @@ export function otpEmail(args: { code: string; ttlMinutes: number }): EmailConte
   const body = `
     <p style="margin:0 0 14px;">Use this code to sign in. It expires in ${args.ttlMinutes} minutes and works once.</p>
     <table role="presentation" cellpadding="0" cellspacing="0" style="margin:20px 0;">
-      <tr><td style="padding:18px 28px;background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.35);border-radius:12px;font:700 32px/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.28em;color:${COLORS.text};">${escapeHtml(args.code)}</td></tr>
+      <tr><td style="padding:18px 28px;background:#0d1b33;background:rgba(22,104,255,.12);border:1px solid rgba(22,104,255,.35);border-radius:12px;font:700 32px/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.28em;color:${COLORS.text};">${escapeHtml(args.code)}</td></tr>
     </table>
     <p style="margin:0;color:${COLORS.muted};font-size:13px;">Didn't request this? Ignore this email — nobody can sign in without the code.</p>`;
 

@@ -13,17 +13,33 @@ stays in step with `src/lib/email/templates.ts`.
 | `reset-password.html` | Reset password | Link **and** code |
 | `reauthentication.html` | Reauthentication | Code only |
 
-## These are not the app's emails
+## Only one of these has traffic
 
-Nothing the app sends passes through here. Registration, the four reminders,
-task-files-released, submission-received, results, judge invites and the sign-in
-fallback code are all built in `src/lib/email/templates.ts` and go out over SMTP
-from `src/lib/email/send.ts`.
+Most of what the app sends does not pass through here. Registration, the four
+reminders, task-files-released, submission-received, results and judge invites
+are all built in `src/lib/email/templates.ts` and go out over SMTP from
+`src/lib/email/send.ts`.
 
-Supabase Auth is a separate sender that this app does not use — it authenticates
-against its own `users` table via NextAuth. These templates only fire if someone
-creates a Supabase Auth user directly, which nothing in this codebase does. Keep
-them presentable rather than broken, but do not expect traffic.
+**`magic-link.html` is the exception, and it is the sign-in code contestants
+actually receive.** Sign-in calls `supabase.auth.signInWithOtp`
+(`src/server/actions/auth-actions.ts`), so Supabase sends that mail, from the
+mailbox configured in Supabase's own Custom SMTP screen — not from this app's
+SMTP settings. Treat it as production copy.
+
+The other five are unreachable today, and each for a specific reason:
+
+- **Confirm signup** — accounts are created server-side with `email_confirm: true`
+  (`src/lib/supabase/auth-admin.ts`), so there is nothing to confirm.
+- **Invite user** — judges are created through the admin API, not
+  `inviteUserByEmail`.
+- **Reset password** — the app never calls `resetPasswordForEmail`; a forgotten
+  password is handled by the OTP code path instead.
+- **Change email** — no code path changes an address; the app treats email as
+  immutable.
+- **Reauthentication** — never triggered.
+
+Keep them presentable rather than broken: any of the five becomes live the moment
+someone adds the matching call.
 
 ## Placeholders
 
@@ -54,3 +70,25 @@ Email clients are not browsers. What is here is deliberate:
   to render is a dead end, and that is the one link that has to work.
 - The preheader `<span>` is hidden but padded, so clients do not pull the body
   text in beside the subject.
+
+## Palette
+
+Six values, and they are the site's, not invented here — `src/app/globals.css`
+resolved to hex, with the accent taken from `arena.blue` in `tailwind.config.ts`.
+Keep them identical to `COLORS` in `src/lib/email/templates.ts` so the Supabase
+mail and the app's own mail look like one sender.
+
+| Role | Hex | Source |
+|---|---|---|
+| Page background | `#060b13` | `--background` |
+| Card | `#0e1520` | `--card` |
+| Border | `#222e3f` | `--border` |
+| Body text | `#eef2f6` | `--foreground` |
+| Muted text | `#9facbc` | `--muted-foreground` |
+| Accent | `#1668ff` → `#0b3fa8` | `arena.blue` → `arena.blue-deep` |
+
+Button labels are `#ffffff`. White clears 4.5:1 on `#1668ff`; the near-black
+label this palette replaced was correct on the old amber and is not on blue.
+
+The tinted code box pairs `rgba(22,104,255,.12)` with a solid `#0d1b33` in front
+of it, for the same reason the button does — Outlook drops the translucent one.
